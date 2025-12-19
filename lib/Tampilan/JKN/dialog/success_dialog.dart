@@ -8,6 +8,7 @@ class SuccessDialog extends StatefulWidget {
   final String message;
   final String? noAntrian;
   final VoidCallback onAntrianBerikutnya;
+  final VoidCallback? onReprint;
 
   const SuccessDialog({
     super.key,
@@ -15,6 +16,7 @@ class SuccessDialog extends StatefulWidget {
     required this.message,
     this.noAntrian,
     required this.onAntrianBerikutnya,
+    this.onReprint,
   });
 
   @override
@@ -202,7 +204,31 @@ class _SuccessDialogState extends State<SuccessDialog>
                     ),
                   ),
                 ),
-                const SizedBox(width: 16),
+                if (widget.onReprint != null) ...[
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        widget.onReprint?.call();
+                      },
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: isMobile ? 14 : 18),
+                        side: BorderSide(color: Colors.blue.shade700),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      child: Text(
+                        'CETAK ULANG',
+                        style: GoogleFonts.montserrat(
+                          fontSize: fontSize * 0.9,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue.shade700,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(width: 12),
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {

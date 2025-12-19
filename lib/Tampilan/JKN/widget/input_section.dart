@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';
+import 'package:my_app/models/apm_antrian_model.dart';
 import '../../../Blog Antrian APM/antrian_apm_bloc.dart';
-import '../../../models/apm/apm_antrian_model.dart';
 import '../responsive/responsive.dart';
 import 'validated_data_display.dart';
 import 'action_buttons.dart';
@@ -15,6 +15,8 @@ class InputSection extends StatelessWidget {
   final bool isLanjutButtonsDisabled;
   final bool isFormPendaftaranActive;
   final bool isBatalBooking;
+  final bool isVisible;
+
   final VoidCallback onBackToSelection;
   final VoidCallback onValidateAntrian;
   final VoidCallback onLanjutPoli;
@@ -32,17 +34,20 @@ class InputSection extends StatelessWidget {
     required this.isLanjutButtonsDisabled,
     required this.isFormPendaftaranActive,
     required this.isBatalBooking,
+    required this.isVisible,
     required this.onBackToSelection,
     required this.onValidateAntrian,
     required this.onLanjutPoli,
     required this.onLanjutLoket,
     required this.onJknPressed,
     required this.onUmumPressed,
-    required this.onPendaftaranPressed, required isVisible,
+    required this.onPendaftaranPressed,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (!isVisible) return const SizedBox.shrink();
+
     final bool isMobile = ResponsiveUtils.isMobile(context);
 
     return Container(
@@ -69,7 +74,6 @@ class InputSection extends StatelessWidget {
             const SizedBox(height: 12),
             _buildInputField(isMobile),
             const SizedBox(height: 16),
-
             if (state is AntrianApmLoading)
               _buildLoadingState()
             else
@@ -84,9 +88,12 @@ class InputSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (selectedType.isNotEmpty && validatedData == null)
-          _buildSelectionHeader(context, isMobile),
-
+        // if (selectedType.isNotEmpty && validatedData == null)
+        //   _buildSelectionHeader(context, isMobile),
+        if (selectedType.isNotEmpty &&
+          validatedData == null &&
+          _getTypeInfo(selectedType).$3 != 'BELUM DIPILIH')
+        _buildSelectionHeader(context, isMobile),
         const SizedBox(height: 10),
         _buildMainTitle(isMobile),
         const SizedBox(height: 6),
@@ -149,7 +156,6 @@ class InputSection extends StatelessWidget {
   }
 
   Widget _buildSubtitle(bool isMobile) {
-    // Mapping tipe ke subtitle
     final Map<String, String> subtitleMap = {
       'jkn': 'Masukkan No. BPJS / KTP',
       'umum': 'Masukkan No. Peserta / Booking / RM / KTP',
@@ -157,8 +163,7 @@ class InputSection extends StatelessWidget {
     };
 
     return Text(
-      subtitleMap[selectedType] ??
-          'Silahkan Pilih',
+      subtitleMap[selectedType] ?? 'Silahkan Pilih',
       style: GoogleFonts.montserrat(
         fontSize: isMobile ? 13 : 18,
         fontWeight: FontWeight.w500,
@@ -322,8 +327,13 @@ class InputSection extends StatelessWidget {
 
     return ActionButtons(
       isJknEnabled: true,
-      isUmumEnabled: true,
-      isPendaftaranEnabled: true,
+      // isUmumEnabled: true,
+      // isPendaftaranEnabled: true,
+
+      // isJknEnabled: selectedType.isEmpty || selectedType == 'jkn',
+      isUmumEnabled: selectedType.isEmpty || selectedType == 'umum',
+      isPendaftaranEnabled: selectedType.isEmpty || selectedType == 'pendaftaran',
+
       isLanjutButtonsDisabled: isLanjutButtonsDisabled,
       isFormPendaftaranActive: isFormPendaftaranActive,
       isBatalBooking: isBatalBooking,
@@ -358,8 +368,25 @@ class InputSection extends StatelessWidget {
     );
   }
 
+  // Cadangan..
+
+  // (IconData, Color, String) _getTypeInfo(String type) {
+  //   switch (type) {
+  //     case 'jkn':
+  //       return (Icons.health_and_safety, Colors.blue.shade700, 'JKN');
+  //     case 'umum':
+  //       return (Icons.person, Colors.green.shade600, 'UMUM');
+  //     case 'pendaftaran':
+  //       return (Icons.app_registration, Colors.deepOrange, 'DAFTAR POLI');
+  //     default:
+  //       return (Icons.info, Colors.grey, 'BELUM DIPILIH');
+  //   }
+  // }
+
   (IconData, Color, String) _getTypeInfo(String type) {
-    switch (type) {
+  final t = type.trim().toLowerCase();
+
+  switch (t) {
       case 'jkn':
         return (Icons.health_and_safety, Colors.blue.shade700, 'JKN');
       case 'umum':

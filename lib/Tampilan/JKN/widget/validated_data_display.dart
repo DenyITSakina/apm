@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-import '../../../models/apm/apm_antrian_model.dart';
+import '../../../models/apm_antrian_model.dart';
 
 class ValidatedDataDisplay extends StatelessWidget {
   final ApmAntrianModel validatedData;
@@ -96,7 +95,7 @@ class ValidatedDataDisplay extends StatelessWidget {
             _buildInfoRow('RM:', validatedData.rm!, context),
           _buildInfoRow('Nama:', validatedData.pasien, context),
           _buildInfoRow('Tanggal Lahir:', validatedData.tglLahir, context),
-          _buildInfoRow('Alamat:', validatedData.alamat, context),
+          _buildInfoRow('Alamat:', validatedData.alamatDomisili, context),
           if (isBatalBooking) _buildWarningBanner(context),
         ],
       ),

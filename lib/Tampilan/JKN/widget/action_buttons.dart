@@ -55,193 +55,17 @@ class ActionButtons extends StatelessWidget {
         : _buildMainButtons(context, buttonHeight, fontSize, isMobile);
   }
 
-  Widget _buildLanjutButtons(
-      BuildContext context, double buttonHeight, double fontSize, bool isMobile) {
-    final bool isDisabled = isBatalBooking || isLanjutButtonsDisabled;
-
-    if (isFormPendaftaranActive) return const SizedBox.shrink();
-
-    return AnimatedOpacity(
-      opacity: 1.0,
-      duration: const Duration(milliseconds: 300),
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 16, vertical: 8),
-        child: isMobile
-            ? Column(
-                children: [
-                  _buildActionButton(
-                    selectedType == 'pendaftaran' ? 'Pilih POLI' : 'Ke Poli',
-                    isDisabled ? Colors.grey : Colors.blue.shade700,
-                    isDisabled ? null : onLanjutPoli,
-                    buttonHeight,
-                    fontSize,
-                  ),
-                  const SizedBox(height: 6),
-                  _buildActionButton(
-                    'Ke Loket',
-                    isDisabled ? Colors.grey : Colors.green.shade600,
-                    isDisabled ? null : onLanjutLoket,
-                    buttonHeight,
-                    fontSize,
-                  ),
-                ],
-              )
-            : Row(
-                children: [
-                  Expanded(
-                    child: _buildActionButton(
-                      selectedType == 'pendaftaran' ? 'Pilih Poli' : 'Ke Poli',
-                      isDisabled ? Colors.grey : Colors.blue.shade700,
-                      isDisabled ? null : onLanjutPoli,
-                      buttonHeight,
-                      fontSize,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _buildActionButton(
-                      'Ke Loket',
-                      isDisabled ? Colors.grey : Colors.green.shade600,
-                      isDisabled ? null : onLanjutLoket,
-                      buttonHeight,
-                      fontSize,
-                    ),
-                  ),
-                ],
-              ),
-      ),
-    );
-  }
-
-  //TOMBOL UTAMA
-  Widget _buildMainButtons(
-      BuildContext context, double buttonHeight, double fontSize, bool isMobile) {
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 16, vertical: 8),
-      child: Column(
-        children: [
-          // --- Baris 1: JKN dan UMUM ---
-          isMobile
-              ? Column(
-                  children: [
-                    _buildActionButton(
-                      'JKN',
-                      Colors.blue.shade700,
-                      isJknEnabled && !isLoading ? onJknPressed : null,
-                      buttonHeight,
-                      fontSize,
-                    ),
-                    const SizedBox(height: 6),
-                    _buildActionButton(
-                      'UMUM',
-                      Colors.green.shade600,
-                      isUmumEnabled && !isLoading ? onUmumPressed : null,
-                      buttonHeight,
-                      fontSize,
-                    ),
-                  ],
-                )
-              : Row(
-                  children: [
-                    Expanded(
-                      child: _buildActionButton(
-                        'JKN',
-                        Colors.blue.shade700,
-                        isJknEnabled && !isLoading ? onJknPressed : null,
-                        buttonHeight,
-                        fontSize,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _buildActionButton(
-                        'UMUM',
-                        Colors.green.shade600,
-                        isUmumEnabled && !isLoading ? onUmumPressed : null,
-                        buttonHeight,
-                        fontSize,
-                      ),
-                    ),
-                  ],
-                ),
-          const SizedBox(height: 8),
-
-          // --- Baris 2: DAFTAR POLI dan LANJUT ---
-          isMobile
-              ? Column(
-                  children: [
-                    _buildActionButton(
-                      'DAFTAR POLI',
-                      Colors.deepOrange,
-                      isPendaftaranEnabled && !isLoading ? onPendaftaranPressed : null,
-                      buttonHeight,
-                      fontSize,
-                    ),
-                    const SizedBox(height: 6),
-                    _buildActionButton(
-                      'LANJUT',
-                      _getLanjutButtonColor(),
-                      _getLanjutButtonCallback(),
-                      buttonHeight,
-                      fontSize,
-                    ),
-                  ],
-                )
-              : Row(
-                  children: [
-                    Expanded(
-                      child: _buildActionButton(
-                        'DAFTAR POLI',
-                        Colors.deepOrange,
-                        isPendaftaranEnabled && !isLoading ? onPendaftaranPressed : null,
-                        buttonHeight,
-                        fontSize,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _buildActionButton(
-                        'LANJUT',
-                        _getLanjutButtonColor(),
-                        _getLanjutButtonCallback(),
-                        buttonHeight,
-                        fontSize,
-                      ),
-                    ),
-                  ],
-                ),
-        ],
-      ),
-    );
-  }
-
-  // Helper method untuk menentukan warna tombol LANJUT
+  // Tombol LANJUT
   Color _getLanjutButtonColor() {
-    if (isLoading) {
-      return Colors.grey;
-    }
-    
-    final bool isEnabled = selectedType.isNotEmpty && 
-                          textControllerText.isNotEmpty && 
-                          !isLoading;
-    
+    final bool isEnabled = selectedType.isNotEmpty && textControllerText.isNotEmpty && !isLoading;
     return isEnabled ? Colors.redAccent : Colors.grey.shade400;
   }
 
-  // Helper method untuk menentukan callback tombol LANJUT
   VoidCallback? _getLanjutButtonCallback() {
-    if (isLoading) {
-      return null;
-    }
-    
-    final bool isEnabled = selectedType.isNotEmpty && 
-                          textControllerText.isNotEmpty && 
-                          !isLoading;
-    
+    final bool isEnabled = selectedType.isNotEmpty && textControllerText.isNotEmpty && !isLoading;
     return isEnabled ? onValidateAntrian : null;
   }
 
-  //TEMPLATE BUTTON
   Widget _buildActionButton(
     String text,
     Color color,
@@ -258,11 +82,7 @@ class ActionButtons extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: disabled ? Colors.grey.shade400 : color,
           foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          elevation: disabled ? 0 : 3,
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
         child: FittedBox(
           fit: BoxFit.scaleDown,
@@ -270,7 +90,7 @@ class ActionButtons extends StatelessWidget {
             text,
             textAlign: TextAlign.center,
             style: GoogleFonts.montserrat(
-              fontSize: _getAdjustedFontSize(text, fontSize),
+              fontSize: fontSize,
               fontWeight: FontWeight.w600,
               color: Colors.white,
             ),
@@ -280,13 +100,70 @@ class ActionButtons extends StatelessWidget {
     );
   }
 
-  // Helper method untuk menyesuaikan ukuran font berdasarkan panjang teks
-  double _getAdjustedFontSize(String text, double baseFontSize) {
-    if (text.length > 10) {
-      return baseFontSize * 0.85;
-    } else if (text.length > 8) {
-      return baseFontSize * 0.9;
-    }
-    return baseFontSize;
+  // Tombol utama (JKN, UMUM, DAFTAR POLI, LANJUT)
+  Widget _buildMainButtons(BuildContext context, double buttonHeight, double fontSize, bool isMobile) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 16, vertical: 8),
+      child: Column(
+        children: [
+          isMobile
+              ? Column(
+                  children: [
+                    _buildActionButton('JKN', Colors.blue.shade700, isJknEnabled && !isLoading ? onJknPressed : null, buttonHeight, fontSize),
+                    const SizedBox(height: 6),
+                    _buildActionButton('UMUM', Colors.green.shade600, isUmumEnabled && !isLoading ? onUmumPressed : null, buttonHeight, fontSize),
+                  ],
+                )
+              : Row(
+                  children: [
+                    Expanded(child: _buildActionButton('JKN', Colors.blue.shade700, isJknEnabled && !isLoading ? onJknPressed : null, buttonHeight, fontSize)),
+                    const SizedBox(width: 10),
+                    Expanded(child: _buildActionButton('UMUM', Colors.green.shade600, isUmumEnabled && !isLoading ? onUmumPressed : null, buttonHeight, fontSize)),
+                  ],
+                ),
+          const SizedBox(height: 8),
+          isMobile
+              ? Column(
+                  children: [
+                    _buildActionButton('DAFTAR POLI', Colors.deepOrange, isPendaftaranEnabled && !isLoading ? onPendaftaranPressed : null, buttonHeight, fontSize),
+                    const SizedBox(height: 6),
+                    _buildActionButton('LANJUT', _getLanjutButtonColor(), _getLanjutButtonCallback(), buttonHeight, fontSize),
+                  ],
+                )
+              : Row(
+                  children: [
+                    Expanded(child: _buildActionButton('DAFTAR POLI', Colors.deepOrange, isPendaftaranEnabled && !isLoading ? onPendaftaranPressed : null, buttonHeight, fontSize)),
+                    const SizedBox(width: 10),
+                    Expanded(child: _buildActionButton('LANJUT', _getLanjutButtonColor(), _getLanjutButtonCallback(), buttonHeight, fontSize)),
+                  ],
+                ),
+        ],
+      ),
+    );
+  }
+
+  // Tombol Lanjut setelah validasi
+  Widget _buildLanjutButtons(BuildContext context, double buttonHeight, double fontSize, bool isMobile) {
+    final bool isDisabled = isBatalBooking || isLanjutButtonsDisabled;
+    if (isFormPendaftaranActive) return const SizedBox.shrink();
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 16, vertical: 8),
+      child: isMobile
+          ? Column(
+              children: [
+                _buildActionButton(selectedType == 'pendaftaran' ? 'Pilih POLI' : 'Ke Poli', isDisabled ? Colors.grey : Colors.blue.shade700, isDisabled ? null : onLanjutPoli, buttonHeight, fontSize),
+                const SizedBox(height: 6),
+                _buildActionButton('Ke Loket', isDisabled ? Colors.grey : Colors.green.shade600, isDisabled ? null : onLanjutLoket, buttonHeight, fontSize),
+              ],
+            )
+          : Row(
+              children: [
+                Expanded(child: _buildActionButton(selectedType == 'pendaftaran' ? 'Pilih Poli' : 'Ke Poli', isDisabled ? Colors.grey : Colors.blue.shade700, isDisabled ? null : onLanjutPoli, buttonHeight, fontSize)),
+                const SizedBox(width: 10),
+                Expanded(child: _buildActionButton('Ke Loket', isDisabled ? Colors.grey : Colors.green.shade600, isDisabled ? null : onLanjutLoket, buttonHeight, fontSize)),
+              ],
+            ),
+    );
   }
 }

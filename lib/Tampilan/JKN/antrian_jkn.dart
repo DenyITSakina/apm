@@ -4,11 +4,14 @@ import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:another_flushbar/flushbar.dart';
+import 'package:my_app/Tampilan/JKN/dialog/info_dialog.dart';
 import 'package:win32/win32.dart';
 
 import '../../Blog Antrian APM/antrian_apm_bloc.dart';
 import '../../Services/api_service_config.dart';
-import '../../models/apm/apm_antrian_model.dart';
+import '../../models/apm_antrian_model.dart';
+import '../../models/dokter_model.dart';
+import '../../models/poli_model.dart';
 import 'dialog/confirmation_dialog.dart';
 import 'dialog/error_dialog.dart';
 import 'dialog/success_dialog.dart';
@@ -142,7 +145,7 @@ class _AntrianJknPageState extends State<AntrianJknPage> {
 
   Future<void> _onJknPressed() async {
     setState(() {
-      _selectedType = 'jkn';
+      _selectedType = 'JKN';
       _isJknEnabled = true;
       _isUmumEnabled = false;
       _isPendaftaranEnabled = false;
@@ -155,7 +158,7 @@ class _AntrianJknPageState extends State<AntrianJknPage> {
       showDialog(
         context: context,
         builder: (BuildContext context) {
-          return ErrorDialog(message: 'Mohon isi No. Peserta JKN terlebih dahulu sebelum melanjutkan.');
+          return InfoDialog(message: 'Pastika Data Yang Anda Masukkan Benar, Silahkan Masukkan No BPJS', title: 'Informasi',);
         },
       );
       return;
@@ -190,21 +193,43 @@ class _AntrianJknPageState extends State<AntrianJknPage> {
     });
   }
 
-  void _onValidateAntrian(BuildContext context) {
-    if (_textController.text.isEmpty) {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return ErrorDialog(message: 'Nomor tidak boleh kosong');
-        },
-      );
-      return;
-    }
+  // void _onValidateAntrian(BuildContext context) {
+  //   if (_textController.text.isEmpty) {
+  //     showDialog(
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return ErrorDialog(message: 'Nomor tidak boleh kosong');
+  //       },
+  //     );
+  //     return;
+  //   }
 
-    context.read<AntrianApmBloc>().add(
-      ValidateAntrianEvent(_textController.text, _selectedType, noIdentitas: ''),
+  //   context.read<AntrianApmBloc>().add(
+  //     ValidateAntrianEvent(_textController.text, _selectedType, noIdentitas: ''),
+  //   );
+  // }
+
+  void _onValidateAntrian(BuildContext context) {
+  final input = _textController.text.trim();
+
+  if (input.isEmpty) {
+    showDialog(
+      context: context,
+      builder: (_) => const ErrorDialog(
+        message: 'Nomor tidak boleh kosong',
+      ),
     );
+    return;
   }
+
+  context.read<AntrianApmBloc>().add(
+    ValidateAntrianEvent(
+      noAntrian: input,
+      jenisAntrian: _selectedType,
+    ),
+  );
+}
+
 
   Future<void> _fetchPoliAndDokter() async {
   try {
@@ -300,7 +325,7 @@ class _AntrianJknPageState extends State<AntrianJknPage> {
                 'ID: ${_validatedData!.id}',
             onConfirm: () {
               context.read<AntrianApmBloc>().add(
-                LanjutKeLoketEvent(_validatedData!, _selectedType,  _validatedData!.noBooking),
+                LanjutKeLoketEvent(_validatedData!, _selectedType,  _validatedData!.noBooking.toString()),
               );
             },
           );
@@ -591,6 +616,17 @@ class _AntrianJknPageState extends State<AntrianJknPage> {
                   onAntrianBerikutnya: () {
                     //Navigator.of(context).pop();
                     _onBackToSelection();   
+                  },
+                  onReprint: () {
+                    final msg = state.message.toLowerCase();
+                    if (msg.contains('poli')) {
+                      context.read<AntrianApmBloc>().add(ReprintPoliEvent());
+                    } else if (msg.contains('loket')) {
+                      context.read<AntrianApmBloc>().add(ReprintLoketEvent());
+                    } else {
+                      // fallback: try reprint loket first, then poli
+                      context.read<AntrianApmBloc>().add(ReprintLoketEvent());
+                    }
                   },
                 );
               },

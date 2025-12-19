@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+// import 'package:marquee/marquee.dart';
 
 import '../responsive/responsive.dart';
 
@@ -37,6 +38,32 @@ class AntrianHeader extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          //text jalan
+          //  SizedBox(
+          //   height: isMobile ? 26 : 32,
+          //   width: double.infinity,
+          //   child: Marquee(
+          //     text:
+          //         'Selamat Datang di RSU Sakina Idaman • Silakan Ambil Nomor Antrian Anda',
+          //     style: GoogleFonts.poppins(
+          //       fontSize: isMobile ? 12 : 14,
+          //       color: Colors.white,
+          //       fontWeight: FontWeight.w500,
+          //     ),
+          //     scrollAxis: Axis.horizontal,
+          //     crossAxisAlignment: CrossAxisAlignment.center,
+          //     blankSpace: 60.0,
+          //     velocity: 30.0,
+          //     pauseAfterRound: const Duration(seconds: 1),
+          //     startPadding: 5.0,
+          //     accelerationDuration: const Duration(seconds: 1),
+          //     accelerationCurve: Curves.linear,
+          //     decelerationDuration: const Duration(milliseconds: 500),
+          //     decelerationCurve: Curves.easeOut,
+          //   ),
+          // ),
+
+          const SizedBox(height: 4),
           // Logo
           Image.asset(
             "assets/images/logo_sakina.png",

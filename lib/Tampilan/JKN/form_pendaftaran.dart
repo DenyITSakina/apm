@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-
+import 'package:my_app/models/apm_antrian_model.dart';
+import 'package:my_app/models/dokter_model.dart';
+import 'package:my_app/models/pendaftaran_poli_model.dart';
+import 'package:my_app/models/poli_model.dart';
 import '../../Blog Antrian APM/antrian_apm_bloc.dart';
-import '../../models/apm/apm_antrian_model.dart';
 
 class PendaftaranDialog extends StatefulWidget {
   final ApmAntrianModel pasienData;
@@ -63,7 +65,6 @@ class _PendaftaranDialogState extends State<PendaftaranDialog> {
       tglController.text = DateTime.now().toString().split(' ')[0];
     });
 
-    // Reset state Bloc jika perlu
     context.read<AntrianApmBloc>().add(ResetValidationEvent());
   }
 
@@ -97,14 +98,19 @@ class _PendaftaranDialogState extends State<PendaftaranDialog> {
                 serverMessage = state.pendaftaranData.noAntrian;
                 _pendaftaranData = null;
               });
+            } else if (state is AntrianApmPrinted) {
+              // Handle print/reprint success
+              setState(() {
+                isSubmitting = false;
+                isSuccess = true;
+                if (state.noAntrian.isNotEmpty) serverMessage = state.noAntrian;
+              });
             } else if (state is AntrianApmError) {
               setState(() {
                 isSubmitting = false;
                 isSuccess = false;
                 serverMessage = state.pesan;
               });
-            } else if (state is DokterLoaded) {
-              setState(() {});
             }
           },
           child: _buildContent(),
@@ -116,7 +122,6 @@ class _PendaftaranDialogState extends State<PendaftaranDialog> {
   Widget _buildContent() {
     if (isSubmitting) return _buildLoading();
     if (isSuccess == true) return _buildSuccessContent();
-    //if (isSuccess == false) return _buildErrorContent();
     return _buildFormContent();
   }
 
@@ -134,7 +139,11 @@ class _PendaftaranDialogState extends State<PendaftaranDialog> {
           const SizedBox(height: 22),
           Text(
             "Mengirim data...",
-            style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.grey[800]),
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.bold,
+              color: Colors.grey[800],
+            ),
           ),
           const SizedBox(height: 6),
           const Text(
@@ -159,7 +168,8 @@ class _PendaftaranDialogState extends State<PendaftaranDialog> {
               Expanded(
                 child: Text(
                   'Form Pendaftaran',
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.teal[700]),
+                  style: TextStyle(
+                      fontSize: 22, fontWeight: FontWeight.bold, color: Colors.teal[700]),
                 ),
               ),
             ],
@@ -199,7 +209,9 @@ class _PendaftaranDialogState extends State<PendaftaranDialog> {
           DropdownButtonFormField<PoliModel>(
             value: selectedPoli,
             hint: const Text('Pilih POLI'),
-            items: widget.listPoli.map((poli) => DropdownMenuItem(value: poli, child: Text(poli.poli))).toList(),
+            items: widget.listPoli
+                .map((poli) => DropdownMenuItem(value: poli, child: Text(poli.nama)))
+                .toList(),
             onChanged: (value) {
               setState(() {
                 selectedPoli = value;
@@ -228,12 +240,16 @@ class _PendaftaranDialogState extends State<PendaftaranDialog> {
                   child: Center(child: CircularProgressIndicator()),
                 );
               }
-
               if (state is DokterLoaded && state.dokter.isNotEmpty) {
                 return DropdownButtonFormField<DokterModel>(
                   value: selectedDokter,
                   hint: const Text("Pilih Dokter"),
-                  items: state.dokter.map((dokter) => DropdownMenuItem(value: dokter, child: Text(dokter.namaDokter))).toList(),
+                  items: state.dokter
+                      .map((dokter) => DropdownMenuItem(
+                            value: dokter,
+                            child: Text(dokter.namaDokter),
+                          ))
+                      .toList(),
                   onChanged: (value) => setState(() => selectedDokter = value),
                   decoration: InputDecoration(
                     labelText: "Dokter",
@@ -244,10 +260,10 @@ class _PendaftaranDialogState extends State<PendaftaranDialog> {
                   ),
                 );
               }
-
               return const Padding(
                 padding: EdgeInsets.only(top: 12),
-                child: Text("Belum ada dokter untuk poli ini", style: TextStyle(fontSize: 12, color: Colors.red)),
+                child: Text("Belum ada dokter untuk poli ini",
+                    style: TextStyle(fontSize: 12, color: Colors.red)),
               );
             },
           ),
@@ -255,7 +271,9 @@ class _PendaftaranDialogState extends State<PendaftaranDialog> {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              TextButton(onPressed: () => Navigator.of(context).pop(), child: Text('Batal', style: TextStyle(color: Colors.grey[700], fontSize: 14))),
+              TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('Batal', style: TextStyle(color: Colors.grey[700], fontSize: 14))),
               const SizedBox(width: 12),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -271,6 +289,7 @@ class _PendaftaranDialogState extends State<PendaftaranDialog> {
                               rm: widget.pasienData.rm.toString(),
                               jaminan: selectedTipe,
                               idJadwalDokter: selectedDokter!.id.toString(),
+                              idDokter: selectedDokter!.idDokter.toString(),
                               idLayanan: selectedPoli!.id.toString(),
                               jenisAntrian: 'pendaftaran',
                             ));
@@ -303,94 +322,48 @@ class _PendaftaranDialogState extends State<PendaftaranDialog> {
         const SizedBox(height: 6),
         Text(serverMessage, style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Colors.teal, letterSpacing: 1.2)),
         const SizedBox(height: 26),
-        if (_pendaftaranData != null)
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    side: const BorderSide(color: Colors.teal),
-                  ),
-                  onPressed: () {
-                    // _resetForm();
-                    Navigator.pop(context);
-                    // widget.onDialogClose();   
-                  },
-                  child: const Text("Tutup", style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.teal)),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  side: const BorderSide(color: Colors.teal),
                 ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text("Tutup", style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.teal)),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    elevation: 2,
-                  ),
-                  onPressed: () {
-                    context.read<AntrianApmBloc>().add(PrintStrukEvent(
-                          pendaftaranData: _pendaftaranData!,
-                          jenisAntrian: _jenisAntrianFinal!,
-                          jaminan: _jaminanFinal!,
-                        ));
-                  },
-                  child: const Text("Print Struk", style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
-                ),
-              ),
-            ],
-          )
-        else
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                //_resetForm();
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal,
-                padding: const EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-              ),
-              child: const Text("Tutup", style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
             ),
-          ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.teal,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  elevation: 2,
+                ),
+                onPressed: () {
+                  if (_pendaftaranData != null && _jenisAntrianFinal != null && _jaminanFinal != null) {
+                    context.read<AntrianApmBloc>().add(PrintStrukEvent(
+                      pendaftaranData: _pendaftaranData!,
+                      jenisAntrian: _jenisAntrianFinal!,
+                      jaminan: _jaminanFinal!,
+                      listPoli: widget.listPoli,
+                    ));
+                  } else {
+                    context.read<AntrianApmBloc>().add(ReprintPendaftaranEvent());
+                  }
+                },
+                child: const Text("Print Struk", style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
-
-  // Widget _buildErrorContent() {
-  //   return Column(
-  //     mainAxisSize: MainAxisSize.min,
-  //     children: [
-  //       Icon(Icons.error_rounded, size: 90, color: Colors.redAccent),
-  //       const SizedBox(height: 14),
-  //       Text(
-  //         "Pendaftaran Gagal",
-  //         style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: Colors.red[700], letterSpacing: 0.3),
-  //         textAlign: TextAlign.center,
-  //       ),
-  //       const SizedBox(height: 14),
-  //       Divider(color: Colors.red[100], thickness: 1),
-  //       const SizedBox(height: 14),
-  //       Text(serverMessage, style: const TextStyle(fontSize: 15.5, color: Colors.grey, height: 1.4), textAlign: TextAlign.center),
-  //       const SizedBox(height: 26),
-  //       SizedBox(
-  //         width: double.infinity,
-  //         child: OutlinedButton(
-  //           style: OutlinedButton.styleFrom(
-  //             side: const BorderSide(color: Colors.redAccent, width: 1.2),
-  //             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-  //             padding: const EdgeInsets.symmetric(vertical: 12),
-  //           ),
-  //           onPressed: () => setState(() => isSuccess = null),
-  //           child: const Text("Kembali", style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: Colors.redAccent)),
-  //         ),
-  //       ),
-  //     ],
-  //   );
-  // }
 }
