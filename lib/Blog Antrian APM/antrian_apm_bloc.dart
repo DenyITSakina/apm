@@ -19,7 +19,7 @@ import '../models/poli_model.dart';
 abstract class AntrianApmEvent {}
 
 // class ValidateAntrianEvent extends AntrianApmEvent {
-//   final String noAntrian, jenisAntrian; 
+//   final String noAntrian, jenisAntrian;
 //   final String? noIdentitas;
 //   ValidateAntrianEvent(this.noAntrian, this.jenisAntrian, {this.noIdentitas});
 // }
@@ -28,17 +28,14 @@ class ValidateAntrianEvent extends AntrianApmEvent {
   final String noAntrian;
   final String jenisAntrian;
 
-  ValidateAntrianEvent({
-    required this.noAntrian,
-    required this.jenisAntrian,
-  });
+  ValidateAntrianEvent({required this.noAntrian, required this.jenisAntrian});
 }
 
 class PrintStrukEvent extends AntrianApmEvent {
   final PendaftaranPoliModel pendaftaranData;
   final String jenisAntrian;
   final String jaminan;
-   final List<PoliModel> listPoli;
+  final List<PoliModel> listPoli;
 
   PrintStrukEvent({
     required this.pendaftaranData,
@@ -52,11 +49,15 @@ class PrintStrukEvent extends AntrianApmEvent {
 }
 
 class ReprintPoliEvent extends AntrianApmEvent {}
+
 class ReprintLoketEvent extends AntrianApmEvent {}
-class ReprintPendaftaranEvent extends AntrianApmEvent {}class LanjutKePoliEvent extends AntrianApmEvent {
-  final String? noBoking;  
-  final String? noRm;       
-  final String? noKtp;     
+
+class ReprintPendaftaranEvent extends AntrianApmEvent {}
+
+class LanjutKePoliEvent extends AntrianApmEvent {
+  final String? noBoking;
+  final String? noRm;
+  final String? noKtp;
   final String jenisAntrian;
 
   LanjutKePoliEvent({
@@ -77,15 +78,11 @@ class ReprintPendaftaranEvent extends AntrianApmEvent {}class LanjutKePoliEvent 
 //   });
 // }
 
-
 class AntrianApmBlocked extends AntrianApmState {
   final String? message;
   final ApmAntrianModel apmData;
 
-  const AntrianApmBlocked({
-    this.message,
-    required this.apmData,
-  });
+  const AntrianApmBlocked({this.message, required this.apmData});
 }
 
 class LanjutKeLoketEvent extends AntrianApmEvent {
@@ -102,7 +99,6 @@ class LanjutKePendaftaranEvent extends AntrianApmEvent {
   final String idDokter;
   final String idLayanan;
   final String jenisAntrian;
-  
 
   LanjutKePendaftaranEvent({
     required this.rm,
@@ -120,12 +116,8 @@ class FetchDokterEvent extends AntrianApmEvent {
   final int idLayanan;
   final int? groupJaminan;
 
-  FetchDokterEvent({
-    required this.idLayanan,
-    this.groupJaminan,
-  });
+  FetchDokterEvent({required this.idLayanan, this.groupJaminan});
 }
-
 
 class ResetValidationEvent extends AntrianApmEvent {}
 
@@ -146,7 +138,7 @@ class AntrianApmValidated extends AntrianApmState {
   final ApmAntrianModel apmData;
   final String jenisAntrian;
   final bool isBatalBooking;
-  
+
   const AntrianApmValidated({
     required this.apmData,
     required this.jenisAntrian,
@@ -161,13 +153,13 @@ class AntrianApmPrinting extends AntrianApmState {
 class AntrianApmPrinted extends AntrianApmState {
   final String message;
   final String noAntrian;
-  
+
   const AntrianApmPrinted(this.message, {this.noAntrian = ''});
 }
 
 class AntrianApmError extends AntrianApmState {
   final String pesan;
-  
+
   const AntrianApmError(this.pesan);
 }
 
@@ -177,7 +169,7 @@ class AntrianApmReset extends AntrianApmState {
 
 class PoliListLoaded extends AntrianApmState {
   final List<PoliModel> poliList;
-  
+
   const PoliListLoaded(this.poliList);
 }
 
@@ -185,22 +177,17 @@ class DokterLoaded extends AntrianApmState {
   final List<DokterModel> dokter;
   final List<PoliModel> poliklinik;
 
-  const DokterLoaded({
-    required this.dokter,
-    required this.poliklinik,
-  });
+  const DokterLoaded({required this.dokter, required this.poliklinik});
 }
 
 class PendaftaranSuccess extends AntrianApmState {
   final PendaftaranPoliModel pendaftaranData;
-  
+
   const PendaftaranSuccess(this.pendaftaranData);
 }
+
 //Ambil nama poli
-String getNamaPoliByIdUnit(
-  String idUnit,
-  List<PoliModel> listPoli,
-) {
+String getNamaPoliByIdUnit(String idUnit, List<PoliModel> listPoli) {
   final poli = listPoli.firstWhere(
     (p) => p.id.toString() == idUnit,
     orElse: () => PoliModel(id: 0, nama: '-'),
@@ -252,9 +239,12 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     on<ReprintLoketEvent>(_onReprintLoket);
     on<ReprintPendaftaranEvent>(_onReprintPendaftaran);
   }
-  
+
   //HTTP
-  Future<Map<String, dynamic>> _requestPost(String url, Map<String, dynamic> body) async {
+  Future<Map<String, dynamic>> _requestPost(
+    String url,
+    Map<String, dynamic> body,
+  ) async {
     printColor('POST $url | Body: $body', textColor: TextColor.cyan);
 
     try {
@@ -267,7 +257,9 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
           .timeout(const Duration(seconds: 15));
 
       if (response.statusCode != 200) {
-        throw Exception('HTTP ${response.statusCode}: ${response.reasonPhrase}');
+        throw Exception(
+          'HTTP ${response.statusCode}: ${response.reasonPhrase}',
+        );
       }
 
       final jsonResp = json.decode(response.body) as Map<String, dynamic>;
@@ -283,14 +275,26 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
   }
 
   //EVENT HANDLERS
-  Future<void> _onValidateAntrian(ValidateAntrianEvent event, Emitter<AntrianApmState> emit) async {
+  Future<void> _onValidateAntrian(
+    ValidateAntrianEvent event,
+    Emitter<AntrianApmState> emit,
+  ) async {
     emit(const AntrianApmLoading());
     try {
-      final resp = await _requestPost('${ApiConfig.antrianApm}/${event.jenisAntrian}', {'no': event.noAntrian});
+      final resp = await _requestPost(
+        '${ApiConfig.antrianApm}/${event.jenisAntrian}',
+        {'no': event.noAntrian},
+      );
 
       if (resp['code'] == 200) {
         final apmData = ApmAntrianModel.fromJson(resp['data']);
-        emit(AntrianApmValidated(apmData: apmData, jenisAntrian: event.jenisAntrian, isBatalBooking: apmData.isDibatalkan));
+        emit(
+          AntrianApmValidated(
+            apmData: apmData,
+            jenisAntrian: event.jenisAntrian,
+            isBatalBooking: apmData.isDibatalkan,
+          ),
+        );
       } else {
         emit(AntrianApmError(resp['message'] ?? 'Gagal validasi'));
       }
@@ -321,26 +325,30 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
       );
 
       if (respPoliData['code'] != 200 || respPoliData['data'] == null) {
-        emit(AntrianApmError(
-          respPoliData['message'] ?? 'Data Poli tidak ditemukan',
-        ));
+        emit(
+          AntrianApmError(
+            respPoliData['message'] ?? 'Data Poli tidak ditemukan',
+          ),
+        );
         return;
       }
 
       final poliData = respPoliData['data'];
 
       if (poliData['status_booking'] == 5) {
-        emit(AntrianApmBlocked(
-          message: 'Tiket sudah di Loket',
-          apmData: ApmAntrianModel.fromJson(poliData),
-        ));
+        emit(
+          AntrianApmBlocked(
+            message: 'Tiket sudah di Loket',
+            apmData: ApmAntrianModel.fromJson(poliData),
+          ),
+        );
         return;
       }
 
       final body = <String, dynamic>{
-        'no': poliData['no_booking'],             // id booking
-        'id_layanan': poliData['id_layanan'],     // Poli
-        'jaminan': poliData['jaminan'],           // BPJS / UMUM
+        'rm': poliData['rm'],
+        'id_layanan': poliData['id_layanan'],
+        'jaminan': poliData['jaminan'],
         'id_dokter': poliData['id_dokter'],
         'id_jadwal_dokter': poliData['id_jadwal_dokter'],
       };
@@ -352,41 +360,39 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
 
       if (resp['code'] == 200 && resp['data'] != null) {
         final apmPoliData = ApmAntrianPoliModel.fromJson(resp['data']);
-
-        // store last printed poli data for reprint
+        final namaPoli = resp['nama_poli']?.toString() ?? '';
+        apmPoliData.namaPoli = namaPoli;
+        printColor('Nama Poli: $namaPoli', textColor: TextColor.green);
         _lastPoliPrinted = apmPoliData;
         _lastPoliJenis = event.jenisAntrian;
 
-        // Attempt printing but do not fail the registration flow if printing fails
         try {
-          await _printToThermalPrinterPoli(
-            apmPoliData,
-            event.jenisAntrian,
-          );
+          await _printToThermalPrinterPoli(apmPoliData, event.jenisAntrian);
         } catch (e) {
           printColor('Gagal mencetak tiket Poli: $e', textColor: TextColor.red);
         }
 
-        emit(AntrianApmPrinted(
-          'Berhasil lanjut ke Poli',
-          noAntrian: apmPoliData.noAntrianPoli,
-        ));
+        emit(
+          AntrianApmPrinted(
+            'Berhasil lanjut ke Poli',
+            noAntrian: apmPoliData.noAntrianPoli,
+          ),
+        );
       } else if (resp['code'] == 400 && resp['data'] != null) {
-        emit(AntrianApmBlocked(
-          message: resp['message'],
-          apmData: ApmAntrianModel.fromJson(resp['data']),
-        ));
+        emit(
+          AntrianApmBlocked(
+            message: resp['message'],
+            apmData: ApmAntrianModel.fromJson(resp['data']),
+          ),
+        );
       } else {
-        emit(AntrianApmError(
-          resp['message'] ?? 'Gagal lanjut ke Poli',
-        ));
+        emit(AntrianApmError(resp['message'] ?? 'Gagal lanjut ke Poli'));
       }
     } catch (e, st) {
       debugPrint('Error lanjut ke Poli: $e\n$st');
       emit(AntrianApmError('Error lanjut ke Poli: $e'));
     }
   }
-
 
   Future<void> _onLanjutKeLoket(
     LanjutKeLoketEvent event,
@@ -395,16 +401,12 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     emit(const AntrianApmPrinting());
 
     try {
-      final url =
-          '${ApiConfig.antrianApmLoket}/${event.noBooking}';
+      final url = '${ApiConfig.antrianApmLoket}/${event.noBooking}';
       printColor('POST -> $url');
 
-      final resp = await _requestPost(
-        url,
-        {
-          'jenis_antrian': event.jenisAntrian,
-        },
-      );
+      final resp = await _requestPost(url, {
+        'jenis_antrian': event.jenisAntrian,
+      });
 
       if (resp['code'] == 200) {
         final noLoket = resp['data'].toString();
@@ -422,30 +424,35 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
             noLoket,
           );
         } catch (e) {
-          printColor('Gagal mencetak tiket Loket: $e', textColor: TextColor.red);
+          printColor(
+            'Gagal mencetak tiket Loket: $e',
+            textColor: TextColor.red,
+          );
         }
 
-        emit(AntrianApmPrinted(
-          'Berhasil lanjut ke Loket',
-          noAntrian: noLoket,
-        ));
+        emit(AntrianApmPrinted('Berhasil lanjut ke Loket', noAntrian: noLoket));
       } else {
-        emit(AntrianApmError(
-          resp['message'] ?? 'Gagal lanjut ke Loket',
-        ));
+        emit(AntrianApmError(resp['message'] ?? 'Gagal lanjut ke Loket'));
       }
     } catch (e) {
       emit(AntrianApmError('Error lanjut ke Loket: $e'));
     }
   }
 
-  Future<void> _onFetchPoliList(FetchPoliListEvent event, Emitter<AntrianApmState> emit) async {
+  Future<void> _onFetchPoliList(
+    FetchPoliListEvent event,
+    Emitter<AntrianApmState> emit,
+  ) async {
     try {
-      final response = await http.get(Uri.parse(ApiConfig.poliListApm)).timeout(const Duration(seconds: 15));
+      final response = await http
+          .get(Uri.parse(ApiConfig.poliListApm))
+          .timeout(const Duration(seconds: 15));
       if (response.statusCode == 200) {
         final jsonResp = json.decode(response.body);
         if (jsonResp['code'] == 200) {
-          final poliList = (jsonResp['data'] as List).map((e) => PoliModel.fromJson(e)).toList();
+          final poliList = (jsonResp['data'] as List)
+              .map((e) => PoliModel.fromJson(e))
+              .toList();
           emit(PoliListLoaded(poliList));
         } else {
           emit(AntrianApmError(jsonResp['message'] ?? 'Gagal fetch poli'));
@@ -463,12 +470,9 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     Emitter<AntrianApmState> emit,
   ) async {
     try {
-      final resp = await _requestPost(
-        ApiConfig.dokterJadwalApm,
-        {
-          "id_layanan": event.idLayanan.toString(),
-        },
-      );
+      final resp = await _requestPost(ApiConfig.dokterJadwalApm, {
+        "id_layanan": event.idLayanan.toString(),
+      });
 
       if (resp['code'] == 200) {
         final data = resp['data'];
@@ -477,37 +481,18 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
 
         if (data is List) {
           dokterList = data
-              .map((e) => DokterModel.fromJson(
-                    Map<String, dynamic>.from(e),
-                  ))
+              .map((e) => DokterModel.fromJson(Map<String, dynamic>.from(e)))
               .toList();
+        } else if (data is Map) {
+          dokterList = [DokterModel.fromJson(Map<String, dynamic>.from(data))];
         }
 
-        else if (data is Map) {
-          dokterList = [
-            DokterModel.fromJson(
-              Map<String, dynamic>.from(data),
-            ),
-          ];
-        }
-
-        emit(
-          DokterLoaded(
-            dokter: dokterList,
-            poliklinik: [],
-          ),
-        );
+        emit(DokterLoaded(dokter: dokterList, poliklinik: []));
       } else {
-        emit(
-          AntrianApmError(
-            resp['message'] ?? 'Gagal fetch dokter',
-          ),
-        );
+        emit(AntrianApmError(resp['message'] ?? 'Gagal fetch dokter'));
       }
     } catch (e) {
-      emit(
-        AntrianApmError('Error fetch dokter: $e'),
-      );
+      emit(AntrianApmError('Error fetch dokter: $e'));
     }
   }
 
@@ -526,8 +511,9 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
         throw Exception('Jadwal dokter belum dipilih');
       }
 
-      final jenisAntrianFinal =
-          event.jenisAntrian.isNotEmpty ? event.jenisAntrian : 'pendaftaran';
+      final jenisAntrianFinal = event.jenisAntrian.isNotEmpty
+          ? event.jenisAntrian
+          : 'pendaftaran';
 
       final url = '${ApiConfig.daftarApmRegPoli}/$jenisAntrianFinal';
 
@@ -536,36 +522,37 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
         'jaminan': event.jaminan,
         'id_jadwal_dokter': event.idJadwalDokter,
         'id_layanan': event.idLayanan,
+        'id_dokter': event.idDokter,
       });
 
       if (resp['code'] == 200) {
-        final pendaftaranData =
-            PendaftaranPoliModel.fromJson(resp['data']);
+        final pendaftaranData = PendaftaranPoliModel.fromJson(resp['data']);
 
         _lastPendaftaranPrinted = pendaftaranData;
         _lastPendaftaranJenis = jenisAntrianFinal;
         _lastPendaftaranJaminan = event.jaminan;
-
-        // emit(PendaftaranSuccessWaitingPrint(
-        //   pendaftaranData: pendaftaranData,
-        //   jenisAntrian: jenisAntrianFinal,
-        //   jaminan: event.jaminan,
-        // ));
 
         emit(const AntrianApmPrinting());
 
         try {
           List<PoliModel> listPoli = [];
           try {
-            final response = await http.get(Uri.parse(ApiConfig.poliListApm)).timeout(const Duration(seconds: 15));
+            final response = await http
+                .get(Uri.parse(ApiConfig.poliListApm))
+                .timeout(const Duration(seconds: 15));
             if (response.statusCode == 200) {
               final jsonResp = json.decode(response.body);
               if (jsonResp['code'] == 200) {
-                listPoli = (jsonResp['data'] as List).map((e) => PoliModel.fromJson(e)).toList();
+                listPoli = (jsonResp['data'] as List)
+                    .map((e) => PoliModel.fromJson(e))
+                    .toList();
               }
             }
           } catch (e) {
-            printColor('Gagal fetch poli untuk print: $e', textColor: TextColor.yellow);
+            printColor(
+              'Gagal fetch poli untuk print: $e',
+              textColor: TextColor.yellow,
+            );
           }
 
           await _printToThermalPrinterPendaftaran(
@@ -575,22 +562,27 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
             listPoli,
           );
         } catch (e) {
-          printColor('Gagal mencetak struk pendaftaran: $e', textColor: TextColor.red);
+          printColor(
+            'Gagal mencetak struk pendaftaran: $e',
+            textColor: TextColor.red,
+          );
         }
         emit(PendaftaranSuccess(pendaftaranData));
 
-       // 
-      }
-      else if (resp['code'] == 400 && resp['data'] != null) {
-        emit(AntrianApmBlocked(
-          message: resp['message'],
-          apmData: ApmAntrianModel.fromJson(resp['data']),
-        ));
-      }
-      else {
-        emit(AntrianApmError(
-          resp['message'] ?? 'Gagal melakukan pendaftaran poli',
-        ));
+        //
+      } else if (resp['code'] == 400 && resp['data'] != null) {
+        emit(
+          AntrianApmBlocked(
+            message: resp['message'],
+            apmData: ApmAntrianModel.fromJson(resp['data']),
+          ),
+        );
+      } else {
+        emit(
+          AntrianApmError(
+            resp['message'] ?? 'Gagal melakukan pendaftaran poli',
+          ),
+        );
       }
     } catch (e) {
       emit(AntrianApmError('Error pendaftaran: $e'));
@@ -618,12 +610,18 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     }
   }
 
-  void _onResetValidation(ResetValidationEvent event, Emitter<AntrianApmState> emit) {
+  void _onResetValidation(
+    ResetValidationEvent event,
+    Emitter<AntrianApmState> emit,
+  ) {
     printColor('Reset state', textColor: TextColor.cyan);
     emit(const AntrianApmReset());
   }
 
-  Future<void> _onReprintPoli(ReprintPoliEvent event, Emitter<AntrianApmState> emit) async {
+  Future<void> _onReprintPoli(
+    ReprintPoliEvent event,
+    Emitter<AntrianApmState> emit,
+  ) async {
     if (_lastPoliPrinted == null) {
       emit(const AntrianApmError('Tidak ada data poli untuk dicetak ulang'));
       return;
@@ -633,13 +631,21 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
 
     try {
       await _printToThermalPrinterPoli(_lastPoliPrinted!, _lastPoliJenis ?? '');
-      emit(AntrianApmPrinted('Berhasil cetak ulang Poli', noAntrian: _lastPoliPrinted!.noAntrianPoli));
+      emit(
+        AntrianApmPrinted(
+          'Berhasil cetak ulang Poli',
+          noAntrian: _lastPoliPrinted!.noAntrianPoli,
+        ),
+      );
     } catch (e) {
       emit(AntrianApmError('Gagal mencetak ulang Poli: $e'));
     }
   }
 
-  Future<void> _onReprintLoket(ReprintLoketEvent event, Emitter<AntrianApmState> emit) async {
+  Future<void> _onReprintLoket(
+    ReprintLoketEvent event,
+    Emitter<AntrianApmState> emit,
+  ) async {
     if (_lastLoketApmData == null || _lastLoketNo == null) {
       emit(const AntrianApmError('Tidak ada data loket untuk dicetak ulang'));
       return;
@@ -648,96 +654,183 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     emit(const AntrianApmPrinting());
 
     try {
-      await _printToThermalPrinterLoket(_lastLoketApmData!, _lastLoketJenis ?? '', _lastLoketNo!);
-      emit(AntrianApmPrinted('Berhasil cetak ulang Loket', noAntrian: _lastLoketNo!));
+      await _printToThermalPrinterLoket(
+        _lastLoketApmData!,
+        _lastLoketJenis ?? '',
+        _lastLoketNo!,
+      );
+      emit(
+        AntrianApmPrinted(
+          'Berhasil cetak ulang Loket',
+          noAntrian: _lastLoketNo!,
+        ),
+      );
     } catch (e) {
       emit(AntrianApmError('Gagal mencetak ulang Loket: $e'));
     }
   }
 
-  Future<void> _onReprintPendaftaran(ReprintPendaftaranEvent event, Emitter<AntrianApmState> emit) async {
+  Future<void> _onReprintPendaftaran(
+    ReprintPendaftaranEvent event,
+    Emitter<AntrianApmState> emit,
+  ) async {
     if (_lastPendaftaranPrinted == null) {
-      emit(const AntrianApmError('Tidak ada data pendaftaran untuk dicetak ulang'));
+      emit(
+        const AntrianApmError('Tidak ada data pendaftaran untuk dicetak ulang'),
+      );
       return;
     }
 
     emit(const AntrianApmPrinting());
 
     try {
-      await _printToThermalPrinterPendaftaran(_lastPendaftaranPrinted!, _lastPendaftaranJenis ?? '', _lastPendaftaranJaminan ?? '', _lastPendaftaranPoliList);
-      emit(AntrianApmPrinted('Berhasil cetak ulang Pendaftaran', noAntrian: _lastPendaftaranPrinted!.noAntrian));
+      await _printToThermalPrinterPendaftaran(
+        _lastPendaftaranPrinted!,
+        _lastPendaftaranJenis ?? '',
+        _lastPendaftaranJaminan ?? '',
+        _lastPendaftaranPoliList,
+      );
+      emit(
+        AntrianApmPrinted(
+          'Berhasil cetak ulang Pendaftaran',
+          noAntrian: _lastPendaftaranPrinted!.noAntrian,
+        ),
+      );
     } catch (e) {
       emit(AntrianApmError('Gagal mencetak ulang Pendaftaran: $e'));
     }
   }
 
   //PRINTING
-  Future<void> _printToThermalPrinterPoli(ApmAntrianPoliModel apmPoliModel, String jenisAntrian) async {
+  Future<void> _printToThermalPrinterPoli(
+    ApmAntrianPoliModel apmPoliModel,
+    String jenisAntrian,
+  ) async {
     final pdf = pw.Document();
     final now = DateTime.now();
-    final qrData = json.encode(apmPoliModel.namaPoli);
+    final qrData = json.encode(apmPoliModel.rm);
 
-    pdf.addPage(pw.Page(
-      pageFormat: const PdfPageFormat(72 * PdfPageFormat.mm, 100 * PdfPageFormat.mm),
-      margin: const pw.EdgeInsets.all(12),
-      build: (context) => _buildPoliTicket(apmPoliModel, qrData, _formatDate(now), _formatTime(now)),
-    ));
+    pdf.addPage(
+      pw.Page(
+        pageFormat: const PdfPageFormat(
+          72 * PdfPageFormat.mm,
+          100 * PdfPageFormat.mm,
+        ),
+        margin: const pw.EdgeInsets.all(12),
+        build: (context) => _buildPoliTicket(
+          apmPoliModel,
+          qrData,
+          _formatDate(now),
+          _formatTime(now),
+        ),
+      ),
+    );
 
     await Printing.layoutPdf(onLayout: (format) async => pdf.save());
   }
 
-  Future<void> _printToThermalPrinterLoket(ApmAntrianModel apmData, String jenisAntrian, String noAntrianLoket) async {
+  Future<void> _printToThermalPrinterLoket(
+    ApmAntrianModel apmData,
+    String jenisAntrian,
+    String noAntrianLoket,
+  ) async {
     final pdf = pw.Document();
     final now = DateTime.now();
     final qrData = json.encode(apmData.rm);
 
-    pdf.addPage(pw.Page(
-      pageFormat: const PdfPageFormat(72 * PdfPageFormat.mm, 80 * PdfPageFormat.mm),
-      margin: const pw.EdgeInsets.all(12),
-      build: (context) => _buildLoketTicket(apmData, qrData, noAntrianLoket, _formatDate(now), _formatTime(now)),
-    ));
+    pdf.addPage(
+      pw.Page(
+        pageFormat: const PdfPageFormat(
+          72 * PdfPageFormat.mm,
+          80 * PdfPageFormat.mm,
+        ),
+        margin: const pw.EdgeInsets.all(12),
+        build: (context) => _buildLoketTicket(
+          apmData,
+          qrData,
+          noAntrianLoket,
+          _formatDate(now),
+          _formatTime(now),
+        ),
+      ),
+    );
 
     await Printing.layoutPdf(onLayout: (format) async => pdf.save());
   }
 
-  Future<void> _printToThermalPrinterPendaftaran(PendaftaranPoliModel data, String jenisAntrian, String jaminan,  List<PoliModel> listPoli) async {
+  Future<void> _printToThermalPrinterPendaftaran(
+    PendaftaranPoliModel data,
+    String jenisAntrian,
+    String jaminan,
+    List<PoliModel> listPoli,
+  ) async {
     final pdf = pw.Document();
     final now = DateTime.now();
     final qrData = json.encode(data.rm);
 
-    pdf.addPage(pw.Page(
-      pageFormat: const PdfPageFormat(72 * PdfPageFormat.mm, 100 * PdfPageFormat.mm),
-      margin: const pw.EdgeInsets.all(12),
-      build: (context) => _buildPendaftaranTicket(data, qrData, jaminan, _formatDate(now), _formatTime(now), listPoli,),
-    ));
+    pdf.addPage(
+      pw.Page(
+        pageFormat: const PdfPageFormat(
+          72 * PdfPageFormat.mm,
+          100 * PdfPageFormat.mm,
+        ),
+        margin: const pw.EdgeInsets.all(12),
+        build: (context) => _buildPendaftaranTicket(
+          data,
+          qrData,
+          jaminan,
+          _formatDate(now),
+          _formatTime(now),
+          listPoli,
+        ),
+      ),
+    );
 
     await Printing.layoutPdf(onLayout: (format) async => pdf.save());
   }
 
   //HELPERS
-  String _formatDate(DateTime date) => '${date.day.toString().padLeft(2,'0')}-${date.month.toString().padLeft(2,'0')}-${date.year}';
-  String _formatTime(DateTime date) => '${date.hour.toString().padLeft(2,'0')}:${date.minute.toString().padLeft(2,'0')}:${date.second.toString().padLeft(2,'0')}';
+  String _formatDate(DateTime date) =>
+      '${date.day.toString().padLeft(2, '0')}-${date.month.toString().padLeft(2, '0')}-${date.year}';
+  String _formatTime(DateTime date) =>
+      '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}:${date.second.toString().padLeft(2, '0')}';
   String _formatTanggal(String tanggal) {
-    try { return tanggal.isEmpty ? '-' : _formatDate(DateTime.parse(tanggal)); } 
-    catch (_) { return tanggal; }
+    try {
+      return tanggal.isEmpty ? '-' : _formatDate(DateTime.parse(tanggal));
+    } catch (_) {
+      return tanggal;
+    }
   }
 
   //PDF TICKETS
   pw.Widget _buildHeader() => pw.Column(
     children: [
-      pw.Text('RSU SAKINA IDAMAN', style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold)),
-      pw.Text('Jl. Nyi Tjondro Loekito No. 60', style: const pw.TextStyle(fontSize: 8)),
-      pw.Text('Telp. (0274) 5018221, 5029090', style: const pw.TextStyle(fontSize: 8)),
+      pw.Text(
+        'RSU SAKINA IDAMAN',
+        style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
+      ),
+      pw.Text(
+        'Jl. Nyi Tjondro Loekito No. 60',
+        style: const pw.TextStyle(fontSize: 8),
+      ),
+      pw.Text(
+        'Telp. (0274) 5018221, 5029090',
+        style: const pw.TextStyle(fontSize: 8),
+      ),
       pw.Divider(thickness: 1),
     ],
   );
 
-  pw.Widget _buildPoliTicket(ApmAntrianPoliModel m, String qrData, String date, String time) {
+  pw.Widget _buildPoliTicket(
+    ApmAntrianPoliModel m,
+    String qrData,
+    String date,
+    String time,
+  ) {
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.center,
       children: [
         _buildHeader(),
-        pw.SizedBox(height: 6),
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
@@ -745,117 +838,42 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  pw.Text(m.nama.toUpperCase(), style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
-                  pw.Text('RM: ${m.rm}', style: const pw.TextStyle(fontSize: 8)),
+                  pw.Text(
+                    m.nama.toUpperCase(),
+                    style: pw.TextStyle(
+                      fontSize: 9,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.Text(
+                    'RM: ${m.rm}',
+                    style: const pw.TextStyle(fontSize: 8),
+                  ),
                 ],
               ),
             ),
-            pw.SizedBox(width: 50, height: 50, child: pw.BarcodeWidget(barcode: pw.Barcode.qrCode(), data: qrData)),
+            pw.SizedBox(
+              width: 50,
+              height: 50,
+              child: pw.BarcodeWidget(
+                barcode: pw.Barcode.qrCode(),
+                data: qrData,
+              ),
+            ),
           ],
         ),
-        pw.SizedBox(height: 8),
         pw.Divider(thickness: 1),
         pw.Text('No. Antrian Poli', style: const pw.TextStyle(fontSize: 9)),
         pw.Text(m.namaPoli, style: const pw.TextStyle(fontSize: 7)),
-        pw.SizedBox(height: 4),
-        pw.Text(m.noAntrianPoli, style: pw.TextStyle(fontSize: 30, fontWeight: pw.FontWeight.bold)),
-        pw.SizedBox(height: 4),
+        pw.Text(
+          m.noAntrianPoli,
+          style: pw.TextStyle(fontSize: 30, fontWeight: pw.FontWeight.bold),
+        ),
         // pw.Text(m.namaPoli.toUpperCase(), style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
-        pw.SizedBox(height: 8),
         pw.Text('$date / $time', style: const pw.TextStyle(fontSize: 8)),
       ],
     );
   }
-
-//  pw.Widget _buildLoketTicket(ApmAntrianModel m,String qrData,String no,String date,String time,) {
-//     return pw.Container(
-//       width: double.infinity,
-//       alignment: pw.Alignment.center,
-//       child: pw.Column(
-//         mainAxisAlignment: pw.MainAxisAlignment.center,
-//         crossAxisAlignment: pw.CrossAxisAlignment.center,
-//         children: [
-//           pw.Text(
-//             'RSU SAKINA IDAMAN',
-//             style: pw.TextStyle(
-//               fontSize: 13,
-//               fontWeight: pw.FontWeight.bold,
-//             ),
-//             textAlign: pw.TextAlign.center,
-//           ),
-
-//           pw.SizedBox(height: 2),
-//           pw.Text(
-//             'Jl. Nyi Tjondro Loekito, Yogyakarta',
-//             style: pw.TextStyle(fontSize: 8),
-//             textAlign: pw.TextAlign.center,
-//           ),
-//           pw.Text(
-//             'Telp. (0274) 5018221, 5029090',
-//             style: pw.TextStyle(fontSize: 8),
-//             textAlign: pw.TextAlign.center,
-//           ),
-
-//           pw.SizedBox(height: 2),
-//           pw.Text(
-//             '----------------------------------------------',
-//             textAlign: pw.TextAlign.center,
-//             style: pw.TextStyle(fontSize: 8),
-//           ),
-
-//           pw.SizedBox(height: 5),
-//           pw.Text(
-//             'No. Antrian Loket :',
-//             style: pw.TextStyle(fontSize: 10),
-//             textAlign: pw.TextAlign.center,
-//           ),
-
-//           pw.SizedBox(height: 2),
-//           pw.Text(
-//             no,
-//             style: pw.TextStyle(
-//               fontSize: 36,
-//               fontWeight: pw.FontWeight.bold,
-//             ),
-//             textAlign: pw.TextAlign.center,
-//           ),
-
-//           pw.SizedBox(height: 2),
-//           pw.Text(
-//             '$date / $time',
-//             style: pw.TextStyle(fontSize: 9),
-//             textAlign: pw.TextAlign.center,
-//           ),
-
-//           pw.SizedBox(height: 5),
-//           pw.Text(
-//             '----------------------------------------------',
-//             style: pw.TextStyle(fontSize: 8),
-//             textAlign: pw.TextAlign.center,
-//           ),
-
-//           pw.SizedBox(height: 2),
-//           pw.Text(
-//             'Silahkan Tunggu No Antrian Anda Dipanggil',
-//             style: pw.TextStyle(fontSize: 8),
-//             textAlign: pw.TextAlign.center,
-//           ),
-//           pw.Text(
-//             'Jagalah Kebersihan',
-//             style: pw.TextStyle(fontSize: 8),
-//             textAlign: pw.TextAlign.center,
-//           ),
-
-//           pw.SizedBox(height: 2),
-//           pw.Text(
-//             '----------------------------------------------',
-//             style: pw.TextStyle(fontSize: 8),
-//             textAlign: pw.TextAlign.center,
-//           ),
-//         ],
-//       ),
-//     );
-//   }
 
   pw.Widget _buildLoketTicket(
     ApmAntrianModel m,
@@ -869,38 +887,17 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
       children: [
         pw.Text(
           'RSU SAKINA IDAMAN',
-          style: pw.TextStyle(
-            fontSize: 11,
-            fontWeight: pw.FontWeight.bold,
-          ),
+          style: pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
           textAlign: pw.TextAlign.center,
         ),
-
-        pw.SizedBox(height: 2),
-        pw.Text(
-          'ANTRIAN LOKET',
-          style: pw.TextStyle(fontSize: 9),
-        ),
-
-        pw.SizedBox(height: 4),
+        pw.Text('ANTRIAN LOKET', style: pw.TextStyle(fontSize: 9)),
         pw.Divider(),
-
         pw.Text(
           no,
-          style: pw.TextStyle(
-            fontSize: 42,
-            fontWeight: pw.FontWeight.bold,
-          ),
+          style: pw.TextStyle(fontSize: 42, fontWeight: pw.FontWeight.bold),
           textAlign: pw.TextAlign.center,
         ),
-
-        pw.SizedBox(height: 2),
-        pw.Text(
-          '$date  $time',
-          style: pw.TextStyle(fontSize: 8),
-        ),
-
-        pw.SizedBox(height: 4),
+        pw.Text('$date  $time', style: pw.TextStyle(fontSize: 8)),
         pw.Divider(),
         pw.Text(
           'Silahkan menunggu panggilan',
@@ -911,14 +908,19 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     );
   }
 
-
-  pw.Widget _buildPendaftaranTicket(PendaftaranPoliModel m, String qrData, String jaminan, String date, String time, List<PoliModel> listPoli,) {
-  final namaPoli = getNamaPoliByIdUnit(m.idUnit, listPoli); 
+  pw.Widget _buildPendaftaranTicket(
+    PendaftaranPoliModel m,
+    String qrData,
+    String jaminan,
+    String date,
+    String time,
+    List<PoliModel> listPoli,
+  ) {
+    final namaPoli = getNamaPoliByIdUnit(m.idUnit, listPoli);
     return pw.Column(
       crossAxisAlignment: pw.CrossAxisAlignment.center,
       children: [
         _buildHeader(),
-        pw.SizedBox(height: 6),
         pw.Row(
           mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
           children: [
@@ -926,13 +928,29 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
               child: pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.start,
                 children: [
-                  // pw.Text(m.nama, style:  pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold)),
-                  pw.Text('RM: ${m.rm}', style: const pw.TextStyle(fontSize: 8)),
+                  pw.Text(
+                    m.nama,
+                    style: pw.TextStyle(
+                      fontSize: 9,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                  ),
+                  pw.Text(
+                    'RM: ${m.rm}',
+                    style: const pw.TextStyle(fontSize: 8),
+                  ),
                   // pw.Text('Jaminan: $jaminan', style: const pw.TextStyle(fontSize: 8)),
                 ],
               ),
             ),
-            pw.SizedBox(width: 50, height: 50, child: pw.BarcodeWidget(barcode: pw.Barcode.qrCode(), data: qrData)),
+            pw.SizedBox(
+              width: 50,
+              height: 50,
+              child: pw.BarcodeWidget(
+                barcode: pw.Barcode.qrCode(),
+                data: qrData,
+              ),
+            ),
           ],
         ),
         pw.SizedBox(height: 8),
@@ -940,7 +958,10 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
         pw.Text('No. Antrian Poli', style: const pw.TextStyle(fontSize: 9)),
         pw.Text(namaPoli, style: const pw.TextStyle(fontSize: 7)),
         pw.SizedBox(height: 4),
-        pw.Text(m.noAntrian, style:pw.TextStyle(fontSize: 30, fontWeight: pw.FontWeight.bold)),
+        pw.Text(
+          m.noAntrian,
+          style: pw.TextStyle(fontSize: 30, fontWeight: pw.FontWeight.bold),
+        ),
         // pw.SizedBox(height: 4),
         // pw.Text(m.idUnit.toUpperCase(), style:pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
         pw.SizedBox(height: 8),

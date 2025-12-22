@@ -3,13 +3,13 @@ class ApmAntrianModel {
   final String pasien;
   final String alamatDomisili;
   final String tglLahir;
-  final String namaPoli;
+  final String poli;
 
   final String? rm;
   final String? noPeserta;
   final String? jenisBooking;
   final String? noIdentitas;
-  final String? noBooking; // <- baru
+  final String? noBooking;
   final String? idDokter;
   final String? idJadwalDokter;
   final String? idLayanan;
@@ -22,7 +22,7 @@ class ApmAntrianModel {
     required this.pasien,
     required this.alamatDomisili,
     required this.tglLahir,
-    required this.namaPoli,
+    required this.poli,
     required this.noAntrian,
     this.rm,
     this.noPeserta,
@@ -41,7 +41,7 @@ class ApmAntrianModel {
       pasien: json['nama_pasien'] ?? json['pasien'] ?? '',
       alamatDomisili: json['alamat_domisili'] ?? json['alamat'] ?? '',
       tglLahir: json['tgl_lahir']?.toString() ?? '',
-      namaPoli: json['nama_poli'] ?? '',
+      poli: json['nama_poli'],
       noAntrian: json['no_antrian']?.toString() ?? '',
       rm: json['rm']?.toString(),
       noPeserta: json['no_peserta']?.toString(),

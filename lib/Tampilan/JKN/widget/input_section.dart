@@ -50,6 +50,9 @@ class InputSection extends StatelessWidget {
 
     final bool isMobile = ResponsiveUtils.isMobile(context);
 
+    final bool isPasienBaru =
+        validatedData?.rm == null || validatedData!.rm!.trim().isEmpty;
+
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
       padding: const EdgeInsets.all(14),
@@ -77,7 +80,7 @@ class InputSection extends StatelessWidget {
             if (state is AntrianApmLoading)
               _buildLoadingState()
             else
-              _buildInteractiveSection(context, isMobile),
+              _buildInteractiveSection(context, isMobile, isPasienBaru),
           ],
         ),
       ),
@@ -91,9 +94,9 @@ class InputSection extends StatelessWidget {
         // if (selectedType.isNotEmpty && validatedData == null)
         //   _buildSelectionHeader(context, isMobile),
         if (selectedType.isNotEmpty &&
-          validatedData == null &&
-          _getTypeInfo(selectedType).$3 != 'BELUM DIPILIH')
-        _buildSelectionHeader(context, isMobile),
+            validatedData == null &&
+            _getTypeInfo(selectedType).$3 != 'BELUM DIPILIH')
+          _buildSelectionHeader(context, isMobile),
         const SizedBox(height: 10),
         _buildMainTitle(isMobile),
         const SizedBox(height: 6),
@@ -105,7 +108,9 @@ class InputSection extends StatelessWidget {
   }
 
   Widget _buildSelectionHeader(BuildContext context, bool isMobile) {
-    final (IconData icon, Color color, String label) = _getTypeInfo(selectedType);
+    final (IconData icon, Color color, String label) = _getTypeInfo(
+      selectedType,
+    );
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
@@ -178,9 +183,15 @@ class InputSection extends StatelessWidget {
         ? 'Silakan masukkan nomor untuk tipe ${selectedType.toUpperCase()}'
         : 'Pilih tipe antrian terlebih dahulu untuk melanjutkan';
 
-    final Color backgroundColor = hasSelection ? Colors.blue.shade50 : Colors.amber.shade50;
-    final Color iconColor = hasSelection ? Colors.blue.shade600 : Colors.amber.shade600;
-    final IconData icon = hasSelection ? Icons.info_outline : Icons.warning_amber;
+    final Color backgroundColor = hasSelection
+        ? Colors.blue.shade50
+        : Colors.amber.shade50;
+    final Color iconColor = hasSelection
+        ? Colors.blue.shade600
+        : Colors.amber.shade600;
+    final IconData icon = hasSelection
+        ? Icons.info_outline
+        : Icons.warning_amber;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
@@ -293,7 +304,11 @@ class InputSection extends StatelessWidget {
     );
   }
 
-  Widget _buildInteractiveSection(BuildContext context, bool isMobile) {
+  Widget _buildInteractiveSection(
+    BuildContext context,
+    bool isMobile,
+    bool isPasienBaru,
+  ) {
     if (validatedData != null) {
       return Column(
         children: [
@@ -306,7 +321,9 @@ class InputSection extends StatelessWidget {
           ActionButtons(
             isJknEnabled: false,
             isUmumEnabled: false,
-            isPendaftaranEnabled: false,
+            // isPendaftaranEnabled: false,
+            isPendaftaranEnabled:
+                !isPasienBaru, // tombol poli disable jika pasien baru
             isLanjutButtonsDisabled: isLanjutButtonsDisabled,
             isFormPendaftaranActive: isFormPendaftaranActive,
             isBatalBooking: isBatalBooking,
@@ -332,7 +349,8 @@ class InputSection extends StatelessWidget {
 
       // isJknEnabled: selectedType.isEmpty || selectedType == 'jkn',
       isUmumEnabled: selectedType.isEmpty || selectedType == 'umum',
-      isPendaftaranEnabled: selectedType.isEmpty || selectedType == 'pendaftaran',
+      isPendaftaranEnabled:
+          selectedType.isEmpty || selectedType == 'pendaftaran',
 
       isLanjutButtonsDisabled: isLanjutButtonsDisabled,
       isFormPendaftaranActive: isFormPendaftaranActive,
@@ -354,9 +372,16 @@ class InputSection extends StatelessWidget {
     return TextButton.icon(
       onPressed: onBackToSelection,
       style: TextButton.styleFrom(
-        padding: EdgeInsets.symmetric(horizontal: isMobile ? 8 : 12, vertical: 6),
+        padding: EdgeInsets.symmetric(
+          horizontal: isMobile ? 8 : 12,
+          vertical: 6,
+        ),
       ),
-      icon: Icon(Icons.arrow_back_rounded, size: isMobile ? 14 : 16, color: Colors.grey.shade700),
+      icon: Icon(
+        Icons.arrow_back_rounded,
+        size: isMobile ? 14 : 16,
+        color: Colors.grey.shade700,
+      ),
       label: Text(
         'Ulangi',
         style: GoogleFonts.montserrat(
@@ -384,9 +409,9 @@ class InputSection extends StatelessWidget {
   // }
 
   (IconData, Color, String) _getTypeInfo(String type) {
-  final t = type.trim().toLowerCase();
+    final t = type.trim().toLowerCase();
 
-  switch (t) {
+    switch (t) {
       case 'jkn':
         return (Icons.health_and_safety, Colors.blue.shade700, 'JKN');
       case 'umum':
