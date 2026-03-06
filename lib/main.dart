@@ -1,10 +1,11 @@
 import 'dart:io';
+import 'package:apm/home/dashboard_apm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
-import 'package:my_app/Tampilan/JKN/antrian_jkn.dart';
-import 'Blog Antrian APM/antrian_apm_bloc.dart';
+import 'Blog/antrian_apm_bloc.dart';
+import 'Blog/blog_pendaftran.dart';
 import 'theme/Style/http_overrides.dart';
 import 'theme/app_theme.dart';
 
@@ -24,12 +25,13 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => AntrianApmBloc()),
+        BlocProvider(create: (_) => CekinBloc()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'RSU Sakina Idaman',
         theme: AppTheme.lightTheme,
-        home: AntrianJknPage(),
+        home: DashboardApm(),
       ),
     );
   }

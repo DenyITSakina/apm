@@ -1,40 +1,35 @@
 import 'dart:convert';
+import 'package:apm/models/ApmPasienSosialModel.dart';
+import 'package:apm/models/apm_antrian_model.dart';
+import 'package:apm/models/apm_antrian_poli_model.dart';
+import 'package:apm/models/dokter_model.dart';
+import 'package:apm/models/pendaftaran_poli_model.dart';
+import 'package:apm/models/poli_model.dart';
 import 'package:http/http.dart' as http;
-import 'package:my_app/models/ApmPasienSosialModel.dart';
-import 'package:my_app/models/apm_antrian_model.dart';
-import 'package:my_app/models/apm_antrian_poli_model.dart';
-import 'package:my_app/models/dokter_model.dart';
-import 'package:my_app/models/pendaftaran_poli_model.dart';
-import 'package:my_app/models/poli_model.dart';
 
-
-/// API CONFIG
 class ApiConfig {
   ApiConfig._();
 
   static const String baseUrl =
       'http://10.30.0.16/api_dev/public/index.php/api';
 
-  static const String antrianApm =
-      '$baseUrl/apm-antrian'; // POST /{jenis}
+  static const String antrianApm = '$baseUrl/apm-antrian';
 
-  static const String antrianApmLoket =
-      '$baseUrl/apm-antrian-loket'; // POST /{id}
+  static const String antrianApmLoket = '$baseUrl/apm-antrian-loket';
 
-  static const String antrianApmPoli =
-      '$baseUrl/apm-antrian-poli'; // POST /{jenis}
+  static const String antrianApmPoli = '$baseUrl/apm-antrian-poli';
 
-  static const String poliListApm =
-      '$baseUrl/apm-poli'; // GET
+  static const String poliListApm = '$baseUrl/apm-poli';
 
-  static const String dokterJadwalApm =
-      '$baseUrl/apm-jadwal-dokter'; // POST
+  static const String dokterJadwalApm = '$baseUrl/apm-jadwal-dokter';
 
-  static const String daftarApmRegPoli =
-      '$baseUrl/apm-reg-poli'; // POST /{jenis}
+  static const String daftarApmRegPoli = '$baseUrl/apm-reg-poli';
 
-  static const String antrianFarmasi =
-      '$baseUrl/antrian-farmasi-scan';
+  static const String bookingUpdateStatus = '$baseUrl/booking/update-status';
+
+  static const String getDaftar = '$baseUrl/apm-get-sosial';
+
+  static String bookingPasienBaru(int jenis) => '$baseUrl/pasien-baru/$jenis';
 }
 
 class ApiResponse<T> {
@@ -42,11 +37,7 @@ class ApiResponse<T> {
   final String message;
   final T? data;
 
-  ApiResponse({
-    required this.code,
-    required this.message,
-    this.data,
-  });
+  ApiResponse({required this.code, required this.message, this.data});
 
   bool get isSuccess => code == 200;
 
@@ -74,9 +65,7 @@ class ApiService {
   ) async {
     final response = await http.post(
       Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
       body: body.map((k, v) => MapEntry(k, v.toString())),
     );
 
@@ -92,10 +81,7 @@ class ApiService {
     required String jenis,
     required String no,
   }) async {
-    final jsonResp = await _post(
-      '${ApiConfig.antrianApm}/$jenis',
-      {'no': no},
-    );
+    final jsonResp = await _post('${ApiConfig.antrianApm}/$jenis', {'no': no});
 
     return ApiResponse.fromJson(jsonResp, (data) {
       if (data['status_booking'] != null) {
@@ -107,9 +93,7 @@ class ApiService {
 
   //POLI LIST
   static Future<List<PoliModel>> getPoliList() async {
-    final response = await http.get(
-      Uri.parse(ApiConfig.poliListApm),
-    );
+    final response = await http.get(Uri.parse(ApiConfig.poliListApm));
 
     if (response.statusCode != 200) {
       throw Exception('HTTP ${response.statusCode}');
@@ -126,13 +110,10 @@ class ApiService {
   }
 
   //DOKTER BY POLI
-  static Future<List<DokterModel>> getDokterByPoli(
-    int idLayanan,
-  ) async {
-    final jsonResp = await _post(
-      ApiConfig.dokterJadwalApm,
-      {'id_layanan': idLayanan},
-    );
+  static Future<List<DokterModel>> getDokterByPoli(int idLayanan) async {
+    final jsonResp = await _post(ApiConfig.dokterJadwalApm, {
+      'id_layanan': idLayanan,
+    });
 
     if (jsonResp['code'] != 200) {
       throw Exception(jsonResp['message']);
@@ -156,10 +137,7 @@ class ApiService {
     if (rm?.isNotEmpty == true) body['rm'] = rm;
     if (noKtp?.isNotEmpty == true) body['no_ktp'] = noKtp;
 
-    final jsonResp = await _post(
-      '${ApiConfig.antrianApmPoli}/$jenis',
-      body,
-    );
+    final jsonResp = await _post('${ApiConfig.antrianApmPoli}/$jenis', body);
 
     return ApiResponse.fromJson(
       jsonResp,
@@ -167,7 +145,6 @@ class ApiService {
     );
   }
 
-  // ================= PENDAFTARAN POLI =================
   static Future<ApiResponse<PendaftaranPoliModel>> daftarPoli({
     required String jenis,
     required String rm,
@@ -175,15 +152,12 @@ class ApiService {
     required String idJadwalDokter,
     required String idLayanan,
   }) async {
-    final jsonResp = await _post(
-      '${ApiConfig.daftarApmRegPoli}/$jenis',
-      {
-        'rm': rm,
-        'jaminan': jaminan,
-        'id_jadwal_dokter': idJadwalDokter,
-        'id_layanan': idLayanan,
-      },
-    );
+    final jsonResp = await _post('${ApiConfig.daftarApmRegPoli}/$jenis', {
+      'rm': rm,
+      'jaminan': jaminan,
+      'id_jadwal_dokter': idJadwalDokter,
+      'id_layanan': idLayanan,
+    });
 
     return ApiResponse.fromJson(
       jsonResp,

@@ -9,6 +9,8 @@ class PendaftaranPoliModel {
   final String idDokter;
   final String grupJaminan;
   final String noAntrian;
+  final String noChekin;
+  String noBooking;
   final String createdAt;
 
   PendaftaranPoliModel({
@@ -22,6 +24,8 @@ class PendaftaranPoliModel {
     required this.idDokter,
     required this.grupJaminan,
     required this.noAntrian,
+    required this.noBooking,
+    required this.noChekin,
     required this.createdAt,
   });
 
@@ -37,6 +41,8 @@ class PendaftaranPoliModel {
       idJadwalDokter: json['id_jadwal_dokter']?.toString() ?? '',
       grupJaminan: json['grup_jaminan']?.toString() ?? '',
       noAntrian: json['no_antrian']?.toString() ?? '',
+      noChekin: json['no_checkin']?.toString() ?? '',
+      noBooking: json['id_booking']?.toString() ?? '',
       createdAt: json['created_at']?.toString() ?? '',
     );
   }
