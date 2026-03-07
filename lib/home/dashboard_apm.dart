@@ -327,7 +327,7 @@ class _DashboardApmState extends State<DashboardApm>
                                 end: Alignment.bottomRight,
                               ),
                               icon: Icons.calendar_month,
-                              description: "Cek & batalkan booking",
+                              description: "Booking untuk pasien",
                               onTap: () => showBookingDialog(context),
                             ),
                           ],
