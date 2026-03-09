@@ -26,7 +26,6 @@ class TopToast {
     overlay.insert(overlayEntry);
   }
 
-  /// Versi cepat: warning (orange)
   static void warning(BuildContext context, String message) {
     show(
       context,
@@ -36,7 +35,6 @@ class TopToast {
     );
   }
 
-  /// Versi cepat: success (hijau)
   static void success(BuildContext context, String message) {
     show(
       context,
@@ -46,7 +44,6 @@ class TopToast {
     );
   }
 
-  /// Versi cepat: error (merah)
   static void error(BuildContext context, String message) {
     show(
       context,
@@ -57,7 +54,6 @@ class TopToast {
   }
 }
 
-// --- _ToastWidget tetap sama seperti sebelumnya ---
 class _ToastWidget extends StatefulWidget {
   final String message;
   final Color backgroundColor;

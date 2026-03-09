@@ -1,4 +1,6 @@
 import 'dart:io';
+import 'package:apm/blog/blog_booking_pasien_baru.dart';
+import 'package:apm/blog/booking_pasien_lama_bloc.dart';
 import 'package:apm/home/dashboard_apm.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,6 +28,8 @@ class MyApp extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => AntrianApmBloc()),
         BlocProvider(create: (_) => CekinBloc()),
+        BlocProvider(create: (_) => BookingPasienBaruBloc()),
+        BlocProvider(create: (_) => BookingPasienLamaBloc()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

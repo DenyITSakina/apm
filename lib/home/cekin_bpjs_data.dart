@@ -125,7 +125,6 @@ class CekinBpjsDataPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // HEADER CARD
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(

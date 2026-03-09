@@ -38,8 +38,8 @@ class CustomTextField extends StatelessWidget {
     this.enabled = true,
     this.onTap,
     this.onFocusChange,
-    this.maxLength, // Tambahkan ini
-    this.inputFormatters, // Tambahkan ini
+    this.maxLength,
+    this.inputFormatters,
   }) : super(key: key);
 
   @override
@@ -69,8 +69,8 @@ class CustomTextField extends StatelessWidget {
             obscureText: obscureText,
             enabled: enabled,
             onTap: onTap,
-            maxLength: maxLength, // Tambahkan maxLength
-            inputFormatters: inputFormatters, // Tambahkan inputFormatters
+            maxLength: maxLength,
+            inputFormatters: inputFormatters,
             style: GoogleFonts.poppins(
               fontSize: 14,
               color: AppColors.textPrimary,
@@ -119,7 +119,6 @@ class CustomTextField extends StatelessWidget {
                 horizontal: 16,
                 vertical: 14,
               ),
-              // Hilangkan counter text karena kita tidak perlu menampilkan jumlah karakter
               counterText: '',
             ),
           ),

@@ -682,12 +682,10 @@ class DokterListItem extends StatelessWidget {
 
             const SizedBox(height: 8),
 
-            // Informasi tambahan
             Wrap(
               spacing: 8,
               runSpacing: 4,
               children: [
-                // Kapasitas pasien
                 if (dokter.kapasitasPasien != null &&
                     dokter.kapasitasPasien! > 0)
                   Container(
@@ -708,7 +706,6 @@ class DokterListItem extends StatelessWidget {
                     ),
                   ),
 
-                // Kuota BPJS
                 if (selectedTipe == "BPJS" &&
                     dokter.kuotaNonJkn != null &&
                     dokter.kuotaNonJkn! > 0)
@@ -730,7 +727,6 @@ class DokterListItem extends StatelessWidget {
                     ),
                   ),
 
-                // Status
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 8,

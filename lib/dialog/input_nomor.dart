@@ -15,7 +15,7 @@ Future<String?> showNomorDialog(BuildContext context) {
         child: Material(
           color: Colors.transparent,
           child: Container(
-            width: 550, // ⬅️ diperbesar
+            width: 550,
             padding: const EdgeInsets.fromLTRB(40, 45, 40, 35),
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -35,7 +35,6 @@ Future<String?> showNomorDialog(BuildContext context) {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // === HEADER ===
                 Column(
                   children: [
                     Container(
@@ -63,7 +62,6 @@ Future<String?> showNomorDialog(BuildContext context) {
                 ),
                 const SizedBox(height: 35),
 
-                // === INPUT NOMOR ===
                 StatefulBuilder(
                   builder: (_, setState) {
                     return TextField(
@@ -109,7 +107,6 @@ Future<String?> showNomorDialog(BuildContext context) {
 
                 const SizedBox(height: 30),
 
-                // === KEYPAD ===
                 GridView.builder(
                   shrinkWrap: true,
                   itemCount: 12,
@@ -148,7 +145,6 @@ Future<String?> showNomorDialog(BuildContext context) {
                         ),
                       ),
                       onPressed: () {
-                        // tombol hapus
                         if (key == "←") {
                           if (controller.text.isNotEmpty) {
                             controller.text = controller.text.substring(
@@ -162,7 +158,6 @@ Future<String?> showNomorDialog(BuildContext context) {
                           }
                         }
 
-                        // VALIDASI
                         if (controller.text.length == 13) {
                           errorText.value = "";
                           isValid.value = true;
@@ -172,7 +167,7 @@ Future<String?> showNomorDialog(BuildContext context) {
                           isValid.value = false;
                         }
 
-                        (context as Element).markNeedsBuild(); // refresh UI
+                        (context as Element).markNeedsBuild();
                       },
                       child: Text(
                         key,
@@ -187,7 +182,6 @@ Future<String?> showNomorDialog(BuildContext context) {
 
                 const SizedBox(height: 30),
 
-                // === TOMBOL AKSI ===
                 Row(
                   children: [
                     Expanded(

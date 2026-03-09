@@ -83,7 +83,6 @@ class BookingPasienBaruBloc
       if (response.statusCode == 200) {
         final jsonResp = json.decode(response.body);
 
-        // Cek berbagai kemungkinan format response
         if (jsonResp['code'] == 200 || jsonResp['success'] == true) {
           final dataList = jsonResp['data'] ?? [];
           final poliList = (dataList as List)
@@ -134,20 +133,16 @@ class BookingPasienBaruBloc
         final jsonResp = json.decode(response.body);
         printColor('Response dokter: $jsonResp', textColor: TextColor.cyan);
 
-        // Cek berbagai kemungkinan format response
         if (jsonResp['code'] == 200 || jsonResp['success'] == true) {
           final dataList = jsonResp['data'] ?? [];
 
-          // Parse dokter list
           final semuaDokter = (dataList as List)
               .map((e) => DokterModel.fromJson(e))
               .toList();
 
-          // Filter dokter berdasarkan jenis booking
           List<DokterModel> filteredDokter;
 
           if (event.jenisBooking == 2) {
-            // Untuk BPJS: hanya tampilkan dokter yang memiliki jadwal
             filteredDokter = semuaDokter
                 .where((d) => d.jadwal != null && d.jadwal!.isNotEmpty)
                 .toList();
@@ -157,7 +152,6 @@ class BookingPasienBaruBloc
               textColor: TextColor.green,
             );
           } else {
-            // Untuk UMUM: tampilkan semua dokter
             filteredDokter = semuaDokter;
           }
 
@@ -188,17 +182,14 @@ class BookingPasienBaruBloc
       final jenis = event.request.jenisBooking == 1 ? '1' : '2';
       final url = '${ApiConfig.baseUrl}/pasien-baru/$jenis';
 
-      // Konversi request ke JSON
       final requestBody = event.request.toJson();
 
-      // Log untuk debugging
       printColor('POST $url', textColor: TextColor.cyan);
       printColor(
         'Body: ${json.encode(requestBody)}',
         textColor: TextColor.cyan,
       );
 
-      // Validasi: untuk UMUM, pastikan tidak ada field jadwal
       if (event.request.jenisBooking == 1) {
         assert(
           !requestBody.containsKey('jadwal'),
@@ -233,13 +224,11 @@ class BookingPasienBaruBloc
           emit(BookingError(message: bookingResponse.message));
         }
       } else if (response.statusCode == 422) {
-        // Validation error
         final jsonResp = json.decode(response.body);
         String errorMessage = 'Validasi gagal';
 
         if (jsonResp['errors'] != null) {
           final errors = jsonResp['errors'] as Map;
-          // Ambil error pertama
           final firstError = errors.values.first;
           if (firstError is List && firstError.isNotEmpty) {
             errorMessage = firstError.first.toString();

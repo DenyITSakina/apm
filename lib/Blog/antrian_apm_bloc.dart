@@ -283,7 +283,6 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
   List<PoliModel> _lastPendaftaranPoliList = [];
 
   AntrianApmBloc() : super(const AntrianApmInitial()) {
-    // Event Handlers
     on<ValidateAntrianEvent>(_onValidateAntrian);
     on<LanjutKePoliEvent>(_onLanjutKePoli);
     on<LanjutKeLoketEvent>(_onLanjutKeLoket);
@@ -348,7 +347,6 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
       if (resp['code'] == 200) {
         final apmData = ApmAntrianModel.fromJson(resp['data']);
 
-        // Validasi tambahan
         if (apmData.isDibatalkan) {
           emit(
             AntrianApmValidated(
@@ -418,7 +416,6 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     emit(const AntrianApmLoading());
 
     try {
-      // Validasi input
       if (event.rm.isEmpty) {
         throw Exception('Nomor rekam medis (RM) harus diisi');
       }
@@ -444,12 +441,10 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
       if (resp['code'] == 200) {
         final pendaftaranData = PendaftaranPoliModel.fromJson(resp['data']);
 
-        // Simpan untuk reprint
         _lastPendaftaranPrinted = pendaftaranData;
         _lastPendaftaranJenis = jenisAntrianFinal;
         _lastPendaftaranJaminan = event.jaminan;
 
-        // Ambil data poli untuk cetak
         try {
           final poliResponse = await http
               .get(Uri.parse(ApiConfig.poliListApm))
@@ -469,7 +464,6 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
 
         emit(const AntrianApmPrinting());
 
-        // Cetak struk
         try {
           await _printToThermalPrinterPendaftaran(
             pendaftaranData,
@@ -618,15 +612,12 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     Emitter<AntrianApmState> emit,
   ) async {
     try {
-      // Buat Map body TERLEBIH DAHULU
       Map<String, String> body = {"id_layanan": event.idLayanan.toString()};
 
-      // Tambahkan jenisBooking jika groupJaminan tidak null
       if (event.groupJaminan != null) {
         body["jenisBooking"] = event.groupJaminan.toString();
       }
 
-      // Kirim request dengan body yang sudah lengkap
       final resp = await _requestPost(ApiConfig.dokterJadwalApm, body);
 
       if (resp['code'] == 200) {
@@ -641,7 +632,6 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
           dokterList = [DokterModel.fromJson(Map<String, dynamic>.from(data))];
         }
 
-        // Ambil data poli untuk konteks
         List<PoliModel> poliList = [];
         try {
           final poliResp = await _onFetchPoliListInternal();
