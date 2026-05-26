@@ -124,15 +124,13 @@ class _DashboardApmState extends State<DashboardApm>
                                   ),
                                 ],
                               ),
-                              child: ClipOval(
-                                child: Container(
-                                  padding: const EdgeInsets.all(15),
-                                  color: Colors.white,
-                                  child: Image.asset(
-                                    "assets/images/logo_sakina.png",
-                                    height: size.height * 0.12,
-                                    fit: BoxFit.contain,
-                                  ),
+                              child: Container(
+                                padding: const EdgeInsets.all(15),
+                                color: Colors.white,
+                                child: Image.asset(
+                                  "assets/images/logo_sakina.png",
+                                  height: size.height * 0.15,
+                                  fit: BoxFit.contain,
                                 ),
                               ),
                             ),
