@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:apm/Services/api_service_config.dart';
+import 'package:apm/api/api_config.dart';
 import 'package:apm/models/booking_pasien_baru_model.dart';
 import 'package:apm/models/dokter_model.dart';
 import 'package:apm/models/poli_model.dart';

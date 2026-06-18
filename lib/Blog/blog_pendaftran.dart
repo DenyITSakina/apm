@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:apm/Services/api_service_config.dart';
+import 'package:apm/api/api_config.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 
