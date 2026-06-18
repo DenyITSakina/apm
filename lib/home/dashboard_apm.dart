@@ -113,28 +113,28 @@ class _DashboardApmState extends State<DashboardApm>
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.white.withOpacity(0.5),
-                                    blurRadius: 30,
-                                    spreadRadius: 5,
-                                  ),
-                                ],
-                              ),
-                              child: Container(
-                                padding: const EdgeInsets.all(15),
-                                color: Colors.white,
-                                child: Image.asset(
-                                  "assets/images/logo_sakina.png",
-                                  height: size.height * 0.15,
-                                  fit: BoxFit.contain,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 20),
+                            // Container(
+                            //   decoration: BoxDecoration(
+                            //     shape: BoxShape.rectangle,
+                            //     boxShadow: [
+                            //       BoxShadow(
+                            //         color: Colors.white.withOpacity(0.5),
+                            //         blurRadius: 10,
+                            //         spreadRadius: 10,
+                            //       ),
+                            //     ],
+                            //   ),
+                            //   child: Container(
+                            //     padding: const EdgeInsets.all(15),
+                            //     color: Colors.white,
+                            //     child: Image.asset(
+                            //       "assets/images/logo_sakina.png",
+                            //       height: size.height * 0.15,
+                            //       fit: BoxFit.contain,
+                            //     ),
+                            //   ),
+                            // ),
+                            // const SizedBox(height: 20),
                             ShaderMask(
                               shaderCallback: (bounds) => const LinearGradient(
                                 colors: [Colors.white, Color(0xFFE0F7FA)],

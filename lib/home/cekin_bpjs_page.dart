@@ -54,11 +54,11 @@ class _CekinBpjsState extends State<CekinBpjs> {
             child: SingleChildScrollView(
               physics: const BouncingScrollPhysics(),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                padding: const EdgeInsets.symmetric(horizontal: 12.0),
                 child: Column(
                   children: [
-                    const SizedBox(height: 30),
-                    _buildStepIndicator(),
+                    // const SizedBox(height: 30),
+                    // _buildStepIndicator(),
                     const SizedBox(height: 30),
                     _inputDisplay(),
                     const SizedBox(height: 30),
@@ -162,7 +162,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
 
               const SizedBox(height: 4),
               Text(
-                "Silakan masukkan data BPJS Anda",
+                "Silahkan masukkan No BPJS Anda",
                 style: GoogleFonts.plusJakartaSans(
                   color: Colors.white.withOpacity(0.8),
                   fontSize: 12,

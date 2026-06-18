@@ -3,6 +3,61 @@ import time
 import subprocess
 import psutil
 import sys
+import mysql.connector
+from mysql.connector import Error
+
+# ===== KONFIGURASI DATABASE =====
+DB_CONFIG = {
+    'host': '10.30.0.15', 
+    'database': 'sakina_pasien2',
+    'user': 'user_stg',
+    'password': '12344321' 
+}
+
+def get_account_from_db(no_peserta=None):
+    """
+    Ambil account dari database.
+    Bisa berdasarkan no_peserta atau ambil yang aktif
+    """
+    connection = None
+    try:
+        connection = mysql.connector.connect(**DB_CONFIG)
+        cursor = connection.cursor(dictionary=True)
+        
+        if no_peserta:
+            query = """
+                SELECT va.username, va.password 
+                FROM vclaim_accounts va
+                JOIN peserta p ON va.id = p.account_id
+                WHERE p.no_peserta = %s
+            """
+            cursor.execute(query, (no_peserta,))
+        else:
+            query = """
+                SELECT username, password 
+                FROM vclaim_accounts 
+                WHERE is_active = 1 
+                LIMIT 1
+            """
+            cursor.execute(query)
+        
+        result = cursor.fetchone()
+        
+        if result:
+            return result['username'], result['password']
+        else:
+            # Fallback ke default jika tidak ditemukan
+            print("Akun tidak ditemukan di database, menggunakan default")
+            return "cicifitria", "Idaman99!"
+            
+    except Error as e:
+        print(f"Error koneksi database: {e}")
+        # Fallback ke default
+        return "cicifitria", "Idaman99!"
+    finally:
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
 
 # Ambil argumen NIK / No Peserta
 if len(sys.argv) < 2:
@@ -10,6 +65,10 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 no_peserta = sys.argv[1]
+
+# Ambil username dan password dari database
+username, password = get_account_from_db(no_peserta)
+print(f"Username: {username}, Password: {'*' * len(password)}")
 
 # Koordinat UI Frista
 username_coords = (641, 381)
@@ -20,8 +79,6 @@ ambil_foto_coords = (953, 394)
 popup_ok_coords = (745, 439)
 
 EXPECTED_COLOR = (240, 240, 240)
-username = "cicifitria"
-password = "Idaman99!"
 FRISTA_PATH = r"C:\frista_v3.0.2\frista\Frista.exe"
 AFTER_PATH = r"C:\Program Files (x86)\BPJS Kesehatan\Aplikasi Sidik Jari BPJS Kesehatan\After.exe"
 
@@ -58,7 +115,8 @@ def detect_nik_popup():
         print(">>> Error deteksi popup:", e)
     return False
 
-def run_after(no_peserta):
+# def run_after(no_peserta):
+def run_after(username, password, no_peserta):
     """Jalankan After.exe dan input NIK / login otomatis"""
     print(">>> Menjalankan After.exe...")
     try:
@@ -84,7 +142,8 @@ def run_after(no_peserta):
         print(">>> Gagal menjalankan After.exe:", e)
 
 # Proses utama Frista
-def start_frista_and_login():
+# def start_frista_and_login():
+def start_frista_and_login(username, password, no_peserta):
     print("Membuka Frista...")
     proc = subprocess.Popen(FRISTA_PATH)
     time.sleep(7)
@@ -110,7 +169,6 @@ def start_frista_and_login():
         kill_process("Frista.exe")
         return False
     
-
     # Input nomor peserta
     pyautogui.click(no_peserta_coords)
     time.sleep(0.3)
@@ -137,12 +195,14 @@ def start_frista_and_login():
     return True
 
 # Eksekusi
-success = start_frista_and_login()
+# success = start_frista_and_login()
+success = start_frista_and_login(username, password, no_peserta)
 if success:
     print("Frista berhasil login, nomor peserta dimasukkan, foto diambil!")
     sys.exit(0)
 else:
     print("Frista gagal login/verifikasi wajah atau NIK tidak ditemukan")
     kill_process("Frista.exe")
-    run_after(username, password) 
+    # run_after(username, password)
+    run_after(username, password, no_peserta)
     sys.exit(0)

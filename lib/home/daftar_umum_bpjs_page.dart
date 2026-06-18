@@ -80,8 +80,8 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: Column(
                     children: [
-                      const SizedBox(height: 30),
-                      _buildStepIndicator(),
+                      // const SizedBox(height: 30),
+                      // _buildStepIndicator(),
                       const SizedBox(height: 30),
                       _inputDisplay(),
                       const SizedBox(height: 30),
@@ -293,7 +293,7 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
             child: Text(
               hasText ? bpjsController.text : "0000 0000 0000",
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 28,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 2,
                 color: hasText ? Colors.black87 : Colors.grey.shade400,

@@ -56,8 +56,8 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
                   children: [
-                    const SizedBox(height: 30),
-                    _buildStepIndicator(),
+                    // const SizedBox(height: 30),
+                    // _buildStepIndicator(),
                     const SizedBox(height: 30),
                     _inputDisplay(),
                     const SizedBox(height: 30),
@@ -269,7 +269,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
             child: Text(
               hasText ? controller.text : "MASUKKAN NOMOR...",
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 26,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.5,
                 color: hasText ? Colors.black87 : Colors.grey.shade400,
