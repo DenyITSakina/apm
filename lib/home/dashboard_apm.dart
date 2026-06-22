@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../Blog/antrian_apm_bloc.dart';
+import '../widget/responsive.dart';
 
 class DashboardApm extends StatefulWidget {
   const DashboardApm({super.key});
@@ -232,103 +233,122 @@ class _DashboardApmState extends State<DashboardApm>
                     },
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 35),
 
                   Expanded(
-                    child: Center(
-                      child: SingleChildScrollView(
-                        scrollDirection: Axis.horizontal,
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _buildServiceCard(
-                              title: "CEK-IN BPJS",
-                              image: "assets/images/bpjs_logo.png",
-                              gradient: const LinearGradient(
-                                colors: [
-                                  Color(0xFF1565C0),
-                                  Color(0xFF1E88E5),
-                                  Color(0xFF42A5F5),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              icon: Icons.health_and_safety,
-                              description: "Untuk pasien BPJS Kesehatan",
-                              onTap: () => _navigateTo(
-                                context,
-                                BlocProvider(
-                                  create: (_) => AntrianApmBloc(),
-                                  child: const CekinBpjs(selectType: "bpjs"),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 24),
-                            _buildServiceCard(
-                              title: "CEK-IN UMUM",
-                              image: "assets/images/umum.png",
-                              gradient: const LinearGradient(
-                                colors: [
-                                  Color(0xFF2E7D32),
-                                  Color(0xFF388E3C),
-                                  Color(0xFF4CAF50),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              icon: Icons.people,
-                              description: "Untuk pasien umum",
-                              onTap: () => _navigateTo(
-                                context,
-                                BlocProvider(
-                                  create: (_) => AntrianApmBloc(),
-                                  child: const CekinUmumPage(
-                                    selectType: "umum",
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: ResponsiveUtils.isMobile(context) ? 12 : 20,
+                      ),
+                      child: Center(
+                        child: LayoutBuilder(
+                          builder: (context, constraints) {
+                            final maxW = constraints.maxWidth;
+                            final crossAxisCount = maxW < 420
+                                ? 2
+                                : (maxW < 700 ? 2 : 4);
+
+                            // Mobile/tablet responsif tanpa scroll horizontal.
+                            final childAspectRatio = maxW < 420
+                                ? 0.85
+                                : (maxW < 700 ? 0.9 : 0.95);
+
+                            return GridView.count(
+                              crossAxisCount: crossAxisCount,
+                              mainAxisSpacing: 16,
+                              crossAxisSpacing: 16,
+                              childAspectRatio: childAspectRatio,
+                              physics: const BouncingScrollPhysics(),
+                              padding: const EdgeInsets.symmetric(vertical: 6),
+                              children: [
+                                _buildServiceCard(
+                                  title: "CEK-IN BPJS",
+                                  image: "assets/images/bpjs_logo.png",
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFF1565C0),
+                                      Color(0xFF1E88E5),
+                                      Color(0xFF42A5F5),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  icon: Icons.health_and_safety,
+                                  description: "Untuk pasien BPJS Kesehatan",
+                                  onTap: () => _navigateTo(
+                                    context,
+                                    BlocProvider(
+                                      create: (_) => AntrianApmBloc(),
+                                      child: const CekinBpjs(
+                                        selectType: "bpjs",
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(width: 24),
-                            _buildServiceCard(
-                              title: "DAFTAR POLI",
-                              image: "assets/images/daftar.png",
-                              gradient: const LinearGradient(
-                                colors: [
-                                  Color(0xFFB71C1C),
-                                  Color(0xFFC62828),
-                                  Color(0xFFD32F2F),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              icon: Icons.local_hospital,
-                              description: "Pendaftaran poli tujuan",
-                              onTap: () => _navigateTo(
-                                context,
-                                const PendaftaranPoliPage(
-                                  selectType: "pendaftaran",
+                                _buildServiceCard(
+                                  title: "CEK-IN UMUM",
+                                  image: "assets/images/umum.png",
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFF2E7D32),
+                                      Color(0xFF388E3C),
+                                      Color(0xFF4CAF50),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  icon: Icons.people,
+                                  description: "Untuk pasien umum",
+                                  onTap: () => _navigateTo(
+                                    context,
+                                    BlocProvider(
+                                      create: (_) => AntrianApmBloc(),
+                                      child: const CekinUmumPage(
+                                        selectType: "umum",
+                                      ),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                            const SizedBox(width: 24),
-                            _buildServiceCard(
-                              title: "BOOKING",
-                              image: "assets/images/booking.png",
-                              gradient: const LinearGradient(
-                                colors: [
-                                  Color(0xFFBF360C),
-                                  Color(0xFFE65100),
-                                  Color(0xFFF57C00),
-                                ],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              icon: Icons.calendar_month,
-                              description: "Booking untuk pasien",
-                              onTap: () => showBookingDialog(context),
-                            ),
-                          ],
+                                _buildServiceCard(
+                                  title: "DAFTAR POLI",
+                                  image: "assets/images/daftar.png",
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFFB71C1C),
+                                      Color(0xFFC62828),
+                                      Color(0xFFD32F2F),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  icon: Icons.local_hospital,
+                                  description: "Pendaftaran poli tujuan",
+                                  onTap: () => _navigateTo(
+                                    context,
+                                    const PendaftaranPoliPage(
+                                      selectType: "pendaftaran",
+                                    ),
+                                  ),
+                                ),
+                                _buildServiceCard(
+                                  title: "BOOKING",
+                                  image: "assets/images/booking.png",
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFFBF360C),
+                                      Color(0xFFE65100),
+                                      Color(0xFFF57C00),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  icon: Icons.calendar_month,
+                                  description: "Booking untuk pasien",
+                                  onTap: () => showBookingDialog(context),
+                                ),
+                              ],
+                            );
+                          },
                         ),
                       ),
                     ),
@@ -403,9 +423,6 @@ class _DashboardApmState extends State<DashboardApm>
     required String description,
     required VoidCallback onTap,
   }) {
-    final size = MediaQuery.of(context).size;
-    final isTablet = size.width > 600;
-
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0.95, end: 1.0),
       duration: const Duration(milliseconds: 500),
@@ -413,115 +430,146 @@ class _DashboardApmState extends State<DashboardApm>
       builder: (context, scale, child) {
         return Transform.scale(
           scale: scale,
-          child: Container(
-            width: isTablet ? 320 : 280,
-            margin: const EdgeInsets.symmetric(vertical: 10),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: onTap,
-                borderRadius: BorderRadius.circular(32),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  decoration: BoxDecoration(
-                    gradient: gradient,
-                    borderRadius: BorderRadius.circular(32),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.2),
-                        blurRadius: 15,
-                        offset: const Offset(0, 8),
-                        spreadRadius: 0,
-                      ),
-                    ],
-                  ),
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        top: -20,
-                        right: -20,
-                        child: Icon(
-                          icon,
-                          size: 100,
-                          color: Colors.white.withOpacity(0.1),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              // Lebar layout card (dipengaruhi parent Row/scroll)
+              final maxW = constraints.maxWidth.isFinite
+                  ? constraints.maxWidth
+                  : MediaQuery.of(context).size.width;
+              final cardWidth = maxW < 360
+                  ? maxW * 0.92
+                  : (maxW < 700 ? 300.0 : 320.0);
+
+              final w = cardWidth;
+              final circleSize = w * 0.41; // ~120 pada w~280
+              final pad = w * 0.085; // ~24 pada w~280
+
+              final titleSize = (w * 0.075).clamp(18.0, 24.0);
+              final descSize = (w * 0.045).clamp(12.0, 14.5);
+              final iconDecoSize = (w * 0.33).clamp(72.0, 110.0);
+              final arrowSize = (w * 0.055).clamp(14.0, 16.0);
+
+              final radius = (w * 0.11).clamp(26.0, 40.0);
+
+              return SizedBox(
+                width: cardWidth,
+                child: Container(
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: onTap,
+                      borderRadius: BorderRadius.circular(radius),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        decoration: BoxDecoration(
+                          gradient: gradient,
+                          borderRadius: BorderRadius.circular(radius),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: (w * 0.05).clamp(10.0, 18.0),
+                              offset: const Offset(0, 8),
+                              spreadRadius: 0,
+                            ),
+                          ],
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
+                        child: Stack(
                           children: [
-                            Container(
-                              height: 120,
-                              width: 120,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: ClipOval(
-                                child: Image.asset(
-                                  image,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      color: Colors.white.withOpacity(0.2),
-                                      child: Icon(
-                                        icon,
-                                        size: 60,
-                                        color: Colors.white,
-                                      ),
-                                    );
-                                  },
-                                ),
+                            Positioned(
+                              top: -20,
+                              right: -20,
+                              child: Icon(
+                                icon,
+                                size: iconDecoSize,
+                                color: Colors.white.withOpacity(0.1),
                               ),
                             ),
-                            const SizedBox(height: 20),
-                            Text(
-                              title,
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.montserrat(
-                                fontSize: isTablet ? 24 : 20,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              description,
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.white.withOpacity(0.9),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withOpacity(0.25),
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              child: Row(
+                            Padding(
+                              padding: EdgeInsets.all(pad),
+                              child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
+                                  Container(
+                                    height: circleSize,
+                                    width: circleSize,
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: ClipOval(
+                                      child: Image.asset(
+                                        image,
+                                        fit: BoxFit.cover,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                              return Container(
+                                                color: Colors.white.withOpacity(
+                                                  0.2,
+                                                ),
+                                                child: Icon(
+                                                  icon,
+                                                  size: (circleSize * 0.5)
+                                                      .clamp(40.0, 70.0),
+                                                  color: Colors.white,
+                                                ),
+                                              );
+                                            },
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: w * 0.07),
                                   Text(
-                                    "Pilih",
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w600,
+                                    title,
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: titleSize,
+                                      fontWeight: FontWeight.w800,
                                       color: Colors.white,
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  const Icon(
-                                    Icons.arrow_forward,
-                                    color: Colors.white,
-                                    size: 16,
+                                  SizedBox(height: w * 0.028),
+                                  Text(
+                                    description,
+                                    textAlign: TextAlign.center,
+                                    style: GoogleFonts.poppins(
+                                      fontSize: descSize,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.white.withOpacity(0.9),
+                                    ),
+                                  ),
+                                  SizedBox(height: w * 0.055),
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: w * 0.075,
+                                      vertical: w * 0.03,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.25),
+                                      borderRadius: BorderRadius.circular(
+                                        radius,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          "Pilih",
+                                          style: GoogleFonts.poppins(
+                                            fontSize: descSize,
+                                            fontWeight: FontWeight.w600,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                        SizedBox(width: w * 0.028),
+                                        Icon(
+                                          Icons.arrow_forward,
+                                          color: Colors.white,
+                                          size: arrowSize,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ],
                               ),
@@ -529,11 +577,11 @@ class _DashboardApmState extends State<DashboardApm>
                           ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ),
+              );
+            },
           ),
         );
       },
