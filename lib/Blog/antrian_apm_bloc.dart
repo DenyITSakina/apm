@@ -332,6 +332,48 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     }
   }
 
+  // Future<void> _onValidateAntrian(
+  //   ValidateAntrianEvent event,
+  //   Emitter<AntrianApmState> emit,
+  // ) async {
+  //   emit(const AntrianApmLoading());
+
+  //   try {
+  //     final resp = await _requestPost(
+  //       '${ApiConfig.antrianApm}/${event.jenisAntrian}',
+  //       {'no': event.noAntrian},
+  //     );
+
+  //     if (resp['code'] == 200) {
+  //       final apmData = ApmAntrianModel.fromJson(resp['data']);
+
+  //       if (apmData.isDibatalkan) {
+  //         emit(
+  //           AntrianApmValidated(
+  //             apmData: apmData,
+  //             jenisAntrian: event.jenisAntrian,
+  //             isBatalBooking: true,
+  //           ),
+  //         );
+  //       } else {
+  //         emit(
+  //           AntrianApmValidated(
+  //             apmData: apmData,
+  //             jenisAntrian: event.jenisAntrian,
+  //             isBatalBooking: false,
+  //           ),
+  //         );
+  //       }
+  //     } else {
+  //       emit(AntrianApmError(resp['message'] ?? 'Gagal validasi antrian'));
+  //     }
+  //   } on HttpException catch (e) {
+  //     emit(AntrianApmError('Koneksi gagal: ${e.message}'));
+  //   } catch (e) {
+  //     emit(AntrianApmError('Error validasi: $e'));
+  //   }
+  // }
+
   Future<void> _onValidateAntrian(
     ValidateAntrianEvent event,
     Emitter<AntrianApmState> emit,
@@ -345,7 +387,12 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
       );
 
       if (resp['code'] == 200) {
-        final apmData = ApmAntrianModel.fromJson(resp['data']);
+        final apmData = ApmAntrianModel.fromJson(resp);
+
+        if (!apmData.isValid) {
+          emit(AntrianApmError('Data pasien tidak ditemukan'));
+          return;
+        }
 
         if (apmData.isDibatalkan) {
           emit(
