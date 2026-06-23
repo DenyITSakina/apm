@@ -25,31 +25,47 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
   DokterModel? selectedDokter;
   final TextEditingController tglController = TextEditingController();
 
-  //
-  bool get hasBpjs {
-    final noBpjs = getField(["no_bpjs", "bpjs", "no_peserta"]);
-    return noBpjs != "-" && noBpjs.trim().isNotEmpty;
-  }
+  Map<String, dynamic>? pasienData;
+
+  bool get isFormValid =>
+      selectedTipe != null && selectedDokter != null && selectedPoli != null;
 
   @override
   void initState() {
     super.initState();
     tglController.text = DateTime.now().toString().split(" ")[0];
     context.read<AntrianApmBloc>().add(const FetchPoliListEvent());
+    _extractPatientData();
+  }
+
+  void _extractPatientData() {
+    final rawData = widget.data;
+
+    if (rawData['data'] != null && rawData['data']['data'] != null) {
+      pasienData = Map<String, dynamic>.from(rawData['data']['data']);
+    } else if (rawData['data'] != null) {
+      pasienData = Map<String, dynamic>.from(rawData['data']);
+    } else {
+      pasienData = Map<String, dynamic>.from(rawData);
+    }
   }
 
   String getField(List<String> keys) {
+    if (pasienData == null) return '-';
+
     for (var key in keys) {
-      if (widget.data[key] != null &&
-          widget.data[key].toString().trim().isNotEmpty) {
-        return widget.data[key].toString();
+      if (pasienData![key] != null &&
+          pasienData![key].toString().trim().isNotEmpty) {
+        return pasienData![key].toString();
       }
     }
     return "-";
   }
 
-  bool get isFormValid =>
-      selectedTipe != null && selectedDokter != null && selectedPoli != null;
+  bool get hasBpjs {
+    final noBpjs = getField(["no_bpjs", "bpjs", "no_peserta"]);
+    return noBpjs != "-" && noBpjs.trim().isNotEmpty;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +83,8 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
     final nik = getField(["nik", "no_identitas"]);
     final rm = getField(["rm", "rekam_medis", "no_rm"]);
     final alamat = getField(["alamat", "alamat_domisili", "alamat_pasien"]);
+    final tglLahir = getField(["tgl_lahir"]);
+    final jenisKelamin = getField(["jenis_kelamin"]);
 
     return BlocListener<AntrianApmBloc, AntrianApmState>(
       listener: (context, state) {
@@ -107,6 +125,7 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                 style: GoogleFonts.oswald(
                   fontWeight: FontWeight.w600,
                   fontSize: 25,
+                  color: Colors.white,
                 ),
               ),
             ],
@@ -117,6 +136,7 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Info Pasien Card
               Container(
                 padding: const EdgeInsets.all(22),
                 decoration: BoxDecoration(
@@ -145,11 +165,16 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                         ),
                       ),
                       const Divider(color: Colors.white54),
-                      _detail("Nama", formatNama(nama)),
+                      _detail("Nama", nama),
                       _detail("NIK", nik),
-                      _detail("No BPJS", noBpjs),
+                      _detail("No BPJS", noBpjs.isNotEmpty ? noBpjs : '-'),
                       _detail("No RM", rm),
-                      _detail("Alamat", formatNama(alamat)),
+                      _detail("Tgl Lahir", tglLahir),
+                      _detail(
+                        "Jenis Kelamin",
+                        jenisKelamin == 'L' ? 'Laki-laki' : 'Perempuan',
+                      ),
+                      _detail("Alamat", alamat),
                     ],
                   ),
                 ),
@@ -477,7 +502,9 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                                   rm: rm,
                                   jaminan: selectedTipe!,
                                   // idJadwalDokter: selectedDokter.toString(),
-                                  idJadwalDokter: selectedDokter!.idJadwal,
+                                  // idJadwalDokter: selectedDokter!.idJadwal,
+                                  idJadwalDokter:
+                                      selectedDokter!.idJadwalDetail,
                                   idDokter: selectedDokter!.idDokter.toString(),
                                   idLayanan: selectedPoli!.id.toString(),
                                   jenisAntrian: "pendaftaran",

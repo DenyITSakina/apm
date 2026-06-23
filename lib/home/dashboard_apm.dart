@@ -310,7 +310,7 @@ class _DashboardApmState extends State<DashboardApm>
                                   ),
                                 ),
                                 _buildServiceCard(
-                                  title: "DAFTAR POLI",
+                                  title: "DAFTAR POLI HARI INI",
                                   image: "assets/images/daftar.png",
                                   gradient: const LinearGradient(
                                     colors: [
