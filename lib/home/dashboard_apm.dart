@@ -1,11 +1,10 @@
+import '../Blog/antrian_apm_bloc.dart';
 import 'package:apm/home/cekin_bpjs_page.dart';
+
 import 'package:apm/home/cekin_umum_page.dart';
-import 'package:apm/home/daftar_umum_bpjs_page.dart';
-import 'package:apm/widget/booking_dialogs.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../Blog/antrian_apm_bloc.dart';
 import '../widget/responsive.dart';
 
 class DashboardApm extends StatefulWidget {
@@ -344,7 +343,7 @@ class _DashboardApmState extends State<DashboardApm>
                                   ),
                                   icon: Icons.calendar_month,
                                   description: "Booking untuk pasien",
-                                  onTap: () => showBookingDialog(context),
+                                  onTap: () {},
                                 ),
                               ],
                             );

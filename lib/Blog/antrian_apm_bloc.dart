@@ -1132,7 +1132,7 @@ String getNamaPoliByIdUnit(String idUnit, List<PoliModel> listPoli) {
   try {
     final poli = listPoli.firstWhere(
       (p) => p.id.toString() == idUnit,
-      orElse: () => PoliModel(id: 0, nama: '-'),
+      orElse: () => PoliModel(id: 0, nama: '-', kodeBpjs: ""),
     );
     return poli.nama;
   } catch (_) {
