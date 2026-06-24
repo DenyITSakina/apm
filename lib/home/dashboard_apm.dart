@@ -309,27 +309,27 @@ class _DashboardApmState extends State<DashboardApm>
                                     ),
                                   ),
                                 ),
-                                _buildServiceCard(
-                                  title: "DAFTAR POLI HARI INI",
-                                  image: "assets/images/daftar.png",
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFFB71C1C),
-                                      Color(0xFFC62828),
-                                      Color(0xFFD32F2F),
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  icon: Icons.local_hospital,
-                                  description: "Pendaftaran poli tujuan",
-                                  onTap: () => _navigateTo(
-                                    context,
-                                    const PendaftaranPoliPage(
-                                      selectType: "pendaftaran",
-                                    ),
-                                  ),
-                                ),
+                                // _buildServiceCard(
+                                //   title: "DAFTAR POLI HARI INI",
+                                //   image: "assets/images/daftar.png",
+                                //   gradient: const LinearGradient(
+                                //     colors: [
+                                //       Color(0xFFB71C1C),
+                                //       Color(0xFFC62828),
+                                //       Color(0xFFD32F2F),
+                                //     ],
+                                //     begin: Alignment.topLeft,
+                                //     end: Alignment.bottomRight,
+                                //   ),
+                                //   icon: Icons.local_hospital,
+                                //   description: "Pendaftaran poli tujuan",
+                                //   onTap: () => _navigateTo(
+                                //     context,
+                                //     const PendaftaranPoliPage(
+                                //       selectType: "pendaftaran",
+                                //     ),
+                                //   ),
+                                // ),
                                 _buildServiceCard(
                                   title: "BOOKING",
                                   image: "assets/images/booking.png",

@@ -940,20 +940,254 @@ class _BookingPasienBaruPageState extends State<BookingPasienBaruPage> {
     }
   }
 
+  // void _openBpjsBookingModal(BuildContext context) {
+  //   if (_bpjsRujukan == null) return;
+
+  //   // Modal BPJS: tampilkan data pasien + tanggal + poli/dokter/jadwal.
+  //   // UI poli/dokter diambil lewat mekanisme dokternya (LoadDokterJadwalEvent) bila tersedia.
+  //   // Karena saat ini komponen pemilihan dokter/poli belum difitting ke modal,
+  //   // kita tampilkan dulu data yang sudah ada dari rujukan + jadwal dari dokter yang dipilih.
+
+  //   // Pastikan daftar poli/dokter dimuat: trigger load dokter jadwal berdasarkan kode poli rujukan.
+  //   if (_kodePoliRujukanBpjs != null) {
+  //     // Di sistem lama poli dipakai pakai id layanan (idLayanan), bukan kode.
+  //     // Untuk menjaga kompatibilitas, kita paksa pilih poli pertama dari list poli yang sudah dimuat.
+  //     // Jika tidak ada list poli di state, pengguna tetap bisa memilih dari hasil load (di dalam modal).
+  //   }
+
+  //   final rujukanItem = _bpjsRujukan!.rujukan?.bpjs?.rujukan?.isNotEmpty == true
+  //       ? _bpjsRujukan!.rujukan!.bpjs!.rujukan!.first
+  //       : null;
+
+  //   final tglKunjungan = rujukanItem?.tglKunjungan;
+  //   final noKunjungan = rujukanItem?.noKunjungan;
+  //   final namaPasien = _namaPasienBpjs;
+  //   final nikPasien = _nikPasienBpjs;
+
+  //   showDialog(
+  //     context: context,
+  //     barrierDismissible: false,
+  //     builder: (ctx) {
+  //       return StatefulBuilder(
+  //         builder: (ctx, setModalState) {
+  //           // Isi default pemilihan poli/dokter dari hasil rujukan (jika cocok dengan daftar yang ada)
+  //           // Dalam versi ini, kita reuse variabel page.
+
+  //           return Dialog(
+  //             shape: RoundedRectangleBorder(
+  //               borderRadius: BorderRadius.circular(18),
+  //             ),
+  //             child: ConstrainedBox(
+  //               constraints: const BoxConstraints(maxWidth: 720),
+  //               child: Padding(
+  //                 padding: const EdgeInsets.all(16),
+  //                 child: Column(
+  //                   mainAxisSize: MainAxisSize.min,
+  //                   children: [
+  //                     Row(
+  //                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //                       children: [
+  //                         const Text(
+  //                           'Data Pasien (BPJS)',
+  //                           style: TextStyle(
+  //                             fontSize: 18,
+  //                             fontWeight: FontWeight.w700,
+  //                           ),
+  //                         ),
+  //                         IconButton(
+  //                           icon: const Icon(Icons.close),
+  //                           onPressed: () {
+  //                             Navigator.of(ctx).pop();
+  //                             setState(() {
+  //                               _isBpjsModalOpen = false;
+  //                             });
+  //                           },
+  //                         ),
+  //                       ],
+  //                     ),
+  //                     const Divider(),
+  //                     const SizedBox(height: 8),
+  //                     _buildModalInfoRow(
+  //                       label: 'Nama',
+  //                       value: namaPasien ?? '-',
+  //                     ),
+  //                     _buildModalInfoRow(label: 'NIK', value: nikPasien ?? '-'),
+  //                     // Tgl: gunakan CustomDatePickerField agar sama seperti request.
+  //                     CustomDatePickerField(
+  //                       controller: _tanggalPeriksaController,
+  //                       label: 'Tanggal Periksa',
+  //                       icon: Icons.calendar_today,
+  //                       onTap: _selectTglPeriksa,
+  //                       validator: (v) => _selectedTglPeriksa == null
+  //                           ? 'Tanggal periksa wajib diisi'
+  //                           : null,
+  //                     ),
+
+  //                     _buildModalInfoRow(
+  //                       label: 'No Kunjungan',
+  //                       value: noKunjungan ?? '-',
+  //                     ),
+  //                     const SizedBox(height: 10),
+
+  //                     // Poli -> dropdown
+  //                     const SizedBox(height: 6),
+  //                     BlocBuilder<
+  //                       BookingPasienBaruBloc,
+  //                       BookingPasienBaruState
+  //                     >(
+  //                       builder: (pageContext, poliState) {
+  //                         final poliList = poliState is PoliListLoaded
+  //                             ? poliState.poliList
+  //                             : <PoliModel>[];
+
+  //                         return CustomDropdown<PoliModel>(
+  //                           label: 'Pilih Poli',
+  //                           value: _selectedPoli,
+  //                           // Filter dropdown BPJS sesuai kodeBpjs dari rujukan.
+  //                           items: poliList
+  //                               .where(
+  //                                 (p) =>
+  //                                     p.kodeBpjs == _kodePoliRujukanBpjs ||
+  //                                     _kodePoliRujukanBpjs == null,
+  //                               )
+  //                               .toSet()
+  //                               .toList(),
+  //                           display: (p) => p.nama,
+  //                           onChanged: (poli) {
+  //                             setModalState(() {
+  //                               _selectedPoli = poli;
+  //                               _selectedDokter = null;
+  //                             });
+
+  //                             if (poli != null) {
+  //                               pageContext.read<BookingPasienBaruBloc>().add(
+  //                                 LoadDokterJadwalEvent(
+  //                                   idLayanan: poli.id,
+  //                                   jenisBooking: 2,
+  //                                 ),
+  //                               );
+  //                             }
+  //                           },
+  //                         );
+  //                       },
+  //                     ),
+
+  //                     const SizedBox(height: 16),
+
+  //                     // Dokter -> list
+  //                     BlocBuilder<
+  //                       BookingPasienBaruBloc,
+  //                       BookingPasienBaruState
+  //                     >(
+  //                       builder: (context, dokterState) {
+  //                         if (dokterState is DokterJadwalLoaded &&
+  //                             _selectedPoli != null) {
+  //                           final filteredDokter = dokterState.dokterList.where(
+  //                             (dokter) {
+  //                               if (dokter.libur != 0) return false;
+  //                               if (dokter.kapasitasPasien != null &&
+  //                                   dokter.kapasitasPasien! <= 0)
+  //                                 return false;
+  //                               if (dokter.jamBuka == null ||
+  //                                   dokter.jamTutup == null)
+  //                                 return false;
+  //                               return true;
+  //                             },
+  //                           ).toList();
+
+  //                           if (filteredDokter.isEmpty) {
+  //                             return const Padding(
+  //                               padding: EdgeInsets.symmetric(vertical: 8),
+  //                               child: Text(
+  //                                 'Tidak ada dokter BPJS tersedia untuk poli ini',
+  //                                 textAlign: TextAlign.center,
+  //                               ),
+  //                             );
+  //                           }
+
+  //                           return Column(
+  //                             crossAxisAlignment: CrossAxisAlignment.start,
+  //                             children: [
+  //                               Text(
+  //                                 'Pilih Dokter',
+  //                                 style: GoogleFonts.poppins(
+  //                                   fontSize: 16,
+  //                                   fontWeight: FontWeight.w600,
+  //                                   color: AppColors.textPrimary,
+  //                                 ),
+  //                               ),
+  //                               const SizedBox(height: 8),
+  //                               Column(
+  //                                 children: filteredDokter.map((dokter) {
+  //                                   return DokterListItem(
+  //                                     dokter: dokter,
+  //                                     isSelected: _selectedDokter == dokter,
+  //                                     onTap: () {
+  //                                       setModalState(() {
+  //                                         _selectedDokter = dokter;
+  //                                         _jadwalDokterRujukan = dokter.jadwal;
+  //                                       });
+  //                                     },
+  //                                   );
+  //                                 }).toList(),
+  //                               ),
+  //                               const SizedBox(height: 8),
+  //                               _buildModalInfoRow(
+  //                                 label: 'Jadwal',
+  //                                 value:
+  //                                     (_selectedDokter?.jadwal != null &&
+  //                                         _selectedDokter!.jadwal!.isNotEmpty)
+  //                                     ? _selectedDokter!.jadwal!
+  //                                     : (_jadwalDokterRujukan ?? '-'),
+  //                               ),
+  //                             ],
+  //                           );
+  //                         }
+
+  //                         return const SizedBox.shrink();
+  //                       },
+  //                     ),
+
+  //                     const SizedBox(height: 16),
+  //                     Row(
+  //                       children: [
+  //                         Expanded(
+  //                           child: ElevatedButton(
+  //                             onPressed: () {
+  //                               // Untuk BPJS: di requirement, tombol kirim ada di modal.
+  //                               // Kita gunakan submitBooking, tapi pastikan field poli/dokter/jadwal terisi.
+  //                               Navigator.of(ctx).pop();
+  //                               _submitBooking();
+  //                             },
+  //                             style: ElevatedButton.styleFrom(
+  //                               backgroundColor: AppColors.primary,
+  //                               foregroundColor: Colors.white,
+  //                               padding: const EdgeInsets.symmetric(
+  //                                 vertical: 14,
+  //                               ),
+  //                               shape: RoundedRectangleBorder(
+  //                                 borderRadius: BorderRadius.circular(12),
+  //                               ),
+  //                             ),
+  //                             child: const Text('KIRIM BOOKING'),
+  //                           ),
+  //                         ),
+  //                       ],
+  //                     ),
+  //                     const SizedBox(height: 8),
+  //                   ],
+  //                 ),
+  //               ),
+  //             ),
+  //           );
+  //         },
+  //       );
+  //     },
+  //   );
+  // }
+
   void _openBpjsBookingModal(BuildContext context) {
     if (_bpjsRujukan == null) return;
-
-    // Modal BPJS: tampilkan data pasien + tanggal + poli/dokter/jadwal.
-    // UI poli/dokter diambil lewat mekanisme dokternya (LoadDokterJadwalEvent) bila tersedia.
-    // Karena saat ini komponen pemilihan dokter/poli belum difitting ke modal,
-    // kita tampilkan dulu data yang sudah ada dari rujukan + jadwal dari dokter yang dipilih.
-
-    // Pastikan daftar poli/dokter dimuat: trigger load dokter jadwal berdasarkan kode poli rujukan.
-    if (_kodePoliRujukanBpjs != null) {
-      // Di sistem lama poli dipakai pakai id layanan (idLayanan), bukan kode.
-      // Untuk menjaga kompatibilitas, kita paksa pilih poli pertama dari list poli yang sudah dimuat.
-      // Jika tidak ada list poli di state, pengguna tetap bisa memilih dari hasil load (di dalam modal).
-    }
 
     final rujukanItem = _bpjsRujukan!.rujukan?.bpjs?.rujukan?.isNotEmpty == true
         ? _bpjsRujukan!.rujukan!.bpjs!.rujukan!.first
@@ -964,124 +1198,225 @@ class _BookingPasienBaruPageState extends State<BookingPasienBaruPage> {
     final namaPasien = _namaPasienBpjs;
     final nikPasien = _nikPasienBpjs;
 
+    // AMBIL BLOC DARI CONTEXT PARENT
+    final bloc = context.read<BookingPasienBaruBloc>();
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) {
-        return StatefulBuilder(
-          builder: (ctx, setModalState) {
-            // Isi default pemilihan poli/dokter dari hasil rujukan (jika cocok dengan daftar yang ada)
-            // Dalam versi ini, kita reuse variabel page.
-
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18),
-              ),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 720),
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          const Text(
-                            'Data Pasien (BPJS)',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.close),
-                            onPressed: () {
-                              Navigator.of(ctx).pop();
-                              setState(() {
-                                _isBpjsModalOpen = false;
-                              });
-                            },
-                          ),
-                        ],
-                      ),
-                      const Divider(),
-                      const SizedBox(height: 8),
-                      _buildModalInfoRow(
-                        label: 'Nama',
-                        value: namaPasien ?? '-',
-                      ),
-                      _buildModalInfoRow(label: 'NIK', value: nikPasien ?? '-'),
-                      _buildModalInfoRow(
-                        label: 'Tanggal',
-                        value: (_selectedTglPeriksa != null)
-                            ? DateFormat(
-                                'yyyy-MM-dd',
-                              ).format(_selectedTglPeriksa!)
-                            : (tglKunjungan ?? '-'),
-                      ),
-                      _buildModalInfoRow(
-                        label: 'No Kunjungan',
-                        value: noKunjungan ?? '-',
-                      ),
-                      const SizedBox(height: 10),
-
-                      // tampilkan poli/dokter/jadwal berdasarkan state pemilihan pengguna
-                      // untuk memenuhi requirement: user sebelumnya sudah disuruh tidak menampilkan poli/dokter.
-                      // tetapi di modal requirement meminta poli/dokter/jadwal muncul.
-                      const SizedBox(height: 6),
-                      _buildModalInfoRow(
-                        label: 'Poli',
-                        value:
-                            _selectedPoli?.nama ??
-                            (_kodePoliRujukanBpjs ?? '-'),
-                      ),
-                      _buildModalInfoRow(
-                        label: 'Dokter',
-                        value: _selectedDokter?.namaDokter ?? '-',
-                      ),
-                      _buildModalInfoRow(
-                        label: 'Jadwal',
-                        value:
-                            (_selectedDokter?.jadwal != null &&
-                                _selectedDokter!.jadwal!.isNotEmpty)
-                            ? _selectedDokter!.jadwal!.toString()
-                            : (_jadwalDokterRujukan ?? '-'),
-                      ),
-
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton(
-                              onPressed: () {
-                                // Untuk BPJS: di requirement, tombol kirim ada di modal.
-                                // Kita gunakan submitBooking, tapi pastikan field poli/dokter/jadwal terisi.
-                                Navigator.of(ctx).pop();
-                                _submitBooking();
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.primary,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
+        // WARISKAN BLOC KE DIALOG MENGGUNAKAN BlocProvider.value
+        return BlocProvider.value(
+          value: bloc,
+          child: StatefulBuilder(
+            builder: (ctx, setModalState) {
+              return Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 720),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Data Pasien (BPJS)',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
                               ),
-                              child: const Text('KIRIM BOOKING'),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                    ],
+                            IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: () {
+                                Navigator.of(ctx).pop();
+                                setState(() {
+                                  _isBpjsModalOpen = false;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                        const Divider(),
+                        const SizedBox(height: 8),
+                        _buildModalInfoRow(
+                          label: 'Nama',
+                          value: namaPasien ?? '-',
+                        ),
+                        _buildModalInfoRow(
+                          label: 'NIK',
+                          value: nikPasien ?? '-',
+                        ),
+                        CustomDatePickerField(
+                          controller: _tanggalPeriksaController,
+                          label: 'Tanggal Periksa',
+                          icon: Icons.calendar_today,
+                          onTap: _selectTglPeriksa,
+                          validator: (v) => _selectedTglPeriksa == null
+                              ? 'Tanggal periksa wajib diisi'
+                              : null,
+                        ),
+                        _buildModalInfoRow(
+                          label: 'No Kunjungan',
+                          value: noKunjungan ?? '-',
+                        ),
+                        const SizedBox(height: 10),
+
+                        const SizedBox(height: 6),
+                        // SEKARANG BlocBuilder DI SINI AKAN BEKERJA
+                        BlocBuilder<
+                          BookingPasienBaruBloc,
+                          BookingPasienBaruState
+                        >(
+                          builder: (pageContext, poliState) {
+                            final poliList = poliState is PoliListLoaded
+                                ? poliState.poliList
+                                : <PoliModel>[];
+
+                            return CustomDropdown<PoliModel>(
+                              label: 'Pilih Poli',
+                              value: _selectedPoli,
+                              items: poliList
+                                  .where(
+                                    (p) =>
+                                        p.kodeBpjs == _kodePoliRujukanBpjs ||
+                                        _kodePoliRujukanBpjs == null,
+                                  )
+                                  .toSet()
+                                  .toList(),
+                              display: (p) => p.nama,
+                              onChanged: (poli) {
+                                setModalState(() {
+                                  _selectedPoli = poli;
+                                  _selectedDokter = null;
+                                });
+
+                                if (poli != null) {
+                                  pageContext.read<BookingPasienBaruBloc>().add(
+                                    LoadDokterJadwalEvent(
+                                      idLayanan: poli.id,
+                                      jenisBooking: 2,
+                                    ),
+                                  );
+                                }
+                              },
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 16),
+
+                        BlocBuilder<
+                          BookingPasienBaruBloc,
+                          BookingPasienBaruState
+                        >(
+                          builder: (context, dokterState) {
+                            if (dokterState is DokterJadwalLoaded &&
+                                _selectedPoli != null) {
+                              final filteredDokter = dokterState.dokterList
+                                  .where((dokter) {
+                                    if (dokter.libur != 0) return false;
+                                    if (dokter.kapasitasPasien != null &&
+                                        dokter.kapasitasPasien! <= 0)
+                                      return false;
+                                    if (dokter.jamBuka == null ||
+                                        dokter.jamTutup == null)
+                                      return false;
+                                    return true;
+                                  })
+                                  .toList();
+
+                              if (filteredDokter.isEmpty) {
+                                return const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 8),
+                                  child: Text(
+                                    'Tidak ada dokter BPJS tersedia untuk poli ini',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                );
+                              }
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Pilih Dokter',
+                                    style: GoogleFonts.poppins(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Column(
+                                    children: filteredDokter.map((dokter) {
+                                      return DokterListItem(
+                                        dokter: dokter,
+                                        isSelected: _selectedDokter == dokter,
+                                        onTap: () {
+                                          setModalState(() {
+                                            _selectedDokter = dokter;
+                                            _jadwalDokterRujukan =
+                                                dokter.jadwal;
+                                          });
+                                        },
+                                      );
+                                    }).toList(),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  _buildModalInfoRow(
+                                    label: 'Jadwal',
+                                    value:
+                                        (_selectedDokter?.jadwal != null &&
+                                            _selectedDokter!.jadwal!.isNotEmpty)
+                                        ? _selectedDokter!.jadwal!
+                                        : (_jadwalDokterRujukan ?? '-'),
+                                  ),
+                                ],
+                              );
+                            }
+
+                            return const SizedBox.shrink();
+                          },
+                        ),
+
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.of(ctx).pop();
+                                  _submitBooking();
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.primary,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text('KIRIM BOOKING'),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         );
       },
     );
