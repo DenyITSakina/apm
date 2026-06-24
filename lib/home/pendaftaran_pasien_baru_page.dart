@@ -486,6 +486,7 @@ class _BookingPasienBaruPageState extends State<BookingPasienBaruPage> {
         _tglKunjunganBpjs = rujukanItem?.tglKunjungan;
         _noKunjunganBpjs = rujukanItem?.noKunjungan;
 
+        // kode rujukan BPJS (contoh: OBG) harus dicocokkan ke field `kode_bpjs` pada PoliModel.
         _kodePoliRujukanBpjs = rujukanItem?.poliRujukan?.kode;
         _kodeDokterRujukan = null;
         _jadwalDokterRujukan = null;
@@ -1201,6 +1202,10 @@ class _BookingPasienBaruPageState extends State<BookingPasienBaruPage> {
     // AMBIL BLOC DARI CONTEXT PARENT
     final bloc = context.read<BookingPasienBaruBloc>();
 
+    // Pastikan list poli tersedia sebelum render modal.
+    // Jika tidak ada, dropdown bisa kosong.
+    context.read<BookingPasienBaruBloc>().add(LoadPoliListEvent());
+
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -1284,7 +1289,9 @@ class _BookingPasienBaruPageState extends State<BookingPasienBaruPage> {
                               items: poliList
                                   .where(
                                     (p) =>
-                                        p.kodeBpjs == _kodePoliRujukanBpjs ||
+                                        (p.kodeBpjs ?? '').trim() ==
+                                            (_kodePoliRujukanBpjs ?? '')
+                                                .trim() ||
                                         _kodePoliRujukanBpjs == null,
                                   )
                                   .toSet()
