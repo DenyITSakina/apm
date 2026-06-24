@@ -28,6 +28,8 @@ class ApiConfig {
   static const String bpjsCekRujukan = '$baseUrl/bpjs/cek-rujukan';
 
   static const String getDaftar = '$baseUrl/apm-get-sosial';
+
+  static const String bookingPasien = '$baseUrl/pasien-booking';
 }
 
 class ApiResponse<T> {

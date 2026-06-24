@@ -813,29 +813,6 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     }
   }
 
-  Future<void> _updateBookingStatus(String idBooking) async {
-    try {
-      final updateResp = await _requestPost(
-        '${ApiConfig.bookingUpdateStatus}/$idBooking',
-        {},
-      );
-
-      if (updateResp['code'] == 200) {
-        printColor(
-          'Status booking berhasil diupdate',
-          textColor: TextColor.green,
-        );
-      } else {
-        printColor(
-          'Gagal update status booking: ${updateResp['message']}',
-          textColor: TextColor.yellow,
-        );
-      }
-    } catch (e) {
-      printColor('Error update booking: $e', textColor: TextColor.red);
-    }
-  }
-
   Future<List<PoliModel>> _onFetchPoliListInternal() async {
     try {
       final response = await http
