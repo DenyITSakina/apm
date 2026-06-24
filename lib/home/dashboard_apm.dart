@@ -166,12 +166,6 @@ class _DashboardApmState extends State<DashboardApm>
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.medical_services,
-                                  color: Colors.white.withOpacity(0.9),
-                                  size: isTablet ? 32 : 24,
-                                ),
-                                const SizedBox(width: 12),
                                 Text(
                                   "ANJUNGAN PENDAFTARAN MANDIRI",
                                   textAlign: TextAlign.center,
@@ -181,12 +175,6 @@ class _DashboardApmState extends State<DashboardApm>
                                     color: Colors.white.withOpacity(0.9),
                                     letterSpacing: 1.5,
                                   ),
-                                ),
-                                const SizedBox(width: 12),
-                                Icon(
-                                  Icons.medical_services,
-                                  color: Colors.white.withOpacity(0.9),
-                                  size: isTablet ? 32 : 24,
                                 ),
                               ],
                             ),
