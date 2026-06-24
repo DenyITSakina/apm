@@ -1,19 +1,19 @@
 class BookingRequestModel {
-  final String? nama;
   final String nik;
   final String nohp;
+  final int idUnit;
+  final int idDokter;
+  final String tanggalperiksa;
+  final String idJadwalDokter;
+  final int jenisBooking;
+  final String? nama;
   final String? jenisKelamin;
   final String? tempatLahir;
   final String? tglLahir;
   final String? alamat;
-  final int idUnit;
-  final int idDokter;
-  final String tanggalperiksa;
+  final String? email;
+  final int? idStatusKawin;
   final String? jadwal;
-  final String idJadwalDokter;
-  final int kapasitaspasien;
-  final int jenisBooking;
-
   final String? nomorkartu;
   final String? noReferensi;
   final String? kodepoli;
@@ -22,22 +22,24 @@ class BookingRequestModel {
   final String? namadokter;
   final int? jeniskunjungan;
   final int? pasienBaru;
+  final int? kapasitaspasien;
 
   BookingRequestModel({
-    this.nama,
     required this.nik,
     required this.nohp,
+    required this.idUnit,
+    required this.idDokter,
+    required this.tanggalperiksa,
+    required this.idJadwalDokter,
+    required this.jenisBooking,
+    this.nama,
     this.jenisKelamin,
     this.tempatLahir,
     this.tglLahir,
     this.alamat,
-    required this.idUnit,
-    required this.idDokter,
-    required this.tanggalperiksa,
+    this.email,
+    this.idStatusKawin,
     this.jadwal,
-    required this.idJadwalDokter,
-    required this.kapasitaspasien,
-    required this.jenisBooking,
     this.nomorkartu,
     this.noReferensi,
     this.kodepoli,
@@ -46,6 +48,7 @@ class BookingRequestModel {
     this.namadokter,
     this.jeniskunjungan,
     this.pasienBaru,
+    this.kapasitaspasien,
   });
 
   Map<String, dynamic> toJson() {
@@ -56,27 +59,32 @@ class BookingRequestModel {
       'id_dokter': idDokter,
       'tanggalperiksa': tanggalperiksa,
       'id_jadwal_dokter': idJadwalDokter,
-      'kapasitaspasien': kapasitaspasien,
       'jenis_booking': jenisBooking,
     };
 
-    if (nama != null) map['nama'] = nama;
-    if (jenisKelamin != null) map['jenis_kelamin'] = jenisKelamin;
-    if (tempatLahir != null) map['tempat_lahir'] = tempatLahir;
-    if (tglLahir != null) map['tgl_lahir'] = tglLahir;
-    if (alamat != null) map['alamat'] = alamat;
+    if (nama != null && nama!.isNotEmpty) map['nama'] = nama;
+    if (jenisKelamin != null && jenisKelamin!.isNotEmpty)
+      map['jenis_kelamin'] = jenisKelamin;
+    if (tempatLahir != null && tempatLahir!.isNotEmpty)
+      map['tempat_lahir'] = tempatLahir;
+    if (tglLahir != null && tglLahir!.isNotEmpty) map['tgl_lahir'] = tglLahir;
+    if (alamat != null && alamat!.isNotEmpty) map['alamat'] = alamat;
+    if (email != null && email!.isNotEmpty) map['email'] = email;
+    if (idStatusKawin != null) map['id_status_kawin'] = idStatusKawin;
+    if (jadwal != null && jadwal!.isNotEmpty) map['jadwal'] = jadwal;
+    if (kapasitaspasien != null) map['kapasitaspasien'] = kapasitaspasien;
 
     if (jenisBooking == 2) {
-      if (jadwal != null && jadwal!.isNotEmpty) {
-        map['jadwal'] = jadwal;
-      }
-
-      if (nomorkartu != null) map['nomorkartu'] = nomorkartu;
-      if (noReferensi != null) map['no_referensi'] = noReferensi;
-      if (kodepoli != null) map['kodepoli'] = kodepoli;
-      if (namapoli != null) map['namapoli'] = namapoli;
-      if (kodedokter != null) map['kodedokter'] = kodedokter;
-      if (namadokter != null) map['namadokter'] = namadokter;
+      if (nomorkartu != null && nomorkartu!.isNotEmpty)
+        map['nomorkartu'] = nomorkartu;
+      if (noReferensi != null && noReferensi!.isNotEmpty)
+        map['no_referensi'] = noReferensi;
+      if (kodepoli != null && kodepoli!.isNotEmpty) map['kodepoli'] = kodepoli;
+      if (namapoli != null && namapoli!.isNotEmpty) map['namapoli'] = namapoli;
+      if (kodedokter != null && kodedokter!.isNotEmpty)
+        map['kodedokter'] = kodedokter;
+      if (namadokter != null && namadokter!.isNotEmpty)
+        map['namadokter'] = namadokter;
       if (jeniskunjungan != null) map['jeniskunjungan'] = jeniskunjungan;
       map['pasien_baru'] = pasienBaru ?? 1;
     }
@@ -106,27 +114,33 @@ class BookingResponseModel {
 }
 
 class BookingData {
-  final String? rm;
-  final String? idSosial;
+  final String? idBooking;
   final String? noAntrian;
   final String? kodeBooking;
   final String? jenisBooking;
+  final String? tanggalPeriksa;
+  final String? namaPasien;
+  final String? nik;
 
   BookingData({
-    this.rm,
-    this.idSosial,
+    this.idBooking,
     this.noAntrian,
     this.kodeBooking,
     this.jenisBooking,
+    this.tanggalPeriksa,
+    this.namaPasien,
+    this.nik,
   });
 
   factory BookingData.fromJson(Map<String, dynamic> json) {
     return BookingData(
-      rm: json['rm']?.toString(),
-      idSosial: json['id_sosial']?.toString(),
+      idBooking: json['id_booking']?.toString(),
       noAntrian: json['no_antrian']?.toString(),
       kodeBooking: json['kode_booking']?.toString(),
       jenisBooking: json['jenis_booking']?.toString(),
+      tanggalPeriksa: json['tanggal_periksa']?.toString(),
+      namaPasien: json['nama_pasien']?.toString(),
+      nik: json['nik']?.toString(),
     );
   }
 }

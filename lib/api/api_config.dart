@@ -25,6 +25,8 @@ class ApiConfig {
 
   static const String daftarApmRegPoli = '$baseUrl/apm-reg-poli';
 
+  static const String bpjsCekRujukan = '$baseUrl/bpjs/cek-rujukan';
+
   static const String bookingUpdateStatus = '$baseUrl/booking/update-status';
 
   static const String getDaftar = '$baseUrl/apm-get-sosial';

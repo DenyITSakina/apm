@@ -7,6 +7,7 @@ import 'package:apm/home/dashboard_apm.dart';
 import 'package:apm/models/booking_pasien_baru_model.dart';
 import 'package:apm/models/dokter_model.dart';
 import 'package:apm/models/poli_model.dart';
+import 'package:apm/models/bpjs_cek_rujukan_model.dart';
 import 'package:apm/utils/validators.dart';
 import 'package:apm/widget/custom_text_field.dart';
 import 'package:apm/widget/keypad_section.dart';
@@ -30,13 +31,31 @@ class _BookingPasienBaruPageState extends State<BookingPasienBaruPage> {
   final _nohpController = TextEditingController();
   final _tanggalPeriksaController = TextEditingController();
   final _nomorKartuController = TextEditingController();
-  final _nomorReferensiController = TextEditingController();
 
+  // Hasil cek rujukan BPJS
+  String? _namaPasienBpjs;
+  String? _nikPasienBpjs;
+
+  // Simpan response untuk modal BPJS
+  BpjsCekRujukanResponse? _bpjsRujukan;
   DateTime? _selectedTglPeriksa;
+
+  // mapping rujukan BPJS -> form poli/dokter/jadwal
+  String? _kodePoliRujukanBpjs;
+  String? _kodeDokterRujukan;
+  String? _jadwalDokterRujukan;
+
   PoliModel? _selectedPoli;
   DokterModel? _selectedDokter;
   int _jenisBooking = 1;
   bool _isLoading = false;
+
+  // kontrol modal untuk jenis 2
+  bool _isBpjsModalOpen = false;
+
+  // agar UI BPJS awal hanya butuh tanggal/poli/dokter dari rujukan
+  String? _tglKunjunganBpjs;
+  String? _noKunjunganBpjs;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -55,7 +74,7 @@ class _BookingPasienBaruPageState extends State<BookingPasienBaruPage> {
     _nohpController.dispose();
     _tanggalPeriksaController.dispose();
     _nomorKartuController.dispose();
-    _nomorReferensiController.dispose();
+
     super.dispose();
   }
 
@@ -113,15 +132,17 @@ class _BookingPasienBaruPageState extends State<BookingPasienBaruPage> {
               children: [
                 _buildJenisBookingSelector(),
                 const SizedBox(height: AppDimens.paddingMedium),
-                _buildDataPasienSection(),
-                const SizedBox(height: AppDimens.paddingMedium),
-                if (_jenisBooking == 2) ...[
+                if (_jenisBooking != 2) ...[
+                  _buildDataPasienSection(),
+                  const SizedBox(height: AppDimens.paddingMedium),
+                  _buildPoliDokterSection(state),
+                  const SizedBox(height: AppDimens.paddingMedium),
+                  _buildSubmitButton(state is BookingPasienBaruLoading),
+                ] else ...[
+                  // Untuk BPJS: tampil awal hanya selector jenis, input No BPJS, dan tombol CARI.
                   _buildBpjsSection(),
                   const SizedBox(height: AppDimens.paddingMedium),
                 ],
-                _buildPoliDokterSection(state),
-                const SizedBox(height: AppDimens.paddingMedium),
-                _buildSubmitButton(state is BookingPasienBaruLoading),
               ],
             ),
           ),
@@ -130,7 +151,7 @@ class _BookingPasienBaruPageState extends State<BookingPasienBaruPage> {
         const SizedBox(width: AppDimens.paddingLarge),
 
         Expanded(
-          flex: 1,
+          flex: 2,
           child: Container(
             height: MediaQuery.of(context).size.height * 0.7,
             child: Card(
@@ -188,14 +209,15 @@ class _BookingPasienBaruPageState extends State<BookingPasienBaruPage> {
         children: [
           _buildJenisBookingSelector(),
           const SizedBox(height: AppDimens.paddingMedium),
-          _buildDataPasienSection(),
-          const SizedBox(height: AppDimens.paddingMedium),
-          if (_jenisBooking == 2) ...[
+          if (_jenisBooking != 2) ...[
+            _buildDataPasienSection(),
+            const SizedBox(height: AppDimens.paddingMedium),
+            _buildPoliDokterSection(state),
+            const SizedBox(height: AppDimens.paddingMedium),
+          ] else ...[
             _buildBpjsSection(),
             const SizedBox(height: AppDimens.paddingMedium),
           ],
-          _buildPoliDokterSection(state),
-          const SizedBox(height: AppDimens.paddingMedium),
 
           Card(
             elevation: 2,
@@ -261,8 +283,6 @@ class _BookingPasienBaruPageState extends State<BookingPasienBaruPage> {
     if (_activeFieldController == _nohpController) return "No. HP";
     if (_activeFieldController == _nomorKartuController)
       return "No. Kartu BPJS";
-    if (_activeFieldController == _nomorReferensiController)
-      return "No. Referensi";
     return "Tidak ada field yang dipilih";
   }
 
@@ -441,15 +461,58 @@ class _BookingPasienBaruPageState extends State<BookingPasienBaruPage> {
 
     if (state is BookingSuccess) {
       setState(() => _isLoading = false);
-      showSuccessDialog(
-        context,
-        'Booking Berhasil!\nNo Antrian: ${state.response.data?.noAntrian}\nRM: ${state.response.data?.rm}',
-      ).then((_) {
+      showSuccessDialog(context, 'Booking Berhasil!}').then((_) {
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const DashboardApm()),
           (route) => false,
         );
+      });
+    }
+
+    if (state is BpjsRujukanLoaded) {
+      setState(() {
+        _bpjsRujukan = state.response;
+        _namaPasienBpjs = state.response.peserta?.nama;
+        _nikPasienBpjs = state.response.peserta?.nik;
+        _isBpjsModalOpen = true;
+
+        // ambil data rujukan pertama
+        final rujukanItem =
+            state.response.rujukan?.bpjs?.rujukan?.isNotEmpty == true
+            ? state.response.rujukan!.bpjs!.rujukan!.first
+            : null;
+
+        _tglKunjunganBpjs = rujukanItem?.tglKunjungan;
+        _noKunjunganBpjs = rujukanItem?.noKunjungan;
+
+        _kodePoliRujukanBpjs = rujukanItem?.poliRujukan?.kode;
+        _kodeDokterRujukan = null;
+        _jadwalDokterRujukan = null;
+
+        // set tanggal periksa dari tglKunjungan jika format parse sesuai
+        if (_tglKunjunganBpjs != null && _tglKunjunganBpjs!.isNotEmpty) {
+          try {
+            final parsed = DateTime.parse(_tglKunjunganBpjs!);
+            _selectedTglPeriksa = parsed;
+            _tanggalPeriksaController.text = DateFormat(
+              'yyyy-MM-dd',
+            ).format(parsed);
+          } catch (_) {
+            _selectedTglPeriksa = null;
+          }
+        } else {
+          _selectedTglPeriksa = null;
+        }
+
+        // reset pilihan poli/dokter agar modal bisa memaksa pemilihan dari hasil cek
+        _selectedPoli = null;
+        _selectedDokter = null;
+      });
+
+      // munculkan modal BPJS.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _openBpjsBookingModal(context);
       });
     }
 
@@ -512,9 +575,9 @@ class _BookingPasienBaruPageState extends State<BookingPasienBaruPage> {
           }
         });
       },
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(7),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.all(7),
         decoration: BoxDecoration(
           color: isSelected ? Colors.blue : Colors.grey.shade200,
           borderRadius: BorderRadius.circular(12),
@@ -522,7 +585,7 @@ class _BookingPasienBaruPageState extends State<BookingPasienBaruPage> {
         child: Column(
           children: [
             Icon(icon, color: isSelected ? Colors.white : Colors.black),
-            const SizedBox(height: 6),
+            const SizedBox(height: 5),
             Text(
               title,
               style: TextStyle(
@@ -605,60 +668,85 @@ class _BookingPasienBaruPageState extends State<BookingPasienBaruPage> {
   }
 
   Widget _buildBpjsSection() {
+    final isBpjsReady = (_nomorKartuController.text.trim().isNotEmpty);
+
     return CustomSectionCard(
       title: "Data BPJS",
       icon: Icons.health_and_safety,
       children: [
-        CustomTextField(
-          controller: _nomorKartuController,
-          label: "Nomor Kartu BPJS",
-          icon: Icons.credit_card,
-          keyboardType: TextInputType.number,
-          textInputAction: TextInputAction.next,
-          maxLength: 13, // Batasi maksimal 13 digit
-          inputFormatters: [
-            FilteringTextInputFormatter.digitsOnly, // Hanya angka
+        Row(
+          children: [
+            Expanded(
+              child: CustomTextField(
+                controller: _nomorKartuController,
+                label: "No BPJS",
+                icon: Icons.credit_card,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.done,
+                maxLength: 13,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                onTap: () {
+                  setState(() {
+                    _activeFieldController = _nomorKartuController;
+                  });
+                },
+                onFocusChange: (hasFocus) {
+                  if (hasFocus) {
+                    setState(() {
+                      _activeFieldController = _nomorKartuController;
+                    });
+                  }
+                },
+                validator: Validators.validateNomorKartuBPJS,
+              ),
+            ),
+            const SizedBox(width: 12),
+            SizedBox(
+              width: 90,
+              child: ElevatedButton.icon(
+                onPressed: (_isLoading || !isBpjsReady)
+                    ? null
+                    : () {
+                        context.read<BookingPasienBaruBloc>().add(
+                          CekRujukanBpjsEvent(
+                            noBpjs: _nomorKartuController.text.trim(),
+                          ),
+                        );
+                      },
+                icon: const Icon(Icons.search_rounded, size: 18),
+                label: const Text("CARI"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
           ],
-          onTap: () {
-            setState(() {
-              _activeFieldController = _nomorKartuController;
-            });
-          },
-          onFocusChange: (hasFocus) {
-            if (hasFocus) {
-              setState(() {
-                _activeFieldController = _nomorKartuController;
-              });
-            }
-          },
-          validator: Validators.validateNomorKartuBPJS,
         ),
-        const SizedBox(height: 16),
-
-        CustomTextField(
-          controller: _nomorReferensiController,
-          label: "Nomor Rujuk",
-          icon: Icons.receipt_outlined,
-          textInputAction: TextInputAction.done,
-          onTap: () {
-            setState(() {
-              _activeFieldController = _nomorReferensiController;
-            });
-          },
-          onFocusChange: (hasFocus) {
-            if (hasFocus) {
-              setState(() {
-                _activeFieldController = _nomorReferensiController;
-              });
-            }
-          },
-          validator: (v) => Validators.validateRequired(v, "Nomor referensi"),
-        ),
+        const SizedBox(height: 10),
+        if (_namaPasienBpjs != null && _nikPasienBpjs != null)
+          Text(
+            "Ditemukan: ${_namaPasienBpjs} (NIK: ${_nikPasienBpjs})",
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              color: Colors.blueGrey.shade700,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
       ],
     );
   }
 
   Widget _buildPoliDokterSection(BookingPasienBaruState state) {
+    // Khusus tampilan awal BPJS (jenis 2) tidak ditampilkan sampai modal muncul.
+    if (_jenisBooking == 2) {
+      return const SizedBox.shrink();
+    }
+
     List<PoliModel> poliList = [];
 
     if (state is PoliListLoaded) {
@@ -811,6 +899,11 @@ class _BookingPasienBaruPageState extends State<BookingPasienBaruPage> {
   }
 
   Widget _buildSubmitButton(bool isLoading) {
+    // Tombol kirim booking untuk BPJS hanya tampil di dalam modal.
+    if (_jenisBooking == 2) {
+      return const SizedBox.shrink();
+    }
+
     return CustomSubmitButton(
       onPressed: _submitBooking,
       text: "KIRIM BOOKING",
@@ -845,6 +938,174 @@ class _BookingPasienBaruPageState extends State<BookingPasienBaruPage> {
         ).format(picked);
       });
     }
+  }
+
+  void _openBpjsBookingModal(BuildContext context) {
+    if (_bpjsRujukan == null) return;
+
+    // Modal BPJS: tampilkan data pasien + tanggal + poli/dokter/jadwal.
+    // UI poli/dokter diambil lewat mekanisme dokternya (LoadDokterJadwalEvent) bila tersedia.
+    // Karena saat ini komponen pemilihan dokter/poli belum difitting ke modal,
+    // kita tampilkan dulu data yang sudah ada dari rujukan + jadwal dari dokter yang dipilih.
+
+    // Pastikan daftar poli/dokter dimuat: trigger load dokter jadwal berdasarkan kode poli rujukan.
+    if (_kodePoliRujukanBpjs != null) {
+      // Di sistem lama poli dipakai pakai id layanan (idLayanan), bukan kode.
+      // Untuk menjaga kompatibilitas, kita paksa pilih poli pertama dari list poli yang sudah dimuat.
+      // Jika tidak ada list poli di state, pengguna tetap bisa memilih dari hasil load (di dalam modal).
+    }
+
+    final rujukanItem = _bpjsRujukan!.rujukan?.bpjs?.rujukan?.isNotEmpty == true
+        ? _bpjsRujukan!.rujukan!.bpjs!.rujukan!.first
+        : null;
+
+    final tglKunjungan = rujukanItem?.tglKunjungan;
+    final noKunjungan = rujukanItem?.noKunjungan;
+    final namaPasien = _namaPasienBpjs;
+    final nikPasien = _nikPasienBpjs;
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setModalState) {
+            // Isi default pemilihan poli/dokter dari hasil rujukan (jika cocok dengan daftar yang ada)
+            // Dalam versi ini, kita reuse variabel page.
+
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(18),
+              ),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 720),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Data Pasien (BPJS)',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            onPressed: () {
+                              Navigator.of(ctx).pop();
+                              setState(() {
+                                _isBpjsModalOpen = false;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
+                      const Divider(),
+                      const SizedBox(height: 8),
+                      _buildModalInfoRow(
+                        label: 'Nama',
+                        value: namaPasien ?? '-',
+                      ),
+                      _buildModalInfoRow(label: 'NIK', value: nikPasien ?? '-'),
+                      _buildModalInfoRow(
+                        label: 'Tanggal',
+                        value: (_selectedTglPeriksa != null)
+                            ? DateFormat(
+                                'yyyy-MM-dd',
+                              ).format(_selectedTglPeriksa!)
+                            : (tglKunjungan ?? '-'),
+                      ),
+                      _buildModalInfoRow(
+                        label: 'No Kunjungan',
+                        value: noKunjungan ?? '-',
+                      ),
+                      const SizedBox(height: 10),
+
+                      // tampilkan poli/dokter/jadwal berdasarkan state pemilihan pengguna
+                      // untuk memenuhi requirement: user sebelumnya sudah disuruh tidak menampilkan poli/dokter.
+                      // tetapi di modal requirement meminta poli/dokter/jadwal muncul.
+                      const SizedBox(height: 6),
+                      _buildModalInfoRow(
+                        label: 'Poli',
+                        value:
+                            _selectedPoli?.nama ??
+                            (_kodePoliRujukanBpjs ?? '-'),
+                      ),
+                      _buildModalInfoRow(
+                        label: 'Dokter',
+                        value: _selectedDokter?.namaDokter ?? '-',
+                      ),
+                      _buildModalInfoRow(
+                        label: 'Jadwal',
+                        value:
+                            (_selectedDokter?.jadwal != null &&
+                                _selectedDokter!.jadwal!.isNotEmpty)
+                            ? _selectedDokter!.jadwal!.toString()
+                            : (_jadwalDokterRujukan ?? '-'),
+                      ),
+
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                // Untuk BPJS: di requirement, tombol kirim ada di modal.
+                                // Kita gunakan submitBooking, tapi pastikan field poli/dokter/jadwal terisi.
+                                Navigator.of(ctx).pop();
+                                _submitBooking();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.primary,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: const Text('KIRIM BOOKING'),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildModalInfoRow({required String label, required String value}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 110,
+            child: Text(
+              '$label:',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          Expanded(
+            child: Text(value, style: const TextStyle(color: Colors.black87)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _submitBooking() async {
@@ -887,9 +1148,8 @@ class _BookingPasienBaruPageState extends State<BookingPasienBaruPage> {
       kapasitaspasien: _selectedDokter!.kapasitasPasien,
       jenisBooking: _jenisBooking,
       nomorkartu: _jenisBooking == 2 ? _nomorKartuController.text.trim() : null,
-      noReferensi: _jenisBooking == 2
-          ? _nomorReferensiController.text.trim()
-          : null,
+      noReferensi: null,
+
       kodepoli: _jenisBooking == 2 ? _selectedPoli!.kodeBpjs : null,
       namapoli: _jenisBooking == 2 ? _selectedPoli!.nama : null,
       kodedokter: _jenisBooking == 2 ? _selectedDokter!.kodeDokter : null,

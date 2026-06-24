@@ -45,35 +45,35 @@ class _BookingPasienLamaPageState extends State<BookingPasienLamaPage> {
 
   TextEditingController? _activeFieldController;
 
-  final List<String> _availableTimes = [
-    '08:00',
-    '08:30',
-    '09:00',
-    '09:30',
-    '10:00',
-    '10:30',
-    '11:00',
-    '11:30',
-    '12:00',
-    '12:30',
-    '13:00',
-    '13:30',
-    '14:00',
-    '14:30',
-    '15:00',
-    '15:30',
-    '16:00',
-    '16:30',
-    '17:00',
-    '17:30',
-    '18:00',
-    '18:30',
-    '19:00',
-    '19:30',
-    '20:00',
-    '20:30',
-    '21:00',
-  ];
+  // final List<String> _availableTimes = [
+  //   '08:00',
+  //   '08:30',
+  //   '09:00',
+  //   '09:30',
+  //   '10:00',
+  //   '10:30',
+  //   '11:00',
+  //   '11:30',
+  //   '12:00',
+  //   '12:30',
+  //   '13:00',
+  //   '13:30',
+  //   '14:00',
+  //   '14:30',
+  //   '15:00',
+  //   '15:30',
+  //   '16:00',
+  //   '16:30',
+  //   '17:00',
+  //   '17:30',
+  //   '18:00',
+  //   '18:30',
+  //   '19:00',
+  //   '19:30',
+  //   '20:00',
+  //   '20:30',
+  //   '21:00',
+  // ];
 
   @override
   void initState() {
@@ -150,8 +150,8 @@ class _BookingPasienLamaPageState extends State<BookingPasienLamaPage> {
 
                   if (_jenisBooking == 2) ...[
                     _buildBpjsSection(),
-                    const SizedBox(height: AppDimens.paddingMedium),
-                    _buildJamSection(),
+                    // const SizedBox(height: AppDimens.paddingMedium),
+                    // _buildJamSection(),
                     const SizedBox(height: AppDimens.paddingMedium),
                   ],
 
@@ -169,7 +169,7 @@ class _BookingPasienLamaPageState extends State<BookingPasienLamaPage> {
 
         if (_shouldShowKeypad())
           Expanded(
-            flex: 1,
+            flex: 2,
             child: Container(
               height: MediaQuery.of(context).size.height * 0.7,
               child: Card(
@@ -236,8 +236,8 @@ class _BookingPasienLamaPageState extends State<BookingPasienLamaPage> {
 
             if (_jenisBooking == 2) ...[
               _buildBpjsSectionWithKeypad(),
-              const SizedBox(height: AppDimens.paddingMedium),
-              _buildJamSection(),
+              // const SizedBox(height: AppDimens.paddingMedium),
+              // _buildJamSection(),
               const SizedBox(height: AppDimens.paddingMedium),
             ],
 
@@ -807,62 +807,62 @@ class _BookingPasienLamaPageState extends State<BookingPasienLamaPage> {
     );
   }
 
-  Widget _buildJamSection() {
-    return CustomSectionCard(
-      title: "Pilih Jam Kunjungan",
-      icon: Icons.access_time,
-      children: [
-        DropdownButtonFormField<String>(
-          value: _selectedJam,
-          decoration: InputDecoration(
-            labelText: "Pilih Jam",
-            labelStyle: GoogleFonts.poppins(
-              fontSize: 14,
-              color: Colors.grey.shade600,
-            ),
-            prefixIcon: Icon(Icons.access_time, color: Colors.teal.shade700),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.teal, width: 2),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Colors.red, width: 1),
-            ),
-            filled: true,
-            fillColor: Colors.white,
-          ),
-          items: _availableTimes.map((time) {
-            return DropdownMenuItem<String>(
-              value: time,
-              child: Text(time, style: GoogleFonts.poppins(fontSize: 14)),
-            );
-          }).toList(),
-          onChanged: (time) {
-            setState(() {
-              _selectedJam = time;
-            });
-          },
-          validator: (value) {
-            if (_jenisBooking == 2) {
-              if (value == null) {
-                return "Jam kunjungan wajib dipilih";
-              }
-            }
-            return null;
-          },
-        ),
-      ],
-    );
-  }
+  // Widget _buildJamSection() {
+  //   return CustomSectionCard(
+  //     title: "Pilih Jam Kunjungan",
+  //     icon: Icons.access_time,
+  //     children: [
+  //       DropdownButtonFormField<String>(
+  //         value: _selectedJam,
+  //         decoration: InputDecoration(
+  //           labelText: "Pilih Jam",
+  //           labelStyle: GoogleFonts.poppins(
+  //             fontSize: 14,
+  //             color: Colors.grey.shade600,
+  //           ),
+  //           prefixIcon: Icon(Icons.access_time, color: Colors.teal.shade700),
+  //           border: OutlineInputBorder(
+  //             borderRadius: BorderRadius.circular(12),
+  //             borderSide: BorderSide(color: Colors.grey.shade300),
+  //           ),
+  //           enabledBorder: OutlineInputBorder(
+  //             borderRadius: BorderRadius.circular(12),
+  //             borderSide: BorderSide(color: Colors.grey.shade300),
+  //           ),
+  //           focusedBorder: OutlineInputBorder(
+  //             borderRadius: BorderRadius.circular(12),
+  //             borderSide: const BorderSide(color: Colors.teal, width: 2),
+  //           ),
+  //           errorBorder: OutlineInputBorder(
+  //             borderRadius: BorderRadius.circular(12),
+  //             borderSide: const BorderSide(color: Colors.red, width: 1),
+  //           ),
+  //           filled: true,
+  //           fillColor: Colors.white,
+  //         ),
+  //         items: _availableTimes.map((time) {
+  //           return DropdownMenuItem<String>(
+  //             value: time,
+  //             child: Text(time, style: GoogleFonts.poppins(fontSize: 14)),
+  //           );
+  //         }).toList(),
+  //         onChanged: (time) {
+  //           setState(() {
+  //             _selectedJam = time;
+  //           });
+  //         },
+  //         validator: (value) {
+  //           if (_jenisBooking == 2) {
+  //             if (value == null) {
+  //               return "Jam kunjungan wajib dipilih";
+  //             }
+  //           }
+  //           return null;
+  //         },
+  //       ),
+  //     ],
+  //   );
+  // }
 
   Widget _buildPoliDokterSection(BookingPasienLamaState state) {
     List<PoliModel> poliList = [];

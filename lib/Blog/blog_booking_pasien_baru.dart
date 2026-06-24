@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:apm/api/api_config.dart';
 import 'package:apm/models/booking_pasien_baru_model.dart';
+import 'package:apm/models/bpjs_cek_rujukan_model.dart';
+
 import 'package:apm/models/dokter_model.dart';
 import 'package:apm/models/poli_model.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -27,6 +29,12 @@ class SubmitBookingEvent extends BookingPasienBaruEvent {
 }
 
 class ResetBookingEvent extends BookingPasienBaruEvent {}
+
+class CekRujukanBpjsEvent extends BookingPasienBaruEvent {
+  final String noBpjs;
+
+  CekRujukanBpjsEvent({required this.noBpjs});
+}
 
 // States
 abstract class BookingPasienBaruState {}
@@ -59,12 +67,19 @@ class BookingError extends BookingPasienBaruState {
   BookingError({required this.message});
 }
 
+class BpjsRujukanLoaded extends BookingPasienBaruState {
+  final BpjsCekRujukanResponse response;
+
+  BpjsRujukanLoaded({required this.response});
+}
+
 // Bloc
 class BookingPasienBaruBloc
     extends Bloc<BookingPasienBaruEvent, BookingPasienBaruState> {
   BookingPasienBaruBloc() : super(BookingPasienBaruInitial()) {
     on<LoadPoliListEvent>(_onLoadPoliList);
     on<LoadDokterJadwalEvent>(_onLoadDokterJadwal);
+    on<CekRujukanBpjsEvent>(_onCekRujukanBpjs);
     on<SubmitBookingEvent>(_onSubmitBooking);
     on<ResetBookingEvent>(_onResetBooking);
   }
@@ -243,6 +258,55 @@ class BookingPasienBaruBloc
       }
     } catch (e) {
       emit(BookingError(message: 'Error submit booking: $e'));
+    }
+  }
+
+  Future<void> _onCekRujukanBpjs(
+    CekRujukanBpjsEvent event,
+    Emitter<BookingPasienBaruState> emit,
+  ) async {
+    emit(BookingPasienBaruLoading());
+
+    try {
+      final response = await http
+          .post(
+            Uri.parse(ApiConfig.bpjsCekRujukan),
+            headers: {'Content-Type': 'application/json'},
+            body: json.encode({'no_peserta': event.noBpjs}),
+          )
+          .timeout(const Duration(seconds: 15));
+
+      if (response.statusCode != 200) {
+        emit(BookingError(message: 'Server error: ${response.statusCode}'));
+        return;
+      }
+
+      final jsonResp = json.decode(response.body);
+      final status = jsonResp is Map<String, dynamic>
+          ? jsonResp['status']
+          : null;
+
+      if (status != true) {
+        final msg = jsonResp is Map<String, dynamic>
+            ? (jsonResp['message'] ??
+                  jsonResp['pesan'] ??
+                  'Data rujukan tidak ditemukan')
+            : 'Data rujukan tidak ditemukan';
+        emit(BookingError(message: msg.toString()));
+        return;
+      }
+
+      if (jsonResp is Map<String, dynamic>) {
+        emit(
+          BpjsRujukanLoaded(
+            response: BpjsCekRujukanResponse.fromJson(jsonResp),
+          ),
+        );
+      } else {
+        emit(BookingError(message: 'Format response tidak valid'));
+      }
+    } catch (e) {
+      emit(BookingError(message: 'Error cek rujukan: $e'));
     }
   }
 
