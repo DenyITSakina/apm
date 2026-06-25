@@ -83,22 +83,26 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
             _isDataLoaded = true;
           });
 
-          if (state.pasienBpjs!.kodePoliRujukan != null) {
+          final kodePoliRujukan = state.pasienBpjs!.kodePoliRujukan;
+          if (kodePoliRujukan != null && kodePoliRujukan.trim().isNotEmpty) {
             final matchedPoli = state.poliList.firstWhere(
-              (p) => p.kodeBpjs == state.pasienBpjs!.kodePoliRujukan,
+              (p) => p.kodeBpjs.trim() == kodePoliRujukan.trim(),
               orElse: () => state.poliList.first,
             );
+
             if (matchedPoli.id != 0) {
               setState(() {
                 _selectedPoliId = matchedPoli.id;
                 _selectedPoliNama = matchedPoli.nama;
               });
-              _loadDokterJkn(context, matchedPoli.id);
+
+              if (_selectedDate != null) {
+                _loadDokterJkn(context, matchedPoli.id);
+              }
             }
           }
         }
 
-        // Tampilkan dialog sukses
         if (state.status == BookingStatus.success &&
             state.bookingResult != null) {
           _showSuccessDialog(context, state);
@@ -118,7 +122,6 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        /// No BPJS
                         TextFormField(
                           controller: _noBpjsController,
                           readOnly: true,
@@ -155,9 +158,7 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                             return null;
                           },
                         ),
-                        const SizedBox(height: 8),
 
-                        /// Cek BPJS Button
                         if (state.pasienBpjs == null)
                           SizedBox(
                             width: double.infinity,
@@ -194,34 +195,41 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                           ),
                         const SizedBox(height: 16),
 
-                        /// Data Pasien BPJS
                         if (state.pasienBpjs != null) ...[
                           _buildInfoCard('Data Pasien', [
-                            _buildInfoItem('Nama', state.pasienBpjs!.nama),
-                            _buildInfoItem('NIK', state.pasienBpjs!.nik),
-                            _buildInfoItem(
-                              'No BPJS',
-                              state.pasienBpjs!.noPeserta,
+                            _buildExpandableInfo(
+                              items: <MapEntry<String, String>>[
+                                MapEntry('Nama', state.pasienBpjs!.nama),
+                                MapEntry('NIK', state.pasienBpjs!.nik),
+                                MapEntry(
+                                  'No BPJS',
+                                  state.pasienBpjs!.noPeserta,
+                                ),
+                                if (state.pasienBpjs!.noTelp != null &&
+                                    state.pasienBpjs!.noTelp!.isNotEmpty)
+                                  MapEntry('No HP', state.pasienBpjs!.noTelp!),
+                                if (state.pasienBpjs!.jenisKelamin != null)
+                                  MapEntry(
+                                    'Jenis Kelamin',
+                                    state.pasienBpjs!.jenisKelamin!,
+                                  ),
+                                if (state.pasienBpjs!.tglLahir != null)
+                                  MapEntry(
+                                    'Tgl Lahir',
+                                    state.pasienBpjs!.tglLahir!,
+                                  ),
+                                if (state.pasienBpjs!.poliRujukan != null)
+                                  MapEntry(
+                                    'Poli Rujukan',
+                                    state.pasienBpjs!.poliRujukan!,
+                                  ),
+                              ],
+                              initialVisibleCount: 4,
                             ),
-                            if (state.pasienBpjs!.noTelp != null)
-                              _buildInfoItem(
-                                'No HP',
-                                state.pasienBpjs!.noTelp!,
-                              ),
-                            if (state.pasienBpjs!.jenisKelamin != null)
-                              _buildInfoItem(
-                                'Jenis Kelamin',
-                                state.pasienBpjs!.jenisKelamin!,
-                              ),
-                            if (state.pasienBpjs!.poliRujukan != null)
-                              _buildInfoItem(
-                                'Poli Rujukan',
-                                state.pasienBpjs!.poliRujukan!,
-                              ),
                           ]),
-                          const SizedBox(height: 16),
 
-                          /// Tanggal Periksa
+                          const SizedBox(height: 12),
+
                           InkWell(
                             onTap: () async {
                               final date = await showDatePicker(
@@ -258,16 +266,19 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
 
-                          /// Poli
                           DropdownButtonFormField<String>(
                             decoration: const InputDecoration(
                               labelText: 'Pilih Poli',
                               border: OutlineInputBorder(),
                               prefixIcon: Icon(Icons.local_hospital),
                             ),
-                            value: _selectedPoliId?.toString(),
+                            value:
+                                (_selectedPoliId == null ||
+                                    _selectedPoliId == 0)
+                                ? null
+                                : _selectedPoliId!.toString(),
                             items: state.poliList.map((poli) {
                               return DropdownMenuItem(
                                 value: poli.id.toString(),
@@ -286,7 +297,10 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                                       );
                                   _selectedPoliNama = selectedPoli.nama;
                                 });
-                                _loadDokterJkn(context, int.parse(value));
+
+                                if (_selectedDate != null) {
+                                  _loadDokterJkn(context, int.parse(value));
+                                }
                               }
                             },
                             validator: (value) {
@@ -298,7 +312,6 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                           ),
                           const SizedBox(height: 16),
 
-                          /// Dokter
                           DropdownButtonFormField<String>(
                             decoration: const InputDecoration(
                               labelText: 'Pilih Dokter',
@@ -351,7 +364,7 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                               return null;
                             },
                           ),
-                          const SizedBox(height: 20),
+                          const SizedBox(height: 12),
 
                           /// Submit Button
                           SizedBox(
@@ -511,23 +524,85 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
     );
   }
 
+  Widget _buildExpandableInfo({
+    required List<MapEntry<String, String>> items,
+    int initialVisibleCount = 4,
+  }) {
+    final visibleCount = initialVisibleCount.clamp(0, items.length);
+    final firstBatch = items.take(visibleCount).toList();
+    final remaining = items.skip(visibleCount).toList();
+
+    if (remaining.isEmpty) {
+      return Column(
+        children: firstBatch
+            .map((e) => _buildInfoItem(e.key, e.value))
+            .toList(),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...firstBatch.map((e) => _buildInfoItem(e.key, e.value)),
+        ...[
+          ExpansionTile(
+            title: const Text('Lihat info lainnya'),
+            children: remaining
+                .map(
+                  (e) => Padding(
+                    padding: EdgeInsets.only(left: 0),
+                    child: _buildInfoItem(e.key, e.value),
+                  ),
+                )
+                .toList(),
+          ),
+        ],
+      ],
+    );
+  }
+
+  // void _submitBooking(BuildContext context) {
+  //   final state = context.read<BookingBloc>().state;
+  //   final selectedDokter = state.dokterList.firstWhere(
+  //     (d) => d.idDokter.toString() == _selectedDokterId,
+  //   );
+
+  //   final request = BookingRequest(
+  //     jenis: '2',
+  //     nik: state.pasienBpjs!.nik,
+  //     nohp: _nohpController.text.isNotEmpty
+  //         ? _nohpController.text
+  //         : state.pasienBpjs!.noTelp ?? '',
+  //     idUnit: _selectedPoliId!,
+  //     idDokter: int.parse(_selectedDokterId!),
+  //     tanggalPeriksa: DateFormat('yyyy-MM-dd').format(_selectedDate!),
+  //     idJadwalDokter: selectedDokter.idJadwalDetail,
+  //     noBpjs: state.pasienBpjs!.noPeserta,
+  //     email: _emailController.text.isNotEmpty ? _emailController.text : null,
+  //   );
+
+  //   context.read<BookingBloc>().add(SubmitBookingBpjsEvent(request));
+  // }
+
   void _submitBooking(BuildContext context) {
     final state = context.read<BookingBloc>().state;
+    final pasien = state.pasienBpjs!;
+
     final selectedDokter = state.dokterList.firstWhere(
       (d) => d.idDokter.toString() == _selectedDokterId,
     );
 
     final request = BookingRequest(
       jenis: '2',
-      nik: state.pasienBpjs!.nik,
+      nik: pasien.nik,
       nohp: _nohpController.text.isNotEmpty
           ? _nohpController.text
-          : state.pasienBpjs!.noTelp ?? '',
+          : pasien.noTelp ?? '',
       idUnit: _selectedPoliId!,
       idDokter: int.parse(_selectedDokterId!),
       tanggalPeriksa: DateFormat('yyyy-MM-dd').format(_selectedDate!),
       idJadwalDokter: selectedDokter.idJadwalDetail,
-      noBpjs: state.pasienBpjs!.noPeserta,
+      noBpjs: pasien.noPeserta,
       email: _emailController.text.isNotEmpty ? _emailController.text : null,
     );
 
