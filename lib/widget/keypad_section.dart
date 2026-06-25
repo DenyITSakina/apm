@@ -30,9 +30,9 @@ class KeypadSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildRow(['7', '8', '9']),
-          _buildRow(['4', '5', '6']),
           _buildRow(['1', '2', '3']),
+          _buildRow(['4', '5', '6']),
+          _buildRow(['7', '8', '9']),
           _buildRow(['backspace', '0', 'C']),
         ],
       ),

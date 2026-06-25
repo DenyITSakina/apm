@@ -3,7 +3,6 @@ import 'package:apm/blog/booking_event.dart';
 import 'package:apm/blog/booking_state.dart';
 import 'package:apm/home/booking_bpjs_page.dart';
 import 'package:apm/home/booking_umum_page.dart';
-import 'package:apm/models/booking_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -20,7 +19,11 @@ class _BookingPageState extends State<BookingPage> {
   @override
   void initState() {
     super.initState();
-    context.read<BookingBloc>().add(LoadPoliEvent());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<BookingBloc>().add(LoadPoliEvent());
+      }
+    });
   }
 
   @override
@@ -40,9 +43,7 @@ class _BookingPageState extends State<BookingPage> {
               ),
             );
           }
-          if (state.status == BookingStatus.success) {
-            _showSuccessDialog(context, state.bookingResult);
-          }
+          // Dialog sukses sekarang ditangani di masing-masing halaman
         },
         builder: (context, state) {
           if (state.status == BookingStatus.loading && state.poliList.isEmpty) {
@@ -75,63 +76,6 @@ class _BookingPageState extends State<BookingPage> {
             return const BookingBpjsPage();
           }
         },
-      ),
-    );
-  }
-
-  void _showSuccessDialog(BuildContext context, BookingData? data) {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.green),
-            SizedBox(width: 8),
-            Text('Booking Berhasil'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildInfoRow('No. Antrian', data?.noAntrian ?? '-'),
-            _buildInfoRow('Kode Booking', data?.kodeBooking ?? '-'),
-            _buildInfoRow('Nama Pasien', data?.namaPasien ?? '-'),
-            _buildInfoRow('Tanggal Periksa', data?.tanggalPeriksa ?? '-'),
-            _buildInfoRow('Unit', data?.unit ?? '-'),
-            _buildInfoRow('Dokter', data?.dokter ?? '-'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.pop(context);
-              context.read<BookingBloc>().add(ResetBookingEvent());
-            },
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ),
-          Expanded(child: Text(': $value')),
-        ],
       ),
     );
   }
