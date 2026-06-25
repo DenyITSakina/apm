@@ -4,7 +4,7 @@ import '../../models/pasien_model.dart';
 import '../../models/dokter_model.dart';
 import '../../models/poli_model.dart';
 
-enum BookingStatus { initial, loading, loaded, success, error }
+enum BookingStatus { initial, loading, loaded, loadingDokter, success, error }
 
 class BookingState extends Equatable {
   final BookingStatus status;
