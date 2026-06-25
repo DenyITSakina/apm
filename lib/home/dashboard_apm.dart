@@ -637,54 +637,181 @@ void _showBookingTypeDialog(BuildContext context) {
   showDialog(
     context: context,
     barrierDismissible: true,
-    builder: (context) => AlertDialog(
-      title: const Text('Pilih Jenis Booking'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          ListTile(
-            leading: const Icon(Icons.person, color: Colors.blue),
-            title: const Text('UMUM'),
-            subtitle: const Text('Booking untuk pasien umum'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BlocProvider(
-                    create: (context) => BookingBloc(),
-                    child: const BookingPage(jenis: '1'),
+    builder: (_) => Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: const EdgeInsets.symmetric(horizontal: 20),
+
+      child: Container(
+        padding: const EdgeInsets.all(24),
+
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              "Pilih Jenis Booking",
+              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 8),
+
+            Text(
+              "Pilih metode pendaftaran",
+              style: TextStyle(color: Colors.grey[600]),
+            ),
+
+            const SizedBox(height: 28),
+
+            /// KANAN KIRI
+            Row(
+              children: [
+                Expanded(
+                  child: _bookingCard(
+                    context,
+                    icon: Icons.person,
+                    title: "UMUM",
+                    subtitle: "Pasien tanpa BPJS",
+                    color: Colors.orange,
+                    jenis: '1',
                   ),
                 ),
-              );
-            },
+
+                const SizedBox(width: 18),
+
+                Expanded(
+                  child: _bookingCard(
+                    context,
+                    icon: Icons.health_and_safety,
+                    title: "BPJS",
+                    subtitle: "Peserta JKN aktif",
+                    color: Colors.blue,
+                    jenis: '2',
+                  ),
+                ),
+              ],
+            ),
+
+            // const SizedBox(height: 24),
+
+            // SizedBox(
+            //   width: double.infinity,
+            //   child: TextButton(
+            //     onPressed: () => Navigator.pop(context),
+            //     child: const Text("Batal", style: TextStyle(fontSize: 16)),
+            //   ),
+            // ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+Widget _bookingCard(
+  BuildContext context, {
+  required IconData icon,
+  required String title,
+  required String subtitle,
+  required Color color,
+  required String jenis,
+}) {
+  return InkWell(
+    borderRadius: BorderRadius.circular(12),
+
+    onTap: () {
+      Navigator.pop(context);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => BlocProvider(
+            create: (_) => BookingBloc(),
+            child: BookingPage(jenis: jenis),
           ),
-          const Divider(),
-          ListTile(
-            leading: const Icon(Icons.card_membership, color: Colors.green),
-            title: const Text('BPJS / JKN'),
-            subtitle: const Text('Booking untuk pasien BPJS'),
-            onTap: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => BlocProvider(
-                    create: (context) => BookingBloc(),
-                    child: const BookingPage(jenis: '2'),
-                  ),
-                ),
-              );
-            },
+        ),
+      );
+    },
+
+    child: Container(
+      height: 290,
+
+      padding: const EdgeInsets.all(20),
+
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [color.withOpacity(.15), color.withOpacity(.04)],
+        ),
+
+        borderRadius: BorderRadius.circular(28),
+
+        border: Border.all(color: color.withOpacity(.20)),
+
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(.08),
+            blurRadius: 20,
+            offset: const Offset(0, 12),
           ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Batal'),
-        ),
-      ],
+
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+
+        children: [
+          Container(
+            width: 90,
+            height: 90,
+
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(12),
+            ),
+
+            child: Icon(icon, size: 46, color: Colors.white),
+          ),
+
+          const SizedBox(height: 20),
+
+          Text(
+            title,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+
+          const SizedBox(height: 10),
+
+          Text(
+            subtitle,
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey[700], height: 1.4),
+          ),
+
+          const Spacer(),
+
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(12),
+            ),
+
+            child: const Text(
+              "Pilih",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }

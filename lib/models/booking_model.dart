@@ -63,6 +63,8 @@ class BookingData {
   final String nik;
   final String unit;
   final String dokter;
+  final String? poliRujukan;
+  final String? kodePoliRujukan;
   final String? noBpjs;
 
   BookingData({
@@ -76,10 +78,26 @@ class BookingData {
     required this.nik,
     required this.unit,
     required this.dokter,
+    this.poliRujukan,
+    this.kodePoliRujukan,
     this.noBpjs,
   });
 
   factory BookingData.fromJson(Map<String, dynamic> json) {
+    // Ambil rujukan dari dalam json
+    final rujukan = json['rujukan'] as Map<String, dynamic>?;
+
+    String? poliRujukanNama;
+    String? poliRujukanKode;
+
+    if (rujukan != null) {
+      final poliRujukan = rujukan['poliRujukan'] as Map<String, dynamic>?;
+      if (poliRujukan != null) {
+        poliRujukanNama = poliRujukan['nama']?.toString();
+        poliRujukanKode = poliRujukan['kode']?.toString();
+      }
+    }
+
     return BookingData(
       idBooking: json['id_booking']?.toString() ?? '',
       noAntrian: json['no_antrian']?.toString() ?? '',
@@ -91,6 +109,8 @@ class BookingData {
       nik: json['nik']?.toString() ?? '',
       unit: json['unit']?.toString() ?? '',
       dokter: json['dokter']?.toString() ?? '',
+      poliRujukan: poliRujukanNama,
+      kodePoliRujukan: poliRujukanKode,
       noBpjs: json['no_bpjs']?.toString(),
     );
   }

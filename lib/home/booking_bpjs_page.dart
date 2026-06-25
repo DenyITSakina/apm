@@ -221,57 +221,6 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                           ]),
                           const SizedBox(height: 16),
 
-                          /// No HP (override)
-                          TextFormField(
-                            controller: _nohpController,
-                            readOnly: true,
-                            onTap: () {
-                              _activeController = _nohpController;
-                              setState(() {});
-                            },
-                            decoration: InputDecoration(
-                              labelText: 'No HP',
-                              hintText: 'Masukkan No HP (opsional)',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.phone),
-                              suffixIcon: _activeController == _nohpController
-                                  ? const Icon(Icons.keyboard)
-                                  : null,
-                            ),
-                            maxLength: 15,
-                          ),
-                          const SizedBox(height: 16),
-
-                          /// Email (Optional)
-                          TextFormField(
-                            controller: _emailController,
-                            readOnly: true,
-                            onTap: () {
-                              _activeController = _emailController;
-                              setState(() {});
-                            },
-                            decoration: InputDecoration(
-                              labelText: 'Email (Opsional)',
-                              hintText: 'Masukkan Email',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.email),
-                              suffixIcon: _activeController == _emailController
-                                  ? const Icon(Icons.keyboard)
-                                  : null,
-                            ),
-                            validator: (value) {
-                              if (value != null && value.isNotEmpty) {
-                                if (!RegExp(
-                                  r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                                ).hasMatch(value)) {
-                                  return 'Format email tidak valid';
-                                }
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-
                           /// Tanggal Periksa
                           InkWell(
                             onTap: () async {
@@ -419,7 +368,7 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                                       }
                                     },
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orange,
+                                backgroundColor: Colors.blue,
                                 foregroundColor: Colors.white,
                               ),
                               child: state.status == BookingStatus.loading
@@ -472,19 +421,70 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
     );
   }
 
-  Widget _buildInfoCard(String title, List<Widget> children) {
-    return Card(
-      elevation: 2,
+  Widget _buildInfoCard(
+    String title,
+    List<Widget> children, {
+    IconData icon = Icons.description_outlined,
+    Color color = Colors.blue,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 18),
+
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(.06),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
+
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(20),
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+
           children: [
-            Text(
-              title,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            /// HEADER
+            Row(
+              children: [
+                Container(
+                  width: 30,
+                  height: 30,
+
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(.10),
+
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+
+                  child: Icon(icon, color: color, size: 22),
+                ),
+
+                const SizedBox(width: 14),
+
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const Divider(),
+
+            Divider(color: Colors.grey.shade200, thickness: 1),
+
+            /// CONTENT
             ...children,
           ],
         ),

@@ -30,8 +30,48 @@ class _BookingPageState extends State<BookingPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.jenis == '1' ? 'Booking Umum' : 'Booking BPJS'),
-        backgroundColor: Colors.orange,
+        elevation: 0,
+        centerTitle: true,
+
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
+
+        title: Column(
+          children: [
+            const Text(
+              "Pendaftaran",
+              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+            ),
+
+            Text(
+              widget.jenis == '1' ? 'Booking Umum' : 'Booking BPJS',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+
+        foregroundColor: Colors.white,
+
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: widget.jenis == '1'
+                  ? [const Color(0xFFFF9800), const Color(0xFFFF6F00)]
+                  : [const Color(0xFF2196F3), const Color(0xFF1565C0)],
+            ),
+          ),
+        ),
+
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(26),
+            bottomRight: Radius.circular(26),
+          ),
+        ),
+
+        toolbarHeight: 90,
       ),
       body: BlocConsumer<BookingBloc, BookingState>(
         listener: (context, state) {
