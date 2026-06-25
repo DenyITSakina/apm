@@ -193,7 +193,7 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                                   : const Text('Cek Data BPJS'),
                             ),
                           ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 2),
 
                         if (state.pasienBpjs != null) ...[
                           _buildInfoCard('Data Pasien', [
@@ -268,49 +268,65 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                           ),
                           const SizedBox(height: 12),
 
-                          DropdownButtonFormField<String>(
-                            decoration: const InputDecoration(
-                              labelText: 'Pilih Poli',
-                              border: OutlineInputBorder(),
-                              prefixIcon: Icon(Icons.local_hospital),
-                            ),
-                            value:
-                                (_selectedPoliId == null ||
-                                    _selectedPoliId == 0)
-                                ? null
-                                : _selectedPoliId!.toString(),
-                            items: state.poliList.map((poli) {
-                              return DropdownMenuItem(
-                                value: poli.id.toString(),
-                                child: Text(poli.nama),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              if (value != null) {
-                                setState(() {
-                                  _selectedPoliId = int.parse(value);
-                                  _selectedDokterId = null;
-                                  _selectedDokterNama = null;
-                                  final selectedPoli = state.poliList
-                                      .firstWhere(
-                                        (e) => e.id.toString() == value,
-                                      );
-                                  _selectedPoliNama = selectedPoli.nama;
-                                });
+                          AbsorbPointer(
+                            absorbing:
+                                state.pasienBpjs != null &&
+                                _selectedPoliId != null &&
+                                _selectedPoliId != 0,
+                            child: DropdownButtonFormField<String>(
+                              decoration: InputDecoration(
+                                labelText: 'Pilih Poli',
+                                border: const OutlineInputBorder(),
+                                prefixIcon: const Icon(Icons.local_hospital),
+                                helperText:
+                                    state.pasienBpjs != null &&
+                                        _selectedPoliId != null &&
+                                        _selectedPoliId != 0
+                                    ? '🔒 Poli ditentukan dari rujukan BPJS'
+                                    : null,
+                                helperStyle: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.blue[700],
+                                ),
+                              ),
+                              value:
+                                  (_selectedPoliId == null ||
+                                      _selectedPoliId == 0)
+                                  ? null
+                                  : _selectedPoliId!.toString(),
+                              items: state.poliList.map((poli) {
+                                return DropdownMenuItem(
+                                  value: poli.id.toString(),
+                                  child: Text(poli.nama),
+                                );
+                              }).toList(),
+                              onChanged: (value) {
+                                if (value != null) {
+                                  setState(() {
+                                    _selectedPoliId = int.parse(value);
+                                    _selectedDokterId = null;
+                                    _selectedDokterNama = null;
+                                    final selectedPoli = state.poliList
+                                        .firstWhere(
+                                          (e) => e.id.toString() == value,
+                                        );
+                                    _selectedPoliNama = selectedPoli.nama;
+                                  });
 
-                                if (_selectedDate != null) {
-                                  _loadDokterJkn(context, int.parse(value));
+                                  if (_selectedDate != null) {
+                                    _loadDokterJkn(context, int.parse(value));
+                                  }
                                 }
-                              }
-                            },
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Poli wajib dipilih';
-                              }
-                              return null;
-                            },
+                              },
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Poli wajib dipilih';
+                                }
+                                return null;
+                              },
+                            ),
                           ),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 12),
 
                           DropdownButtonFormField<String>(
                             decoration: const InputDecoration(
