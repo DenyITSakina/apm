@@ -1,3 +1,7 @@
+import 'package:apm/blog/booking_bloc.dart';
+import 'package:apm/home/booking_page.dart';
+import 'package:apm/home/daftar_umum_bpjs_page.dart';
+
 import '../Blog/antrian_apm_bloc.dart';
 import 'package:apm/home/cekin_bpjs_page.dart';
 
@@ -296,27 +300,27 @@ class _DashboardApmState extends State<DashboardApm>
                                     ),
                                   ),
                                 ),
-                                // _buildServiceCard(
-                                //   title: "DAFTAR POLI HARI INI",
-                                //   image: "assets/images/daftar.png",
-                                //   gradient: const LinearGradient(
-                                //     colors: [
-                                //       Color(0xFFB71C1C),
-                                //       Color(0xFFC62828),
-                                //       Color(0xFFD32F2F),
-                                //     ],
-                                //     begin: Alignment.topLeft,
-                                //     end: Alignment.bottomRight,
-                                //   ),
-                                //   icon: Icons.local_hospital,
-                                //   description: "Pendaftaran poli tujuan",
-                                //   onTap: () => _navigateTo(
-                                //     context,
-                                //     const PendaftaranPoliPage(
-                                //       selectType: "pendaftaran",
-                                //     ),
-                                //   ),
-                                // ),
+                                _buildServiceCard(
+                                  title: "DAFTAR POLI HARI INI",
+                                  image: "assets/images/daftar.png",
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFFB71C1C),
+                                      Color(0xFFC62828),
+                                      Color(0xFFD32F2F),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  icon: Icons.local_hospital,
+                                  description: "Pendaftaran poli tujuan",
+                                  onTap: () => _navigateTo(
+                                    context,
+                                    const PendaftaranPoliPage(
+                                      selectType: "pendaftaran",
+                                    ),
+                                  ),
+                                ),
                                 _buildServiceCard(
                                   title: "BOOKING",
                                   image: "assets/images/booking.png",
@@ -331,7 +335,9 @@ class _DashboardApmState extends State<DashboardApm>
                                   ),
                                   icon: Icons.calendar_month,
                                   description: "Booking untuk pasien",
-                                  onTap: () {},
+                                  onTap: () {
+                                    _showBookingTypeDialog(context);
+                                  },
                                 ),
                               ],
                             );
@@ -625,4 +631,60 @@ class MedicalPatternPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+void _showBookingTypeDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    barrierDismissible: true,
+    builder: (context) => AlertDialog(
+      title: const Text('Pilih Jenis Booking'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            leading: const Icon(Icons.person, color: Colors.blue),
+            title: const Text('UMUM'),
+            subtitle: const Text('Booking untuk pasien umum'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BlocProvider(
+                    create: (context) => BookingBloc(),
+                    child: const BookingPage(jenis: '1'),
+                  ),
+                ),
+              );
+            },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.card_membership, color: Colors.green),
+            title: const Text('BPJS / JKN'),
+            subtitle: const Text('Booking untuk pasien BPJS'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => BlocProvider(
+                    create: (context) => BookingBloc(),
+                    child: const BookingPage(jenis: '2'),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Batal'),
+        ),
+      ],
+    ),
+  );
 }
