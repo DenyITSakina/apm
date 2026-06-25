@@ -465,6 +465,12 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                                   'No BPJS',
                                   state.pasienBpjs!.noPeserta,
                                 ),
+                                if (state.pasienBpjs!.noKunjungan != null &&
+                                    state.pasienBpjs!.noKunjungan!.isNotEmpty)
+                                  MapEntry(
+                                    'No Kunjungan',
+                                    state.pasienBpjs!.noKunjungan!,
+                                  ),
                                 if (state.pasienBpjs!.noTelp != null &&
                                     state.pasienBpjs!.noTelp!.isNotEmpty)
                                   MapEntry('No HP', state.pasienBpjs!.noTelp!),
@@ -966,6 +972,7 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
       idJadwalDokter: selectedDokter.idJadwalDetail,
       noBpjs: pasien.noPeserta,
       email: _emailController.text.isNotEmpty ? _emailController.text : null,
+      noKunjungan: pasien.noKunjungan,
     );
 
     context.read<BookingBloc>().add(SubmitBookingBpjsEvent(request));

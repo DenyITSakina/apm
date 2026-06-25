@@ -8,6 +8,7 @@ class BookingRequest {
   final String idJadwalDokter;
   final String? noBpjs;
   final String? email;
+  final String? noKunjungan;
 
   BookingRequest({
     required this.jenis,
@@ -19,6 +20,7 @@ class BookingRequest {
     required this.idJadwalDokter,
     this.noBpjs,
     this.email,
+    this.noKunjungan,
   });
 
   Map<String, dynamic> toJson() {
@@ -32,6 +34,9 @@ class BookingRequest {
     };
     if (email != null) map['email'] = email!;
     if (noBpjs != null) map['no_bpjs'] = noBpjs!;
+    if (noKunjungan != null && noKunjungan!.isNotEmpty) {
+      map['no_kunjungan'] = noKunjungan!;
+    }
     return map;
   }
 }
@@ -66,6 +71,7 @@ class BookingData {
   final String? poliRujukan;
   final String? kodePoliRujukan;
   final String? noBpjs;
+  final String? noKunjungan;
 
   BookingData({
     required this.idBooking,
@@ -81,6 +87,7 @@ class BookingData {
     this.poliRujukan,
     this.kodePoliRujukan,
     this.noBpjs,
+    this.noKunjungan,
   });
 
   factory BookingData.fromJson(Map<String, dynamic> json) {
@@ -89,6 +96,7 @@ class BookingData {
 
     String? poliRujukanNama;
     String? poliRujukanKode;
+    String? noKunjungan;
 
     if (rujukan != null) {
       final poliRujukan = rujukan['poliRujukan'] as Map<String, dynamic>?;
@@ -96,6 +104,7 @@ class BookingData {
         poliRujukanNama = poliRujukan['nama']?.toString();
         poliRujukanKode = poliRujukan['kode']?.toString();
       }
+      noKunjungan = rujukan['noKunjungan']?.toString();
     }
 
     return BookingData(
@@ -112,6 +121,7 @@ class BookingData {
       poliRujukan: poliRujukanNama,
       kodePoliRujukan: poliRujukanKode,
       noBpjs: json['no_bpjs']?.toString(),
+      noKunjungan: noKunjungan,
     );
   }
 }

@@ -15,10 +15,19 @@ class PasienBpjsResponse {
 
   factory PasienBpjsResponse.fromJson(Map<String, dynamic> json) {
     final source = json['source']?.toString() ?? '';
-    Map<String, dynamic>? pesertaJson;
+    Map<String, dynamic> pesertaJson = {};
 
     if (json['peserta'] != null) {
-      pesertaJson = json['peserta'] as Map<String, dynamic>;
+      pesertaJson = Map<String, dynamic>.from(json['peserta'] as Map);
+      if (json['rujukan'] != null) {
+        pesertaJson['rujukan'] = json['rujukan'];
+      }
+      if (json['poliRujukan'] != null) {
+        pesertaJson['poliRujukan'] = json['poliRujukan'];
+      }
+      if (json['kodePoliRujukan'] != null) {
+        pesertaJson['kodePoliRujukan'] = json['kodePoliRujukan'];
+      }
     } else {
       final rujukan = json['rujukan'] as Map<String, dynamic>?;
       final bpjs = rujukan?['bpjs'] as Map<String, dynamic>?;
@@ -28,19 +37,20 @@ class PasienBpjsResponse {
         final rujukanData = rujukanList[0] as Map<String, dynamic>;
         final pesertaRujukan = rujukanData['peserta'] as Map<String, dynamic>?;
         if (pesertaRujukan != null) {
-          pesertaJson = pesertaRujukan;
+          pesertaJson = Map<String, dynamic>.from(pesertaRujukan);
+          pesertaJson['rujukan'] = rujukan;
+          if (rujukanData['poliRujukan'] != null) {
+            pesertaJson['poliRujukan'] = rujukanData['poliRujukan'];
+          }
+          if (rujukanData['noKunjungan'] != null) {
+            pesertaJson['noKunjungan'] = rujukanData['noKunjungan'];
+          }
         }
       }
     }
 
     PasienBpjsData? peserta;
-    if (pesertaJson != null) {
-      if (json['poliRujukan'] != null) {
-        pesertaJson['poliRujukan'] = json['poliRujukan'];
-      }
-      if (json['kodePoliRujukan'] != null) {
-        pesertaJson['kodePoliRujukan'] = json['kodePoliRujukan'];
-      }
+    if (pesertaJson.isNotEmpty) {
       peserta = PasienBpjsData.fromJson(pesertaJson);
     }
 
@@ -65,6 +75,7 @@ class PasienBpjsData {
   final String? email;
   final String? poliRujukan;
   final String? kodePoliRujukan;
+  final String? noKunjungan;
 
   PasienBpjsData({
     required this.noPeserta,
@@ -77,25 +88,22 @@ class PasienBpjsData {
     this.email,
     this.poliRujukan,
     this.kodePoliRujukan,
+    this.noKunjungan,
   });
 
   factory PasienBpjsData.fromJson(Map<String, dynamic> json) {
-    String? poliRujukan = json['poliRujukan']?['nama']?.toString();
-    String? kodePoliRujukan = json['kodePoliRujukan']?.toString();
+    final noPeserta =
+        json['no_peserta']?.toString() ?? json['noKartu']?.toString() ?? '';
+    final nama = json['nama']?.toString() ?? '';
+    final nik = json['nik']?.toString() ?? '';
+    final tglLahir = json['tglLahir']?.toString();
 
-    if (kodePoliRujukan == null || poliRujukan == null) {
-      final rujukan = json['rujukan'] as Map<String, dynamic>?;
-      final bpjs = rujukan?['bpjs'] as Map<String, dynamic>?;
-      final rujukanList = bpjs?['rujukan'] as List?;
-
-      if (rujukanList != null && rujukanList.isNotEmpty) {
-        final rujukanData = rujukanList[0] as Map<String, dynamic>;
-        final poli = rujukanData['poliRujukan'] as Map<String, dynamic>?;
-        if (poli != null) {
-          poliRujukan ??= poli['nama']?.toString();
-          kodePoliRujukan ??= poli['kode']?.toString();
-        }
-      }
+    final jenisKelaminRaw = json['sex']?.toString();
+    String? jenisKelamin;
+    if (jenisKelaminRaw == 'P') {
+      jenisKelamin = 'Perempuan';
+    } else if (jenisKelaminRaw == 'L') {
+      jenisKelamin = 'Laki-laki';
     }
 
     String? noTelp;
@@ -104,25 +112,52 @@ class PasienBpjsData {
       noTelp = mr['noTelepon']?.toString();
     }
 
-    String? jenisKelamin = json['sex']?.toString();
-    if (jenisKelamin == 'P') {
-      jenisKelamin = 'Perempuan';
-    } else if (jenisKelamin == 'L') {
-      jenisKelamin = 'Laki-laki';
+    String? poliRujukan;
+    String? kodePoliRujukan;
+    String? noKunjungan;
+
+    if (json['poliRujukan'] != null) {
+      final poli = json['poliRujukan'] as Map<String, dynamic>;
+      poliRujukan = poli['nama']?.toString();
+      kodePoliRujukan = poli['kode']?.toString();
+    }
+
+    if (json['kodePoliRujukan'] != null) {
+      kodePoliRujukan = json['kodePoliRujukan']?.toString();
+    }
+
+    final rujukan = json['rujukan'] as Map<String, dynamic>?;
+    final bpjs = rujukan?['bpjs'] as Map<String, dynamic>?;
+    final rujukanList = bpjs?['rujukan'] as List?;
+
+    if (rujukanList != null && rujukanList.isNotEmpty) {
+      final rujukanData = rujukanList[0] as Map<String, dynamic>;
+
+      noKunjungan = rujukanData['noKunjungan']?.toString();
+
+      final poli = rujukanData['poliRujukan'] as Map<String, dynamic>?;
+      if (poli != null) {
+        poliRujukan ??= poli['nama']?.toString();
+        kodePoliRujukan ??= poli['kode']?.toString();
+      }
+    }
+
+    if (noKunjungan == null && json['noKunjungan'] != null) {
+      noKunjungan = json['noKunjungan']?.toString();
     }
 
     return PasienBpjsData(
-      noPeserta:
-          json['no_peserta']?.toString() ?? json['noKartu']?.toString() ?? '',
-      nama: json['nama']?.toString() ?? '',
-      nik: json['nik']?.toString() ?? '',
+      noPeserta: noPeserta,
+      nama: nama,
+      nik: nik,
       noTelp: noTelp,
       jenisKelamin: jenisKelamin,
-      tglLahir: json['tglLahir']?.toString(),
+      tglLahir: tglLahir,
       alamat: json['alamat']?.toString(),
       email: json['email']?.toString(),
       poliRujukan: poliRujukan,
       kodePoliRujukan: kodePoliRujukan,
+      noKunjungan: noKunjungan,
     );
   }
 }
