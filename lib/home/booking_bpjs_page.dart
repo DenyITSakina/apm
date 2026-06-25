@@ -481,7 +481,7 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                                 if (state.pasienBpjs!.poliRujukan != null)
                                   MapEntry(
                                     'Poli Rujukan',
-                                    state.pasienBpjs!.poliRujukan!,
+                                    state.pasienBpjs!.kodePoliRujukan!,
                                   ),
                               ],
                               initialVisibleCount: 4,
