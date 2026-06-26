@@ -156,7 +156,7 @@ class _DashboardApmState extends State<DashboardApm>
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              "Melayani Dengan Sepenuh Hati",
+                              "Peduli Sesama, Sakina Pilihanku",
                               textAlign: TextAlign.center,
                               style: GoogleFonts.lora(
                                 fontSize: isTablet ? 20 : 16,
@@ -313,7 +313,7 @@ class _DashboardApmState extends State<DashboardApm>
                                     end: Alignment.bottomRight,
                                   ),
                                   icon: Icons.local_hospital,
-                                  description: "Pendaftaran poli tujuan",
+                                  description: "Pendaftaran tujuan poli",
                                   onTap: () => _navigateTo(
                                     context,
                                     const PendaftaranPoliPage(
