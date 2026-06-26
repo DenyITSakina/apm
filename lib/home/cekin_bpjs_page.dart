@@ -375,7 +375,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
                   isLoading
                       ? LoadingAnimationWidget.fourRotatingDots(
                           color: Colors.white,
-                          size: 15,
+                          size: 45,
                         )
                       : const Icon(
                           Icons.done_all_rounded,

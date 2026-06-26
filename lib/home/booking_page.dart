@@ -91,7 +91,7 @@ class _BookingPageState extends State<BookingPage> {
             return Center(
               child: LoadingAnimationWidget.fourRotatingDots(
                 color: Colors.blue,
-                size: 50,
+                size: 45,
               ),
             );
           }

@@ -341,7 +341,7 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
               loading
                   ? LoadingAnimationWidget.fourRotatingDots(
                       color: Colors.white,
-                      size: 15,
+                      size: 45,
                     )
                   : const Icon(
                       Icons.arrow_forward_rounded,

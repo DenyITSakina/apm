@@ -366,7 +366,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
                   isLoading
                       ? LoadingAnimationWidget.fourRotatingDots(
                           color: Colors.white,
-                          size: 15,
+                          size: 45,
                         )
                       : const Icon(
                           Icons.search_rounded,
