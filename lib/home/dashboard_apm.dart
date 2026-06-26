@@ -674,7 +674,7 @@ void _showBookingTypeDialog(BuildContext context) {
                     context,
                     icon: Icons.person,
                     title: "UMUM",
-                    subtitle: "Pasien tanpa BPJS",
+                    subtitle: "Pasien Umum / Non Bpjs",
                     color: Colors.orange,
                     jenis: '1',
                   ),

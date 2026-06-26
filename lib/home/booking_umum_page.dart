@@ -614,6 +614,11 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blue,
                               foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(
+                                  12,
+                                ), // circular
+                              ),
                             ),
                             child: state.status == BookingStatus.loading
                                 ? const CircularProgressIndicator()
