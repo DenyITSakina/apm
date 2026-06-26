@@ -8,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import 'package:google_fonts/google_fonts.dart'; // Tambahkan import ini
 
 import '../models/booking_model.dart';
 import '../theme/format_text.dart';
@@ -34,9 +35,10 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
 
   bool _isDokterSelected = false;
 
-  // Simpan nama poli dan dokter
   String? _selectedPoliNama;
   String? _selectedDokterNama;
+
+  final Color primaryColor = const Color(0xFF0D8AAE);
 
   @override
   void dispose() {
@@ -330,484 +332,610 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<BookingBloc, BookingState>(
-      listener: (context, state) {
-        if (state.status == BookingStatus.error) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.errorMessage ?? 'Terjadi kesalahan'),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+    return Scaffold(
+      body: Column(
+        children: [
+          // Main content
+          Expanded(
+            child: BlocConsumer<BookingBloc, BookingState>(
+              listener: (context, state) {
+                if (state.status == BookingStatus.error) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(state.errorMessage ?? 'Terjadi kesalahan'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
 
-        if (state.status == BookingStatus.loaded &&
-            state.pasienBpjs != null &&
-            !_isDataLoaded) {
-          setState(() {
-            _isDataLoaded = true;
-          });
+                if (state.status == BookingStatus.loaded &&
+                    state.pasienBpjs != null &&
+                    !_isDataLoaded) {
+                  setState(() {
+                    _isDataLoaded = true;
+                  });
 
-          final kodePoliRujukan = state.pasienBpjs!.kodePoliRujukan;
-          if (kodePoliRujukan != null && kodePoliRujukan.trim().isNotEmpty) {
-            final matchedPoli = state.poliList.firstWhere(
-              (p) => p.kodeBpjs.trim() == kodePoliRujukan.trim(),
-              orElse: () => state.poliList.first,
-            );
+                  final kodePoliRujukan = state.pasienBpjs!.kodePoliRujukan;
+                  if (kodePoliRujukan != null &&
+                      kodePoliRujukan.trim().isNotEmpty) {
+                    final matchedPoli = state.poliList.firstWhere(
+                      (p) => p.kodeBpjs.trim() == kodePoliRujukan.trim(),
+                      orElse: () => state.poliList.first,
+                    );
 
-            if (matchedPoli.id != 0) {
-              setState(() {
-                _selectedPoliId = matchedPoli.id;
-                _selectedPoliNama = matchedPoli.nama;
-              });
+                    if (matchedPoli.id != 0) {
+                      setState(() {
+                        _selectedPoliId = matchedPoli.id;
+                        _selectedPoliNama = matchedPoli.nama;
+                      });
 
-              if (_selectedDate != null) {
-                _loadDokterJkn(context, matchedPoli.id);
-              }
-            }
-          }
-        }
+                      if (_selectedDate != null) {
+                        _loadDokterJkn(context, matchedPoli.id);
+                      }
+                    }
+                  }
+                }
 
-        if (state.status == BookingStatus.success &&
-            state.bookingResult != null) {
-          _showSuccessDialog(context, state);
-        }
-      },
-      builder: (context, state) {
-        return Padding(
-          padding: const EdgeInsets.all(20),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              /// FORM
-              Expanded(
-                flex: 3,
-                child: SingleChildScrollView(
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        TextFormField(
-                          controller: _noBpjsController,
-                          readOnly: true,
-                          onTap: () {
-                            _activeController = _noBpjsController;
-                            setState(() {});
-                          },
-                          decoration: InputDecoration(
-                            labelText: 'No BPJS',
-                            hintText: 'Masukkan No BPJS (13 digit)',
-                            border: const OutlineInputBorder(),
-                            // prefixIcon: const Icon(Icons.card_membership),
-                            suffixIcon: state.pasienBpjs != null
-                                ? const Icon(
-                                    Icons.check_circle,
-                                    color: Colors.green,
-                                  )
-                                : (_activeController == _noBpjsController
-                                      ? const Icon(Icons.keyboard)
-                                      : null),
-                          ),
-                          maxLength: 13,
-                          enabled: state.pasienBpjs == null,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'No BPJS wajib diisi';
-                            }
-                            if (value.length != 13) {
-                              return 'No BPJS harus 13 digit';
-                            }
-                            if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
-                              return 'No BPJS harus berupa angka';
-                            }
-                            return null;
-                          },
-                        ),
+                if (state.status == BookingStatus.success &&
+                    state.bookingResult != null) {
+                  _showSuccessDialog(context, state);
+                }
+              },
+              builder: (context, state) {
+                return Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      /// FORM
+                      Expanded(
+                        flex: 3,
+                        child: SingleChildScrollView(
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              children: [
+                                TextFormField(
+                                  controller: _noBpjsController,
+                                  readOnly: true,
+                                  onTap: () {
+                                    _activeController = _noBpjsController;
+                                    setState(() {});
+                                  },
+                                  decoration: InputDecoration(
+                                    labelText: 'No BPJS',
+                                    hintText: 'Masukkan No BPJS (13 digit)',
+                                    border: const OutlineInputBorder(),
+                                    suffixIcon: state.pasienBpjs != null
+                                        ? const Icon(
+                                            Icons.check_circle,
+                                            color: Colors.green,
+                                          )
+                                        : (_activeController ==
+                                                  _noBpjsController
+                                              ? const Icon(Icons.keyboard)
+                                              : null),
+                                  ),
+                                  maxLength: 13,
+                                  enabled: state.pasienBpjs == null,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'No BPJS wajib diisi';
+                                    }
+                                    if (value.length != 13) {
+                                      return 'No BPJS harus 13 digit';
+                                    }
+                                    if (!RegExp(r'^[0-9]+$').hasMatch(value)) {
+                                      return 'No BPJS harus berupa angka';
+                                    }
+                                    return null;
+                                  },
+                                ),
 
-                        if (state.pasienBpjs == null)
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: state.status == BookingStatus.loading
-                                  ? null
-                                  : () {
-                                      if (_noBpjsController.text.length == 13) {
-                                        context.read<BookingBloc>().add(
-                                          CekPasienBpjsEvent(
-                                            _noBpjsController.text,
+                                if (state.pasienBpjs == null)
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed:
+                                          state.status == BookingStatus.loading
+                                          ? null
+                                          : () {
+                                              if (_noBpjsController
+                                                      .text
+                                                      .length ==
+                                                  13) {
+                                                context.read<BookingBloc>().add(
+                                                  CekPasienBpjsEvent(
+                                                    _noBpjsController.text,
+                                                  ),
+                                                );
+                                              }
+                                            },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.blue,
+                                        foregroundColor: Colors.white,
+                                        minimumSize: const Size(
+                                          double.infinity,
+                                          30,
+                                        ),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 25,
+                                          vertical: 25,
+                                        ),
+                                        textStyle: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            8,
                                           ),
-                                        );
+                                        ),
+                                      ),
+                                      child:
+                                          state.status == BookingStatus.loading
+                                          ? const SizedBox(
+                                              height: 20,
+                                              width: 20,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                valueColor:
+                                                    AlwaysStoppedAnimation<
+                                                      Color
+                                                    >(Colors.white),
+                                              ),
+                                            )
+                                          : const Text('Cek Data BPJS'),
+                                    ),
+                                  ),
+                                const SizedBox(height: 2),
+
+                                if (state.pasienBpjs != null) ...[
+                                  _buildInfoCard('Data Pasien', [
+                                    _buildExpandableInfo(
+                                      items: <MapEntry<String, String>>[
+                                        MapEntry(
+                                          'Nama',
+                                          state.pasienBpjs!.nama,
+                                        ),
+                                        MapEntry('NIK', state.pasienBpjs!.nik),
+                                        MapEntry(
+                                          'No BPJS',
+                                          state.pasienBpjs!.noPeserta,
+                                        ),
+                                        if (state.pasienBpjs!.noKunjungan !=
+                                                null &&
+                                            state
+                                                .pasienBpjs!
+                                                .noKunjungan!
+                                                .isNotEmpty)
+                                          MapEntry(
+                                            'No Kunjungan',
+                                            state.pasienBpjs!.noKunjungan!,
+                                          ),
+                                        if (state.pasienBpjs!.noTelp != null &&
+                                            state
+                                                .pasienBpjs!
+                                                .noTelp!
+                                                .isNotEmpty)
+                                          MapEntry(
+                                            'No HP',
+                                            state.pasienBpjs!.noTelp!,
+                                          ),
+                                        if (state.pasienBpjs!.jenisKelamin !=
+                                            null)
+                                          MapEntry(
+                                            'Jenis Kelamin',
+                                            state.pasienBpjs!.jenisKelamin!,
+                                          ),
+                                        if (state.pasienBpjs!.tglLahir != null)
+                                          MapEntry(
+                                            'Tgl Lahir',
+                                            state.pasienBpjs!.tglLahir!,
+                                          ),
+                                        if (state.pasienBpjs!.poliRujukan !=
+                                            null)
+                                          MapEntry(
+                                            'Poli Rujukan',
+                                            state.pasienBpjs!.kodePoliRujukan!,
+                                          ),
+                                      ],
+                                      initialVisibleCount: 4,
+                                    ),
+                                  ]),
+
+                                  const SizedBox(height: 12),
+
+                                  InkWell(
+                                    onTap: () async {
+                                      final date = await showDatePicker(
+                                        context: context,
+                                        initialDate: DateTime.now(),
+                                        firstDate: DateTime.now(),
+                                        lastDate: DateTime.now().add(
+                                          const Duration(days: 30),
+                                        ),
+                                      );
+                                      if (date != null) {
+                                        setState(() {
+                                          _selectedDate = date;
+                                          _selectedDokterId = null;
+                                          _selectedDokterNama = null;
+                                        });
+                                        if (_selectedPoliId != null) {
+                                          _loadDokterJkn(
+                                            context,
+                                            _selectedPoliId!,
+                                          );
+                                        }
                                       }
                                     },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.white,
-                                minimumSize: const Size(
-                                  double.infinity,
-                                  30,
-                                ), // Full width, good height
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 25,
-                                  vertical: 25,
-                                ),
-                                textStyle: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-
-                              child: state.status == BookingStatus.loading
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                              Colors.white,
-                                            ),
+                                    child: InputDecorator(
+                                      decoration: const InputDecoration(
+                                        labelText: 'Tanggal Periksa',
+                                        border: OutlineInputBorder(),
+                                        prefixIcon: Icon(Icons.calendar_today),
                                       ),
-                                    )
-                                  : const Text('Cek Data BPJS'),
-                            ),
-                          ),
-                        const SizedBox(height: 2),
-
-                        if (state.pasienBpjs != null) ...[
-                          _buildInfoCard('Data Pasien', [
-                            _buildExpandableInfo(
-                              items: <MapEntry<String, String>>[
-                                MapEntry('Nama', state.pasienBpjs!.nama),
-                                MapEntry('NIK', state.pasienBpjs!.nik),
-                                MapEntry(
-                                  'No BPJS',
-                                  state.pasienBpjs!.noPeserta,
-                                ),
-                                if (state.pasienBpjs!.noKunjungan != null &&
-                                    state.pasienBpjs!.noKunjungan!.isNotEmpty)
-                                  MapEntry(
-                                    'No Kunjungan',
-                                    state.pasienBpjs!.noKunjungan!,
+                                      child: Text(
+                                        _selectedDate != null
+                                            ? DateFormat(
+                                                'dd/MM/yyyy',
+                                              ).format(_selectedDate!)
+                                            : 'Pilih Tanggal',
+                                      ),
+                                    ),
                                   ),
-                                if (state.pasienBpjs!.noTelp != null &&
-                                    state.pasienBpjs!.noTelp!.isNotEmpty)
-                                  MapEntry('No HP', state.pasienBpjs!.noTelp!),
-                                if (state.pasienBpjs!.jenisKelamin != null)
-                                  MapEntry(
-                                    'Jenis Kelamin',
-                                    state.pasienBpjs!.jenisKelamin!,
-                                  ),
-                                if (state.pasienBpjs!.tglLahir != null)
-                                  MapEntry(
-                                    'Tgl Lahir',
-                                    state.pasienBpjs!.tglLahir!,
-                                  ),
-                                if (state.pasienBpjs!.poliRujukan != null)
-                                  MapEntry(
-                                    'Poli Rujukan',
-                                    state.pasienBpjs!.kodePoliRujukan!,
-                                  ),
-                              ],
-                              initialVisibleCount: 4,
-                            ),
-                          ]),
+                                  const SizedBox(height: 12),
 
-                          const SizedBox(height: 12),
-
-                          InkWell(
-                            onTap: () async {
-                              final date = await showDatePicker(
-                                context: context,
-                                initialDate: DateTime.now(),
-                                firstDate: DateTime.now(),
-                                lastDate: DateTime.now().add(
-                                  const Duration(days: 30),
-                                ),
-                              );
-                              if (date != null) {
-                                setState(() {
-                                  _selectedDate = date;
-                                  _selectedDokterId = null;
-                                  _selectedDokterNama = null;
-                                });
-                                if (_selectedPoliId != null) {
-                                  _loadDokterJkn(context, _selectedPoliId!);
-                                }
-                              }
-                            },
-                            child: InputDecorator(
-                              decoration: const InputDecoration(
-                                labelText: 'Tanggal Periksa',
-                                border: OutlineInputBorder(),
-                                prefixIcon: Icon(Icons.calendar_today),
-                              ),
-                              child: Text(
-                                _selectedDate != null
-                                    ? DateFormat(
-                                        'dd/MM/yyyy',
-                                      ).format(_selectedDate!)
-                                    : 'Pilih Tanggal',
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          AbsorbPointer(
-                            absorbing:
-                                state.pasienBpjs != null &&
-                                _selectedPoliId != null &&
-                                _selectedPoliId != 0,
-                            child: DropdownButtonFormField<String>(
-                              decoration: InputDecoration(
-                                labelText: 'Pilih Poli',
-                                border: const OutlineInputBorder(),
-                                prefixIcon: const Icon(Icons.local_hospital),
-                                helperText:
-                                    state.pasienBpjs != null &&
+                                  AbsorbPointer(
+                                    absorbing:
+                                        state.pasienBpjs != null &&
                                         _selectedPoliId != null &&
-                                        _selectedPoliId != 0
-                                    ? '🔒 Poli ditentukan dari rujukan BPJS'
-                                    : null,
-                                helperStyle: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.blue[700],
-                                ),
-                              ),
-                              value:
-                                  (_selectedPoliId == null ||
-                                      _selectedPoliId == 0)
-                                  ? null
-                                  : _selectedPoliId!.toString(),
-                              items: state.poliList.map((poli) {
-                                return DropdownMenuItem(
-                                  value: poli.id.toString(),
-                                  child: Text(poli.nama),
-                                );
-                              }).toList(),
-                              onChanged: (value) {
-                                if (value != null) {
-                                  setState(() {
-                                    _selectedPoliId = int.parse(value);
-                                    _selectedDokterId = null;
-                                    _selectedDokterNama = null;
-                                    final selectedPoli = state.poliList
-                                        .firstWhere(
-                                          (e) => e.id.toString() == value,
-                                        );
-                                    _selectedPoliNama = selectedPoli.nama;
-                                  });
-
-                                  if (_selectedDate != null) {
-                                    _loadDokterJkn(context, int.parse(value));
-                                  }
-                                }
-                              },
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Poli wajib dipilih';
-                                }
-                                return null;
-                              },
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-
-                          // DropdownButtonFormField<String>(
-                          //   decoration: const InputDecoration(
-                          //     labelText: 'Pilih Dokter',
-                          //     border: OutlineInputBorder(),
-                          //     prefixIcon: Icon(Icons.person),
-                          //   ),
-                          //   value: _selectedDokterId,
-                          //   items: state.dokterList.map((dokter) {
-                          //     return DropdownMenuItem(
-                          //       value: dokter.idDokter.toString(),
-                          //       child: Column(
-                          //         crossAxisAlignment: CrossAxisAlignment.start,
-                          //         children: [
-                          //           Text(dokter.namaDokter),
-                          //           Text(
-                          //             dokter.jadwalLengkap,
-                          //             style: TextStyle(
-                          //               fontSize: 12,
-                          //               color: dokter.isLibur
-                          //                   ? Colors.red
-                          //                   : Colors.grey,
-                          //             ),
-                          //           ),
-                          //           if (dokter.terpakaiKapasitaspasien != null)
-                          //             Text(
-                          //               'Sisa Kuota: ${dokter.sisaKoutaKapasitaspasien ?? 0}',
-                          //               style: const TextStyle(
-                          //                 fontSize: 10,
-                          //                 color: Colors.blue,
-                          //               ),
-                          //             ),
-                          //         ],
-                          //       ),
-                          //     );
-                          //   }).toList(),
-                          //   onChanged: (value) {
-                          //     setState(() {
-                          //       _selectedDokterId = value;
-                          //       final selectedDokter = state.dokterList
-                          //           .firstWhere(
-                          //             (d) => d.idDokter.toString() == value,
-                          //           );
-                          //       _selectedDokterNama = selectedDokter.namaDokter;
-                          //     });
-                          //   },
-                          //   validator: (value) {
-                          //     if (value == null || value.isEmpty) {
-                          //       return 'Dokter wajib dipilih';
-                          //     }
-                          //     return null;
-                          //   },
-                          // ),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.person,
-                                size: 20,
-                                color: Colors.blue,
-                              ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                'Pilih Dokter',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              const Spacer(),
-                              if (_selectedDokterId != null)
-                                TextButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _selectedDokterId = null;
-                                      _selectedDokterNama = null;
-                                      _isDokterSelected = false;
-                                    });
-                                  },
-                                  child: const Text('Hapus Pilihan'),
-                                ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-
-                          // List dokter
-                          state.status == BookingStatus.loadingDokter
-                              ? const Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.all(20),
-                                    child: Column(
-                                      children: [
-                                        CircularProgressIndicator(),
-                                        SizedBox(height: 12),
-                                        Text('Memuat data dokter...'),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                              : _buildDokterList(state),
-
-                          const SizedBox(height: 12),
-
-                          // Tampilkan dokter terpilih
-                          if (_selectedDokterId != null)
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.blue.withOpacity(0.05),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: Colors.blue.withOpacity(0.2),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  const Icon(
-                                    Icons.check_circle,
-                                    color: Colors.blue,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Text(
-                                    'Dokter terpilih: ',
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Expanded(
-                                    child: Text(
-                                      _selectedDokterNama ?? '-',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
+                                        _selectedPoliId != 0,
+                                    child: DropdownButtonFormField<String>(
+                                      decoration: InputDecoration(
+                                        labelText: 'Pilih Poli',
+                                        border: const OutlineInputBorder(),
+                                        prefixIcon: const Icon(
+                                          Icons.local_hospital,
+                                        ),
+                                        helperText:
+                                            state.pasienBpjs != null &&
+                                                _selectedPoliId != null &&
+                                                _selectedPoliId != 0
+                                            ? '🔒 Poli ditentukan dari rujukan BPJS'
+                                            : null,
+                                        helperStyle: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.blue[700],
+                                        ),
                                       ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
+                                      value:
+                                          (_selectedPoliId == null ||
+                                              _selectedPoliId == 0)
+                                          ? null
+                                          : _selectedPoliId!.toString(),
+                                      items: state.poliList.map((poli) {
+                                        return DropdownMenuItem(
+                                          value: poli.id.toString(),
+                                          child: Text(poli.nama),
+                                        );
+                                      }).toList(),
+                                      onChanged: (value) {
+                                        if (value != null) {
+                                          setState(() {
+                                            _selectedPoliId = int.parse(value);
+                                            _selectedDokterId = null;
+                                            _selectedDokterNama = null;
+                                            final selectedPoli = state.poliList
+                                                .firstWhere(
+                                                  (e) =>
+                                                      e.id.toString() == value,
+                                                );
+                                            _selectedPoliNama =
+                                                selectedPoli.nama;
+                                          });
+
+                                          if (_selectedDate != null) {
+                                            _loadDokterJkn(
+                                              context,
+                                              int.parse(value),
+                                            );
+                                          }
+                                        }
+                                      },
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Poli wajib dipilih';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+
+                                  // DropdownButtonFormField<String>(
+                                  //   decoration: const InputDecoration(
+                                  //     labelText: 'Pilih Dokter',
+                                  //     border: OutlineInputBorder(),
+                                  //     prefixIcon: Icon(Icons.person),
+                                  //   ),
+                                  //   value: _selectedDokterId,
+                                  //   items: state.dokterList.map((dokter) {
+                                  //     return DropdownMenuItem(
+                                  //       value: dokter.idDokter.toString(),
+                                  //       child: Column(
+                                  //         crossAxisAlignment: CrossAxisAlignment.start,
+                                  //         children: [
+                                  //           Text(dokter.namaDokter),
+                                  //           Text(
+                                  //             dokter.jadwalLengkap,
+                                  //             style: TextStyle(
+                                  //               fontSize: 12,
+                                  //               color: dokter.isLibur
+                                  //                   ? Colors.red
+                                  //                   : Colors.grey,
+                                  //             ),
+                                  //           ),
+                                  //           if (dokter.terpakaiKapasitaspasien != null)
+                                  //             Text(
+                                  //               'Sisa Kuota: ${dokter.sisaKoutaKapasitaspasien ?? 0}',
+                                  //               style: const TextStyle(
+                                  //                 fontSize: 10,
+                                  //                 color: Colors.blue,
+                                  //               ),
+                                  //             ),
+                                  //         ],
+                                  //       ),
+                                  //     );
+                                  //   }).toList(),
+                                  //   onChanged: (value) {
+                                  //     setState(() {
+                                  //       _selectedDokterId = value;
+                                  //       final selectedDokter = state.dokterList
+                                  //           .firstWhere(
+                                  //             (d) => d.idDokter.toString() == value,
+                                  //           );
+                                  //       _selectedDokterNama = selectedDokter.namaDokter;
+                                  //     });
+                                  //   },
+                                  //   validator: (value) {
+                                  //     if (value == null || value.isEmpty) {
+                                  //       return 'Dokter wajib dipilih';
+                                  //     }
+                                  //     return null;
+                                  //   },
+                                  // ),
+                                  Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.person,
+                                        size: 20,
+                                        color: Colors.blue,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      const Text(
+                                        'Pilih Dokter',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                      const Spacer(),
+                                      if (_selectedDokterId != null)
+                                        TextButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              _selectedDokterId = null;
+                                              _selectedDokterNama = null;
+                                              _isDokterSelected = false;
+                                            });
+                                          },
+                                          child: const Text('Hapus Pilihan'),
+                                        ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+
+                                  // List dokter
+                                  state.status == BookingStatus.loadingDokter
+                                      ? const Center(
+                                          child: Padding(
+                                            padding: EdgeInsets.all(20),
+                                            child: Column(
+                                              children: [
+                                                CircularProgressIndicator(),
+                                                SizedBox(height: 12),
+                                                Text('Memuat data dokter...'),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                      : _buildDokterList(state),
+
+                                  const SizedBox(height: 12),
+
+                                  // Tampilkan dokter terpilih
+                                  if (_selectedDokterId != null)
+                                    Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.withOpacity(0.05),
+                                        borderRadius: BorderRadius.circular(8),
+                                        border: Border.all(
+                                          color: Colors.blue.withOpacity(0.2),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          const Icon(
+                                            Icons.check_circle,
+                                            color: Colors.blue,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          const Text(
+                                            'Dokter terpilih: ',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Text(
+                                              _selectedDokterNama ?? '-',
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  const SizedBox(height: 12),
+
+                                  /// Submit Button
+                                  SizedBox(
+                                    width: double.infinity,
+                                    height: 55,
+                                    child: ElevatedButton(
+                                      onPressed:
+                                          state.status == BookingStatus.loading
+                                          ? null
+                                          : () {
+                                              if (_formKey.currentState!
+                                                      .validate() &&
+                                                  _selectedDate != null &&
+                                                  _selectedDokterId != null) {
+                                                _submitBooking(context);
+                                              }
+                                            },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Colors.blue,
+                                        foregroundColor: Colors.white,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                        ),
+                                      ),
+                                      child:
+                                          state.status == BookingStatus.loading
+                                          ? const CircularProgressIndicator()
+                                          : const Text("BOOKING"),
                                     ),
                                   ),
                                 ],
-                              ),
-                            ),
-                          const SizedBox(height: 12),
-
-                          /// Submit Button
-                          SizedBox(
-                            width: double.infinity,
-                            height: 55,
-                            child: ElevatedButton(
-                              onPressed: state.status == BookingStatus.loading
-                                  ? null
-                                  : () {
-                                      if (_formKey.currentState!.validate() &&
-                                          _selectedDate != null &&
-                                          _selectedDokterId != null) {
-                                        _submitBooking(context);
-                                      }
-                                    },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                    12,
-                                  ), // circular
-                                ),
-                              ),
-                              child: state.status == BookingStatus.loading
-                                  ? const CircularProgressIndicator()
-                                  : const Text("BOOKING"),
+                              ],
                             ),
                           ),
-                        ],
-                      ],
+                        ),
+                      ),
+
+                      const SizedBox(width: 20),
+
+                      /// KEYPAD
+                      Expanded(
+                        flex: 2,
+                        child: SizedBox(
+                          height: 550,
+                          child: KeypadSection(
+                            onNumberPressed: _appendNumber,
+                            onBackspacePressed: _backspace,
+                            onClearPressed: _clear,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+          // Footer
+          _footer(),
+        ],
+      ),
+    );
+  }
+
+  Widget _footer() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+      decoration: BoxDecoration(
+        color: primaryColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(25),
+          topRight: Radius.circular(25),
+        ),
+      ),
+      child: Stack(
+        children: [
+          // Teks tengah
+          Center(
+            child: Text(
+              "RSU Sakina Idaman • Pelayanan Booking BPJS",
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+
+          // Teks kanan pojok
+          Positioned(
+            right: 0,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "#pedulisesama | #sakinapilihanku",
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      color: Colors.white.withOpacity(0.4),
+                      fontWeight: FontWeight.w300,
                     ),
                   ),
-                ),
-              ),
-
-              const SizedBox(width: 20),
-
-              /// KEYPAD
-              Expanded(
-                flex: 2,
-                child: SizedBox(
-                  height: 550,
-                  child: KeypadSection(
-                    onNumberPressed: _appendNumber,
-                    onBackspacePressed: _backspace,
-                    onClearPressed: _clear,
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 1,
+                    height: 14,
+                    color: Colors.white.withOpacity(0.3),
                   ),
-                ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "v1.1.1",
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      color: Colors.white.withOpacity(0.6),
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 1,
+                    height: 14,
+                    color: Colors.white.withOpacity(0.3),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "2026",
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      color: Colors.white.withOpacity(0.4),
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
@@ -836,11 +964,9 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 18),
-
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
-
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(.06),
@@ -848,16 +974,12 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
             offset: const Offset(0, 8),
           ),
         ],
-
         border: Border.all(color: Colors.grey.shade200),
       ),
-
       child: Padding(
         padding: const EdgeInsets.all(20),
-
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-
           children: [
             /// HEADER
             Row(
@@ -865,18 +987,13 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                 Container(
                   width: 30,
                   height: 30,
-
                   decoration: BoxDecoration(
                     color: color.withOpacity(.10),
-
                     borderRadius: BorderRadius.circular(12),
                   ),
-
                   child: Icon(icon, color: color, size: 22),
                 ),
-
                 const SizedBox(width: 14),
-
                 Expanded(
                   child: Text(
                     title,
@@ -888,7 +1005,6 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                 ),
               ],
             ),
-
             Divider(color: Colors.grey.shade200, thickness: 1),
 
             /// CONTENT
@@ -977,7 +1093,6 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
 
   //   context.read<BookingBloc>().add(SubmitBookingBpjsEvent(request));
   // }
-
   void _submitBooking(BuildContext context) {
     final state = context.read<BookingBloc>().state;
     final pasien = state.pasienBpjs!;
