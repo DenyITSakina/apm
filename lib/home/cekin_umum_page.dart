@@ -1,5 +1,6 @@
 import 'package:apm/dialog/top_toast.dart';
 import 'package:apm/home/cekin_umum_data.dart';
+import 'package:apm/func/navigation_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -318,16 +319,14 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
           TopToast.error(context, state.pesan);
         } else if (state is AntrianApmValidated) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => BlocProvider.value(
-                  value: context.read<AntrianApmBloc>(),
-                  child: CekinUmumDataPage(
-                    noRm: controller.text,
-                    data: state.apmData,
-                    jenisPasien: widget.selectType,
-                  ),
+            pushBackSwipePage(
+              context: context,
+              page: BlocProvider.value(
+                value: context.read<AntrianApmBloc>(),
+                child: CekinUmumDataPage(
+                  noRm: controller.text,
+                  data: state.apmData,
+                  jenisPasien: widget.selectType,
                 ),
               ),
             );
