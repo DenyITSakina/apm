@@ -1,5 +1,6 @@
 import 'package:apm/home/daftar_umum_bpjs_daftar.dart';
 import 'package:apm/widget/keypad_section.dart';
+import 'package:apm/dialog/top_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -48,12 +49,17 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
       backgroundColor: bgColor,
       body: BlocListener<CekinBloc, CekinState>(
         listener: (context, state) {
-          if (state is CekinLoading) setState(() => loading = true);
+          if (state is CekinLoading) {
+            setState(() => loading = true);
+          }
           if (state is CekinSuccess) {
             setState(() {
               loading = false;
               hasil = "Data Pasien ditemukan!";
             });
+
+            TopToast.success(context, "Data Pasien ditemukan!");
+
             Future.delayed(const Duration(milliseconds: 800), () {
               Navigator.push(
                 context,
@@ -68,6 +74,11 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
               loading = false;
               hasil = "Data Pasien Tidak Ditemukan. Silahkan Ke Loket.";
             });
+
+            TopToast.error(
+              context,
+              "Data Pasien Tidak Ditemukan. Silahkan Ke Loket.",
+            );
           }
         },
         child: Column(
@@ -80,8 +91,6 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
                   padding: const EdgeInsets.symmetric(horizontal: 24.0),
                   child: Column(
                     children: [
-                      // const SizedBox(height: 30),
-                      // _buildStepIndicator(),
                       const SizedBox(height: 12),
                       _inputDisplay(),
                       const SizedBox(height: 12),
@@ -201,56 +210,6 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
     );
   }
 
-  Widget _buildStepIndicator() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _stepCircle("1", "Input", true),
-        _stepLine(true),
-        _stepCircle("2", "Proses", false),
-        _stepLine(false),
-        _stepCircle("3", "Selesai", false),
-      ],
-    );
-  }
-
-  Widget _stepCircle(String num, String label, bool active) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: active ? secondaryColor : Colors.grey.shade300,
-            shape: BoxShape.circle,
-          ),
-          child: Text(
-            num,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            color: active ? secondaryColor : Colors.grey,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _stepLine(bool active) => Container(
-    width: 30,
-    height: 2,
-    color: active ? secondaryColor : Colors.grey.shade300,
-    margin: const EdgeInsets.only(bottom: 20),
-  );
-
   Widget _inputDisplay() {
     final hasText = bpjsController.text.isNotEmpty;
     return Container(
@@ -339,11 +298,36 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
       child: InkWell(
         onTap: isEnabled
             ? () {
+                final nomor = bpjsController.text.trim();
+
+                if (widget.selectType == "bpjs") {
+                  if (nomor.length != 13 && nomor.length != 16) {
+                    TopToast.warning(
+                      context,
+                      "Nomor BPJS harus 13 digit atau NIK 16 digit",
+                    );
+                    return;
+                  }
+
+                  if (!RegExp(r'^[0-9]+$').hasMatch(nomor)) {
+                    TopToast.warning(
+                      context,
+                      "Nomor hanya boleh terdiri dari angka",
+                    );
+                    return;
+                  }
+                } else {
+                  if (nomor.isEmpty) {
+                    TopToast.warning(
+                      context,
+                      "Silakan masukkan nomor rekam medis",
+                    );
+                    return;
+                  }
+                }
+
                 context.read<CekinBloc>().add(
-                  CekNomorEvent(
-                    nomor: bpjsController.text.trim(),
-                    jenis: widget.selectType,
-                  ),
+                  CekNomorEvent(nomor: nomor, jenis: widget.selectType),
                 );
               }
             : null,
@@ -378,7 +362,7 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
   }
 
   Widget _resultInfo() {
-    final sukses = hasil!.contains("✔️");
+    final sukses = hasil!.contains("✔️") || hasil!.contains("ditemukan");
     return Padding(
       padding: const EdgeInsets.only(top: 20),
       child: Container(

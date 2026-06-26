@@ -94,7 +94,6 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
       pasienData = Map<String, dynamic>.from(rawData);
     }
 
-    // Isi otomatis nomor BPJS dari data pasien jika ada
     if (pasienData != null) {
       final noBpjs = getField(["no_bpjs", "bpjs", "no_peserta"]);
       if (noBpjs != "-" && noBpjs.trim().isNotEmpty) {
@@ -120,12 +119,10 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
     return noBpjs != "-" && noBpjs.trim().isNotEmpty;
   }
 
-  // Fungsi untuk mendapatkan poli berdasarkan kode BPJS
   PoliModel? _getPoliByBpjsCode(String kodeBpjs) {
     if (_poliList.isEmpty || kodeBpjs.isEmpty) return null;
 
     try {
-      // Cari berdasarkan kode BPJS (case insensitive)
       return _poliList.firstWhere(
         (poli) => poli.kodeBpjs.toUpperCase() == kodeBpjs.toUpperCase(),
         orElse: () => _poliList.firstWhere(
@@ -142,14 +139,11 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
     }
   }
 
-  // Fungsi untuk mendapatkan kode poli rujukan dari response
   String _getKodePoliRujukan(PasienBpjsResponse result) {
     try {
-      // Coba akses rujukan -> bpjs -> rujukan
       final rujukan = result.rujukan;
       if (rujukan == null) return '';
 
-      // Coba akses sebagai Map
       if (rujukan is Map<String, dynamic>) {
         final bpjs = rujukan['bpjs'];
         if (bpjs is Map<String, dynamic>) {
@@ -167,12 +161,10 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
       }
       return '';
     } catch (e) {
-      print('Error getting kode poli rujukan: $e');
       return '';
     }
   }
 
-  // Fungsi untuk mendapatkan data rujukan sebagai Map
   Map<String, dynamic>? _getRujukanData(PasienBpjsResponse result) {
     try {
       final rujukan = result.rujukan;
@@ -197,7 +189,6 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
     }
   }
 
-  // Fungsi untuk cek BPJS
   Future<void> _checkBpjs() async {
     final nomor = bpjsController.text.trim();
 
@@ -225,29 +216,22 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
       });
 
       if (result.status) {
-        // Ambil nama dari peserta
         String namaPasien = result.peserta?.nama ?? 'Data ditemukan';
         TopToast.success(context, "BPJS Valid: $namaPasien");
 
-        // Jika ada data pasien dari BPJS, update data pasien
         if (result.peserta != null && pasienData != null) {
           setState(() {
-            // Update nama jika ada
             if (result.peserta!.nama.isNotEmpty) {
               pasienData!['nama'] = result.peserta!.nama;
             }
-            // Update no BPJS
             pasienData!['no_bpjs'] = nomor;
-            // Update NIK jika ada
             if (result.peserta!.nik.isNotEmpty) {
               pasienData!['nik'] = result.peserta!.nik;
             }
-            // Update tgl lahir jika ada
             if (result.peserta!.tglLahir != null &&
                 result.peserta!.tglLahir!.isNotEmpty) {
               pasienData!['tgl_lahir'] = result.peserta!.tglLahir;
             }
-            // Update jenis kelamin jika ada
             if (result.peserta!.jenisKelamin != null) {
               pasienData!['jenis_kelamin'] =
                   result.peserta!.jenisKelamin == 'Perempuan' ? 'P' : 'L';
@@ -255,7 +239,6 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
           });
         }
 
-        // AUTO SELECT POLI dari data rujukan
         final kodePoliRujukan = _getKodePoliRujukan(result);
 
         if (kodePoliRujukan.isNotEmpty) {
@@ -266,7 +249,6 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
               selectedPoli = matchedPoli;
             });
 
-            // Auto fetch dokter untuk poli yang dipilih
             if (selectedTipe != null) {
               context.read<AntrianApmBloc>().add(
                 FetchDokterEvent(
@@ -317,7 +299,6 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
     final tglLahir = getField(["tgl_lahir"]);
     final jenisKelamin = getField(["jenis_kelamin"]);
 
-    // Ambil data rujukan untuk ditampilkan
     Map<String, dynamic>? rujukanData;
     bool hasRujukan = false;
     String kodePoliRujukan = '';
@@ -509,7 +490,6 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                                     selectedPoli = null;
                                     selectedDokter = null;
                                     _bpjsCheckResult = null;
-                                    // Isi otomatis dari data pasien jika ada
                                     final noBpjs = getField([
                                       "no_bpjs",
                                       "bpjs",
@@ -547,7 +527,6 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                     ],
                   ),
 
-                  // TAMPILKAN INPUTAN NOMOR BPJS KETIKA PILIH BPJS
                   if (selectedTipe == "BPJS") ...[
                     const SizedBox(height: 20),
                     Container(
@@ -746,7 +725,7 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                                       ),
                                     ],
                                   ),
-                                  // Tampilkan detail data peserta jika valid
+
                                   if (_bpjsCheckResult!.status &&
                                       _bpjsCheckResult!.peserta != null) ...[
                                     const SizedBox(height: 8),
@@ -792,7 +771,7 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                                       ),
                                     ),
                                   ],
-                                  // Tampilkan data rujukan jika ada
+
                                   if (_bpjsCheckResult!.status &&
                                       hasRujukan) ...[
                                     const Divider(color: Colors.grey),
@@ -830,7 +809,7 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                                         ],
                                       ),
                                     ),
-                                    // Tampilkan poli otomatis terpilih
+
                                     if (selectedPoli != null) ...[
                                       const SizedBox(height: 8),
                                       Container(
@@ -901,7 +880,6 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Dropdown Poli dengan status disabled jika sudah otomatis terpilih
                   BlocBuilder<AntrianApmBloc, AntrianApmState>(
                     builder: (_, state) {
                       List<PoliModel> poliList = [];
@@ -1076,26 +1054,129 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                   const SizedBox(height: 35),
 
                   // TOMBOL DAFTAR DENGAN VALIDASI
+                  // SizedBox(
+                  //   width: double.infinity,
+                  //   height: 60,
+                  //   child: ElevatedButton(
+                  //     onPressed: isFormValid
+                  //         ? () async {
+                  //             // Validasi BPJS
+                  //             if (selectedTipe == "BPJS") {
+                  //               final nomor = bpjsController.text.trim();
+                  //               if (nomor.isEmpty || nomor.length != 13) {
+                  //                 TopToast.error(
+                  //                   context,
+                  //                   "Nomor BPJS harus 13 digit!",
+                  //                 );
+                  //                 return;
+                  //               }
+
+                  //               // Pastikan BPJS sudah dicek dan valid
+                  //               if (_bpjsCheckResult == null ||
+                  //                   !_bpjsCheckResult!.status) {
+                  //                 TopToast.error(
+                  //                   context,
+                  //                   "Silakan cek validitas nomor BPJS terlebih dahulu!",
+                  //                 );
+                  //                 return;
+                  //               }
+
+                  //               // Buka aplikasi BPJS
+                  //               final sukses = await openExeFromMap(context, {
+                  //                 "nomor": nomor,
+                  //               });
+
+                  //               if (sukses == false) return;
+                  //             }
+
+                  //             await Future.delayed(
+                  //               const Duration(milliseconds: 1500),
+                  //             );
+
+                  //             context.read<AntrianApmBloc>().add(
+                  //               LanjutKePendaftaranEvent(
+                  //                 rm: rm,
+                  //                 jaminan: selectedTipe!,
+                  //                 idJadwalDokter:
+                  //                     selectedDokter!.idJadwalDetail,
+                  //                 idDokter: selectedDokter!.idDokter.toString(),
+                  //                 idLayanan: selectedPoli!.id.toString(),
+                  //                 jenisAntrian: "pendaftaran",
+                  //               ),
+                  //             );
+                  //           }
+                  //         : null,
+                  //     style:
+                  //         ElevatedButton.styleFrom(
+                  //           padding: EdgeInsets.zero,
+                  //           shape: RoundedRectangleBorder(
+                  //             borderRadius: BorderRadius.circular(20),
+                  //           ),
+                  //         ).copyWith(
+                  //           backgroundColor: MaterialStateProperty.resolveWith(
+                  //             (states) =>
+                  //                 states.contains(MaterialState.disabled)
+                  //                 ? Colors.grey
+                  //                 : null,
+                  //           ),
+                  //         ),
+                  //     child: Ink(
+                  //       decoration: BoxDecoration(
+                  //         gradient: LinearGradient(
+                  //           colors: [
+                  //             Colors.teal.shade700,
+                  //             Colors.teal.shade400,
+                  //           ],
+                  //         ),
+                  //         borderRadius: BorderRadius.circular(20),
+                  //       ),
+                  //       child: Center(
+                  //         child: Text(
+                  //           "DAFTAR PASIEN",
+                  //           style: GoogleFonts.poppins(
+                  //             fontSize: 20,
+                  //             fontWeight: FontWeight.bold,
+                  //             color: Colors.white,
+                  //           ),
+                  //         ),
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
                   SizedBox(
                     width: double.infinity,
                     height: 60,
                     child: ElevatedButton(
                       onPressed: isFormValid
                           ? () async {
-                              // Validasi BPJS
                               if (selectedTipe == "BPJS") {
                                 final nomor = bpjsController.text.trim();
-                                if (nomor.isEmpty || nomor.length != 13) {
+
+                                if (nomor.isEmpty) {
                                   TopToast.error(
                                     context,
-                                    "Nomor BPJS harus 13 digit!",
+                                    "Nomor BPJS tidak boleh kosong!",
                                   );
                                   return;
                                 }
 
-                                // Pastikan BPJS sudah dicek dan valid
-                                if (_bpjsCheckResult == null ||
-                                    !_bpjsCheckResult!.status) {
+                                if (nomor.length != 13) {
+                                  TopToast.error(
+                                    context,
+                                    "Nomor BPJS harus 13 digit! (saat ini: ${nomor.length} digit)",
+                                  );
+                                  return;
+                                }
+
+                                if (!RegExp(r'^[0-9]+$').hasMatch(nomor)) {
+                                  TopToast.error(
+                                    context,
+                                    "Nomor BPJS hanya boleh terdiri dari angka!",
+                                  );
+                                  return;
+                                }
+
+                                if (_bpjsCheckResult == null) {
                                   TopToast.error(
                                     context,
                                     "Silakan cek validitas nomor BPJS terlebih dahulu!",
@@ -1103,12 +1184,33 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                                   return;
                                 }
 
-                                // Buka aplikasi BPJS
+                                if (!_bpjsCheckResult!.status) {
+                                  TopToast.error(
+                                    context,
+                                    "Nomor BPJS tidak valid! ${_bpjsCheckResult!.message ?? ''}",
+                                  );
+                                  return;
+                                }
+
+                                if (_bpjsCheckResult!.rujukan == null) {
+                                  TopToast.warning(
+                                    context,
+                                    "Tidak ditemukan data rujukan untuk nomor BPJS ini",
+                                  );
+                                  return;
+                                }
+
                                 final sukses = await openExeFromMap(context, {
                                   "nomor": nomor,
                                 });
 
-                                if (sukses == false) return;
+                                if (sukses == false) {
+                                  TopToast.error(
+                                    context,
+                                    "Gagal membuka aplikasi BPJS",
+                                  );
+                                  return;
+                                }
                               }
 
                               await Future.delayed(
@@ -1166,7 +1268,6 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                     ),
                   ),
 
-                  // Menampilkan pesan error jika form belum lengkap
                   if (!isFormValid && selectedTipe != null) ...[
                     const SizedBox(height: 12),
                     Container(
@@ -1256,7 +1357,6 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
     ),
   );
 
-  // Widget untuk menampilkan detail BPJS
   Widget _detailBpjs(String label, String value) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 2),
     child: Row(
