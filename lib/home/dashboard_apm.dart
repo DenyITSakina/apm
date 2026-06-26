@@ -7,6 +7,7 @@ import 'package:apm/home/cekin_bpjs_page.dart';
 
 import 'package:apm/home/cekin_umum_page.dart';
 import 'package:flutter/material.dart';
+import 'package:full_swipe_back_gesture/full_swipe_back_gesture.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../widget/responsive.dart';
@@ -645,25 +646,7 @@ class _DashboardApmState extends State<DashboardApm>
   }
 
   void _navigateTo(BuildContext context, Widget page) {
-    Navigator.push(
-      context,
-      PageRouteBuilder(
-        pageBuilder: (context, animation, secondaryAnimation) => page,
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(1.0, 0.0);
-          const end = Offset.zero;
-          const curve = Curves.easeInOutCubic;
-          var tween = Tween(
-            begin: begin,
-            end: end,
-          ).chain(CurveTween(curve: curve));
-          return SlideTransition(
-            position: animation.drive(tween),
-            child: child,
-          );
-        },
-      ),
-    );
+    Navigator.of(context).push(BackSwipePageRoute(builder: (_) => page));
   }
 }
 
@@ -788,9 +771,8 @@ Widget _bookingCard(
     onTap: () {
       Navigator.pop(context);
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(
+      Navigator.of(context).push(
+        BackSwipePageRoute(
           builder: (_) => BlocProvider(
             create: (_) => BookingBloc(),
             child: BookingPage(jenis: jenis),
