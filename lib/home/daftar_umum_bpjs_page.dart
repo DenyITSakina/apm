@@ -52,7 +52,7 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
           if (state is CekinSuccess) {
             setState(() {
               loading = false;
-              hasil = "✔️ Data Pasien ditemukan!";
+              hasil = "Data Pasien ditemukan!";
             });
             Future.delayed(const Duration(milliseconds: 800), () {
               Navigator.push(

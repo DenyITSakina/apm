@@ -659,36 +659,52 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     Emitter<AntrianApmState> emit,
   ) async {
     try {
-      Map<String, String> body = {"id_layanan": event.idLayanan.toString()};
+      final int idLayanan = event.idLayanan;
+      final int jadwalGroup = event.groupJaminan ?? 1;
 
-      if (event.groupJaminan != null) {
-        body["jenisBooking"] = event.groupJaminan.toString();
-      }
+      // groupJaminan: 1 = Umum, 2 = JKN/BPJS (ikut penamaan yang ada di UI)
+      final String tanggal = _formatDate(DateTime.now());
 
-      final resp = await _requestPost(ApiConfig.dokterJadwalApm, body);
+      // Panggilan dokter bedakan umum vs jkn
+      List<DokterModel> dokterList = [];
+      try {
+        final url = jadwalGroup == 2
+            ? ApiConfig.baseUrl + '/jadwal-dokter-jkn'
+            : ApiConfig.baseUrl + '/jadwal-dokter-umum';
 
-      if (resp['code'] == 200) {
-        final data = resp['data'];
-        List<DokterModel> dokterList = [];
+        final resp = await _requestPost(url, {
+          'id_layanan': idLayanan.toString(),
+          'tanggal': tanggal,
+        });
 
-        if (data is List) {
-          dokterList = data
-              .map((e) => DokterModel.fromJson(Map<String, dynamic>.from(e)))
-              .toList();
-        } else if (data is Map) {
-          dokterList = [DokterModel.fromJson(Map<String, dynamic>.from(data))];
+        if (resp['code'] == 200 && resp['data'] != null) {
+          final data = resp['data'];
+          if (data is List) {
+            dokterList = data
+                .map((e) => DokterModel.fromJson(Map<String, dynamic>.from(e)))
+                .toList();
+          } else if (data is Map) {
+            dokterList = [
+              DokterModel.fromJson(Map<String, dynamic>.from(data)),
+            ];
+          }
+        } else {
+          emit(AntrianApmError(resp['message'] ?? 'Gagal fetch dokter'));
+          return;
         }
-
-        List<PoliModel> poliList = [];
-        try {
-          final poliResp = await _onFetchPoliListInternal();
-          poliList = poliResp;
-        } catch (_) {}
-
-        emit(DokterLoaded(dokterList: dokterList, poliList: poliList));
-      } else {
-        emit(AntrianApmError(resp['message'] ?? 'Gagal fetch dokter'));
+      } catch (e) {
+        emit(AntrianApmError('Error fetch dokter: $e'));
+        return;
       }
+
+      // Ambil poli list
+      List<PoliModel> poliList = [];
+      try {
+        final poliResp = await _onFetchPoliListInternal();
+        poliList = poliResp;
+      } catch (_) {}
+
+      emit(DokterLoaded(dokterList: dokterList, poliList: poliList));
     } catch (e) {
       emit(AntrianApmError('Error fetch dokter: $e'));
     }
