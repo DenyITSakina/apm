@@ -9,6 +9,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../models/booking_model.dart';
 import '../theme/format_text.dart';
@@ -546,12 +547,15 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
                                 const SizedBox(height: 8),
 
                                 state.status == BookingStatus.loadingDokter
-                                    ? const Center(
+                                    ? Center(
                                         child: Padding(
                                           padding: EdgeInsets.all(20),
                                           child: Column(
                                             children: [
-                                              CircularProgressIndicator(),
+                                              LoadingAnimationWidget.fourRotatingDots(
+                                                color: Colors.white,
+                                                size: 15,
+                                              ),
                                               SizedBox(height: 12),
                                               Text('Memuat data dokter...'),
                                             ],
@@ -624,7 +628,10 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
                                       ),
                                     ),
                                     child: state.status == BookingStatus.loading
-                                        ? const CircularProgressIndicator()
+                                        ? LoadingAnimationWidget.fourRotatingDots(
+                                            color: Colors.white,
+                                            size: 15,
+                                          )
                                         : const Text("BOOKING"),
                                   ),
                                 ),

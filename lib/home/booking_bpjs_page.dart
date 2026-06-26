@@ -5,6 +5,7 @@ import 'package:apm/widget/keypad_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -741,12 +742,15 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
 
                                   // List dokter
                                   state.status == BookingStatus.loadingDokter
-                                      ? const Center(
+                                      ? Center(
                                           child: Padding(
                                             padding: EdgeInsets.all(20),
                                             child: Column(
                                               children: [
-                                                CircularProgressIndicator(),
+                                                LoadingAnimationWidget.fourRotatingDots(
+                                                  color: Colors.white,
+                                                  size: 15,
+                                                ),
                                                 SizedBox(height: 12),
                                                 Text('Memuat data dokter...'),
                                               ],
@@ -823,7 +827,10 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                                       ),
                                       child:
                                           state.status == BookingStatus.loading
-                                          ? const CircularProgressIndicator()
+                                          ? LoadingAnimationWidget.fourRotatingDots(
+                                              color: Colors.white,
+                                              size: 15,
+                                            )
                                           : const Text("BOOKING"),
                                     ),
                                   ),

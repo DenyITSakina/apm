@@ -3,6 +3,7 @@ import 'package:apm/home/cekin_umum_data.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../Blog/antrian_apm_bloc.dart';
 import '../widget/keypad_section.dart';
 
@@ -363,7 +364,10 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   isLoading
-                      ? const CircularProgressIndicator(color: Colors.white)
+                      ? LoadingAnimationWidget.fourRotatingDots(
+                          color: Colors.white,
+                          size: 15,
+                        )
                       : const Icon(
                           Icons.search_rounded,
                           size: 45,

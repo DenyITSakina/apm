@@ -4,6 +4,7 @@ import 'package:apm/theme/Style/format_tgl.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../models/apm_antrian_model.dart';
 import '../Blog/antrian_apm_bloc.dart';
 import '../dialog/konfirmasi.dart';
@@ -373,7 +374,10 @@ class CekinUmumDataPage extends StatelessWidget {
             ),
             child: Center(
               child: isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
+                  ? LoadingAnimationWidget.fourRotatingDots(
+                      color: Colors.white,
+                      size: 15,
+                    )
                   : Text(
                       "PILIH POLI",
                       style: GoogleFonts.oswald(
@@ -439,7 +443,10 @@ class CekinUmumDataPage extends StatelessWidget {
             ),
             child: Center(
               child: isLoading
-                  ? const CircularProgressIndicator(color: Colors.white)
+                  ? LoadingAnimationWidget.fourRotatingDots(
+                      color: Colors.white,
+                      size: 15,
+                    )
                   : Text(
                       "PILIH LOKET",
                       style: GoogleFonts.oswald(

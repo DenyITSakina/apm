@@ -5,6 +5,7 @@ import 'package:apm/home/booking_bpjs_page.dart';
 import 'package:apm/home/booking_umum_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class BookingPage extends StatefulWidget {
   final String jenis; // '1' for umum, '2' for bpjs
@@ -87,7 +88,12 @@ class _BookingPageState extends State<BookingPage> {
         },
         builder: (context, state) {
           if (state.status == BookingStatus.loading && state.poliList.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(
+              child: LoadingAnimationWidget.fourRotatingDots(
+                color: Colors.blue,
+                size: 50,
+              ),
+            );
           }
 
           if (state.status == BookingStatus.error && state.poliList.isEmpty) {

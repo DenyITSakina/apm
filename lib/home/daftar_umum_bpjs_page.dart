@@ -4,6 +4,7 @@ import 'package:apm/dialog/top_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../Blog/blog_pendaftran.dart';
 
 class PendaftaranPoliPage extends StatefulWidget {
@@ -338,7 +339,10 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               loading
-                  ? const CircularProgressIndicator(color: Colors.white)
+                  ? LoadingAnimationWidget.fourRotatingDots(
+                      color: Colors.white,
+                      size: 15,
+                    )
                   : const Icon(
                       Icons.arrow_forward_rounded,
                       size: 40,

@@ -6,6 +6,7 @@ import 'package:apm/theme/format_text.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../dialog/konfirmasi.dart';
 import '../dialog/sukses.dart';
 import '../models/apm_antrian_model.dart';
@@ -476,8 +477,9 @@ class CekinBpjsDataPage extends StatelessWidget {
                           ),
                           child: Center(
                             child: isLoadingPoli
-                                ? const CircularProgressIndicator(
+                                ? LoadingAnimationWidget.fourRotatingDots(
                                     color: Colors.white,
+                                    size: 15,
                                   )
                                 : Text(
                                     "PILIH POLI",
@@ -583,8 +585,9 @@ class CekinBpjsDataPage extends StatelessWidget {
                           ),
                           child: Center(
                             child: isLoadingLoket
-                                ? const CircularProgressIndicator(
+                                ? LoadingAnimationWidget.fourRotatingDots(
                                     color: Colors.white,
+                                    size: 15,
                                   )
                                 : Text(
                                     "PILIH LOKET",

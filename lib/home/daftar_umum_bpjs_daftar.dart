@@ -6,6 +6,7 @@ import 'package:apm/widget/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../../theme/format_text.dart';
 import '../../models/poli_model.dart';
 import '../../models/dokter_model.dart';
@@ -648,13 +649,14 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                                   elevation: 2,
                                 ),
                                 child: _isCheckingBpjs
-                                    ? const SizedBox(
+                                    ? SizedBox(
                                         width: 24,
                                         height: 24,
-                                        child: CircularProgressIndicator(
-                                          strokeWidth: 2,
-                                          color: Colors.white,
-                                        ),
+                                        child:
+                                            LoadingAnimationWidget.fourRotatingDots(
+                                              color: Colors.white,
+                                              size: 15,
+                                            ),
                                       )
                                     : Row(
                                         mainAxisSize: MainAxisSize.min,
