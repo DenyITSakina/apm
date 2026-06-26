@@ -8,7 +8,9 @@ import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:google_fonts/google_fonts.dart'; // Tambahkan import ini
+import 'package:google_fonts/google_fonts.dart';
+import 'package:apm/func/open_aplikasi_bpjsDaftar.dart';
+import 'package:apm/dialog/top_toast.dart';
 
 import '../models/booking_model.dart';
 import '../theme/format_text.dart';
@@ -1093,9 +1095,23 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
 
   //   context.read<BookingBloc>().add(SubmitBookingBpjsEvent(request));
   // }
-  void _submitBooking(BuildContext context) {
+
+  void _submitBooking(BuildContext context) async {
     final state = context.read<BookingBloc>().state;
     final pasien = state.pasienBpjs!;
+
+    final nik = pasien.nik;
+
+    if (nik.isNotEmpty) {
+      final success = await openExeFromMap(context, {"nomor": nik});
+
+      if (!success) {
+        return;
+      }
+    } else {
+      TopToast.error(context, "NIK tidak ditemukan pada data pasien!");
+      return;
+    }
 
     final selectedDokter = state.dokterList.firstWhere(
       (d) => d.idDokter.toString() == _selectedDokterId,
@@ -1103,7 +1119,7 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
 
     final request = BookingRequest(
       jenis: '2',
-      nik: pasien.nik,
+      nik: nik,
       nohp: _nohpController.text.isNotEmpty
           ? _nohpController.text
           : pasien.noTelp ?? '',
