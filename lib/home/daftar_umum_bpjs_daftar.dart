@@ -227,7 +227,7 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
       if (result.status) {
         // Ambil nama dari peserta
         String namaPasien = result.peserta?.nama ?? 'Data ditemukan';
-        TopToast.success(context, "✅ BPJS Valid: $namaPasien");
+        TopToast.success(context, "BPJS Valid: $namaPasien");
 
         // Jika ada data pasien dari BPJS, update data pasien
         if (result.peserta != null && pasienData != null) {
@@ -278,12 +278,12 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
 
             TopToast.success(
               context,
-              "✅ Poli otomatis dipilih: ${matchedPoli.nama}",
+              "Poli otomatis dipilih: ${matchedPoli.nama}",
             );
           } else {
             TopToast.info(
               context,
-              "⚠️ Poli rujukan ($kodePoliRujukan) tidak ditemukan di sistem",
+              "Poli rujukan ($kodePoliRujukan) tidak ditemukan di sistem",
             );
           }
         }
@@ -419,7 +419,7 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                         "DATA PASIEN",
                         style: GoogleFonts.oswald(
                           fontWeight: FontWeight.bold,
-                          fontSize: 22,
+                          fontSize: 20,
                         ),
                       ),
                       const Divider(color: Colors.white54),
@@ -438,22 +438,22 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                 ),
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 12),
 
               Text(
                 "Form Pendaftaran",
                 style: GoogleFonts.oswald(
-                  fontSize: 30,
+                  fontSize: 28,
                   fontWeight: FontWeight.w600,
                 ),
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 7),
 
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Pilih Jenis Pendaftaran",
+                    "Pilih Jenis Pendaftaran (silahkan klik salah satu untuk melanjutkan pendaftaran)",
                     style: GoogleFonts.poppins(
                       fontSize: 18,
                       fontWeight: FontWeight.normal,
@@ -733,8 +733,8 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                                       Expanded(
                                         child: Text(
                                           _bpjsCheckResult!.status
-                                              ? "✅ BPJS Valid"
-                                              : "❌ ${_bpjsCheckResult!.message ?? 'Nomor BPJS tidak valid'}",
+                                              ? "BPJS Valid"
+                                              : "${_bpjsCheckResult!.message ?? 'Nomor BPJS tidak valid'}",
                                           style: GoogleFonts.poppins(
                                             fontSize: 13,
                                             color: _bpjsCheckResult!.status
@@ -798,7 +798,7 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                                     const Divider(color: Colors.grey),
                                     const SizedBox(height: 4),
                                     Text(
-                                      "📋 Data Rujukan",
+                                      "Data Rujukan",
                                       style: GoogleFonts.poppins(
                                         fontWeight: FontWeight.w600,
                                         fontSize: 13,
@@ -854,7 +854,7 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                                             const SizedBox(width: 8),
                                             Expanded(
                                               child: Text(
-                                                "✅ Poli otomatis dipilih: ${selectedPoli!.nama}",
+                                                "Poli otomatis dipilih: ${selectedPoli!.nama}",
                                                 style: GoogleFonts.poppins(
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.w600,
@@ -1408,7 +1408,7 @@ class DokterListItem extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
-                      "📊 Sisa: ${dokter.kapasitasPasien}",
+                      "Sisa: ${dokter.kapasitasPasien}",
                       style: GoogleFonts.poppins(
                         fontSize: 12,
                         color: Colors.blue.shade700,
