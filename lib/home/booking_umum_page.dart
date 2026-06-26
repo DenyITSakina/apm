@@ -24,7 +24,6 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
 
   final _nikController = TextEditingController();
   final _nohpController = TextEditingController();
-  final _emailController = TextEditingController();
 
   TextEditingController? _activeController;
 
@@ -41,7 +40,6 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
   void dispose() {
     _nikController.dispose();
     _nohpController.dispose();
-    _emailController.dispose();
     super.dispose();
   }
 
@@ -445,28 +443,6 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
                         ),
                         const SizedBox(height: 16),
 
-                        /// EMAIL (Optional)
-                        TextFormField(
-                          controller: _emailController,
-                          decoration: const InputDecoration(
-                            labelText: 'Email (Optional)',
-                            border: OutlineInputBorder(),
-                            prefixIcon: Icon(Icons.email),
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                          validator: (v) {
-                            if (v != null && v.isNotEmpty) {
-                              if (!RegExp(
-                                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                              ).hasMatch(v)) {
-                                return 'Email tidak valid';
-                              }
-                            }
-                            return null;
-                          },
-                        ),
-                        const SizedBox(height: 16),
-
                         /// TANGGAL
                         InkWell(
                           onTap: _pickDate,
@@ -686,7 +662,6 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
       idDokter: int.parse(_selectedDokterId!),
       tanggalPeriksa: DateFormat('yyyy-MM-dd').format(_selectedDate!),
       idJadwalDokter: dokter.idJadwalDetail,
-      email: _emailController.text.isNotEmpty ? _emailController.text : null,
     );
 
     context.read<BookingBloc>().add(SubmitBookingUmumEvent(request));
