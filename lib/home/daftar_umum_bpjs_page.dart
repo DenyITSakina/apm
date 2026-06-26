@@ -398,28 +398,77 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
 
   Widget _footer() {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
       decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
+        color: primaryColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(25),
+          topRight: Radius.circular(25),
+        ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      child: Stack(
         children: [
-          const Icon(Icons.shield_outlined, size: 16, color: Colors.grey),
-          const SizedBox(width: 8),
-          Text(
-            "RSU SAKINA IDAMAN - Sistem Pendaftaran Mandiri",
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-              fontWeight: FontWeight.w500,
+          // Teks tengah
+          Center(
+            child: Text(
+              "RSU SAKINA IDAMAN • Pelayanan BPJS",
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+
+          // Teks kanan pojok
+          Positioned(
+            right: 0,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "#pedulisesama | #sakinapilihanku",
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      color: Colors.white.withOpacity(0.4),
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 1,
+                    height: 14,
+                    color: Colors.white.withOpacity(0.3),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "v1.1.1",
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      color: Colors.white.withOpacity(0.6),
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 1,
+                    height: 14,
+                    color: Colors.white.withOpacity(0.3),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "2026",
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      color: Colors.white.withOpacity(0.4),
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

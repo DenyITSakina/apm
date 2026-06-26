@@ -423,7 +423,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
 
   Widget _footer() {
     return Container(
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
       decoration: BoxDecoration(
         color: primaryColor,
         borderRadius: const BorderRadius.only(
@@ -431,15 +431,72 @@ class _CekinBpjsState extends State<CekinBpjs> {
           topRight: Radius.circular(25),
         ),
       ),
-      child: Center(
-        child: Text(
-          "RSU SAKINA IDAMAN • Pelayanan BPJS",
-          style: GoogleFonts.poppins(
-            fontSize: 13,
-            color: Colors.white,
-            fontWeight: FontWeight.w500,
+      child: Stack(
+        children: [
+          // Teks tengah
+          Center(
+            child: Text(
+              "RSU SAKINA IDAMAN • Pelayanan BPJS",
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                color: Colors.white,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
           ),
-        ),
+
+          // Teks kanan pojok
+          Positioned(
+            right: 0,
+            top: 0,
+            bottom: 0,
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    "#pedulisesama | #sakinapilihanku",
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      color: Colors.white.withOpacity(0.4),
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 1,
+                    height: 14,
+                    color: Colors.white.withOpacity(0.3),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "v1.1.1",
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      color: Colors.white.withOpacity(0.6),
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 1,
+                    height: 14,
+                    color: Colors.white.withOpacity(0.3),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    "2026",
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      color: Colors.white.withOpacity(0.4),
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

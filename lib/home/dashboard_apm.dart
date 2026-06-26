@@ -349,7 +349,7 @@ class _DashboardApmState extends State<DashboardApm>
 
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.9),
                       border: Border(
@@ -359,41 +359,104 @@ class _DashboardApmState extends State<DashboardApm>
                         ),
                       ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+                    child: Column(
                       children: [
-                        Icon(
-                          Icons.access_time,
-                          color: const Color(0xFF006064),
-                          size: 20,
+                        // Baris pertama: Jam operasional dan bantuan
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.access_time,
+                              color: const Color(0xFF006064),
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              "Jam Operasional: 24 Jam",
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF006064),
+                              ),
+                            ),
+                            Container(
+                              margin: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                              ),
+                              width: 1,
+                              height: 20,
+                              color: const Color(0xFF00838F).withOpacity(0.3),
+                            ),
+                            Icon(
+                              Icons.info_outline,
+                              color: const Color(0xFF006064),
+                              size: 20,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              "Butuh bantuan? Hubungi petugas",
+                              style: GoogleFonts.poppins(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF006064),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          "Jam Operasional: 24 Jam",
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF006064),
-                          ),
-                        ),
+
                         Container(
-                          margin: const EdgeInsets.symmetric(horizontal: 20),
-                          width: 1,
-                          height: 20,
-                          color: const Color(0xFF00838F).withOpacity(0.3),
-                        ),
-                        Icon(
-                          Icons.info_outline,
-                          color: const Color(0xFF006064),
-                          size: 20,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          "Butuh bantuan? Hubungi petugas",
-                          style: GoogleFonts.poppins(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            color: const Color(0xFF006064),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.9),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "#pedulisesama | #sakinapilihanku",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  color: const Color(0xFF006064),
+                                  fontWeight: FontWeight.w300,
+                                ),
+                              ),
+                              Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                width: 1,
+                                height: 14,
+                                color: const Color(0xFF006064),
+                              ),
+                              Text(
+                                "v1.1.1",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  color: const Color(0xFF006064),
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                              Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                width: 1,
+                                height: 14,
+                                color: const Color(0xFF006064),
+                              ),
+                              Text(
+                                "2026",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  color: const Color(0xFF006064),
+                                  fontWeight: FontWeight.w300,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
