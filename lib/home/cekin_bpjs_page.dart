@@ -436,7 +436,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
           // Teks tengah
           Center(
             child: Text(
-              "RSU SAKINA IDAMAN • Pelayanan BPJS",
+              "RSU Sakina Idaman • Pelayanan BPJS",
               style: GoogleFonts.poppins(
                 fontSize: 13,
                 color: Colors.white,

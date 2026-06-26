@@ -403,7 +403,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
           // Teks tengah
           Center(
             child: Text(
-              "RSU SAKINA IDAMAN • Pelayanan BPJS",
+              "RSU Sakina Idaman • Pelayanan Umum",
               style: GoogleFonts.poppins(
                 fontSize: 13,
                 color: Colors.white,
