@@ -5,8 +5,12 @@ import 'package:apm/widget/keypad_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 import '../models/booking_model.dart';
+import '../theme/format_text.dart';
 
 class BookingUmumPage extends StatefulWidget {
   const BookingUmumPage({super.key});
@@ -722,7 +726,17 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
         ),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
+              // Cetak tiket PDF dengan tampilan sesuai contoh struk.
+              await _printBookingTicket(
+                kodeBooking: data.kodeBooking,
+                namaPoli: unitName,
+                tanggalPeriksa: data.tanggalPeriksa,
+                namaDokter: dokterName,
+                jamPraktek: data.jamBooking,
+                qrData: data.kodeBooking,
+              );
+
               Navigator.pop(dialogContext);
               Navigator.pop(context);
               context.read<BookingBloc>().add(ResetBookingEvent());
@@ -732,6 +746,115 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
         ],
       ),
     );
+  }
+
+  Future<void> _printBookingTicket({
+    required String kodeBooking,
+    required String namaPoli,
+    required String tanggalPeriksa,
+    required String namaDokter,
+    required String jamPraktek,
+    required String qrData,
+  }) async {
+    final pdf = pw.Document();
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: const PdfPageFormat(
+          72 * PdfPageFormat.mm,
+          100 * PdfPageFormat.mm,
+        ),
+        margin: const pw.EdgeInsets.all(12),
+        build: (context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            children: [
+              pw.Text(
+                'RSU SAKINA IDAMAN',
+                style: pw.TextStyle(
+                  fontSize: 11,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+              pw.Text(
+                'Jl. Nyi Tjondro Loekito No. 60',
+                style: const pw.TextStyle(fontSize: 8),
+              ),
+              pw.Text(
+                'Telp. (0274) 5018221, 5029090',
+                style: const pw.TextStyle(fontSize: 8),
+              ),
+              pw.Divider(thickness: 1),
+
+              pw.Row(
+                mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                children: [
+                  pw.Expanded(
+                    child: pw.Column(
+                      crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      children: [
+                        pw.Text(
+                          formatNama(namaPoli),
+                          style: pw.TextStyle(
+                            fontSize: 9,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                        ),
+                        pw.SizedBox(height: 2),
+                        pw.Text(
+                          formatNama(namaDokter),
+                          style: pw.TextStyle(
+                            fontSize: 10,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                        ),
+                        pw.SizedBox(height: 2),
+                        pw.Text(
+                          'Tanggal: $tanggalPeriksa',
+                          style: const pw.TextStyle(fontSize: 8),
+                        ),
+                        pw.Text(
+                          'Jam Praktek: $jamPraktek',
+                          style: const pw.TextStyle(fontSize: 8),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  pw.SizedBox(
+                    width: 50,
+                    height: 50,
+                    child: pw.BarcodeWidget(
+                      barcode: pw.Barcode.qrCode(),
+                      data: qrData,
+                    ),
+                  ),
+                ],
+              ),
+
+              pw.Divider(thickness: 1),
+
+              pw.Text('No. Booking', style: const pw.TextStyle(fontSize: 9)),
+              pw.Text(
+                kodeBooking,
+                style: pw.TextStyle(
+                  fontSize: 30,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+
+              pw.SizedBox(height: 8),
+              pw.Text(
+                'Tgl Daftar: $tanggalPeriksa',
+                style: const pw.TextStyle(fontSize: 8),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
   }
 
   Widget _buildInfoRow(String label, String value) {
