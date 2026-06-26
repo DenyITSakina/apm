@@ -1,6 +1,7 @@
 import 'package:apm/home/daftar_umum_bpjs_daftar.dart';
 import 'package:apm/widget/keypad_section.dart';
 import 'package:apm/dialog/top_toast.dart';
+import 'package:apm/func/navigation_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -62,11 +63,9 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
             TopToast.success(context, "Data Pasien ditemukan!");
 
             Future.delayed(const Duration(milliseconds: 800), () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => DaftarUmumBpjsDaftar(data: state.data),
-                ),
+              pushBackSwipePage(
+                context: context,
+                page: DaftarUmumBpjsDaftar(data: state.data),
               );
             });
           }
