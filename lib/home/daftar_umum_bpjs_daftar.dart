@@ -38,6 +38,7 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
   Map<String, dynamic>? pasienData;
   bool _isCheckingBpjs = false;
   PasienBpjsResponse? _bpjsCheckResult;
+  List<PoliModel> _poliList = [];
 
   bool get isFormValid {
     // Cek apakah semua field wajib terisi
@@ -68,6 +69,18 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
     tglController.text = DateTime.now().toString().split(" ")[0];
     context.read<AntrianApmBloc>().add(const FetchPoliListEvent());
     _extractPatientData();
+    _loadPoliList();
+  }
+
+  void _loadPoliList() async {
+    try {
+      final poliList = await BookingApiService.getPoliList();
+      setState(() {
+        _poliList = poliList;
+      });
+    } catch (e) {
+      print('Error loading poli list: $e');
+    }
   }
 
   void _extractPatientData() {
@@ -105,6 +118,83 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
   bool get hasBpjs {
     final noBpjs = getField(["no_bpjs", "bpjs", "no_peserta"]);
     return noBpjs != "-" && noBpjs.trim().isNotEmpty;
+  }
+
+  // Fungsi untuk mendapatkan poli berdasarkan kode BPJS
+  PoliModel? _getPoliByBpjsCode(String kodeBpjs) {
+    if (_poliList.isEmpty || kodeBpjs.isEmpty) return null;
+
+    try {
+      // Cari berdasarkan kode BPJS (case insensitive)
+      return _poliList.firstWhere(
+        (poli) => poli.kodeBpjs.toUpperCase() == kodeBpjs.toUpperCase(),
+        orElse: () => _poliList.firstWhere(
+          (poli) =>
+              poli.kodeBpjs.toUpperCase().contains(kodeBpjs.toUpperCase()),
+          orElse: () => _poliList.firstWhere(
+            (poli) => poli.nama.toUpperCase().contains(kodeBpjs.toUpperCase()),
+            orElse: () => throw Exception('Not found'),
+          ),
+        ),
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Fungsi untuk mendapatkan kode poli rujukan dari response
+  String _getKodePoliRujukan(PasienBpjsResponse result) {
+    try {
+      // Coba akses rujukan -> bpjs -> rujukan
+      final rujukan = result.rujukan;
+      if (rujukan == null) return '';
+
+      // Coba akses sebagai Map
+      if (rujukan is Map<String, dynamic>) {
+        final bpjs = rujukan['bpjs'];
+        if (bpjs is Map<String, dynamic>) {
+          final rujukanList = bpjs['rujukan'];
+          if (rujukanList is List && rujukanList.isNotEmpty) {
+            final firstRujukan = rujukanList[0];
+            if (firstRujukan is Map<String, dynamic>) {
+              final poliRujukan = firstRujukan['poliRujukan'];
+              if (poliRujukan is Map<String, dynamic>) {
+                return poliRujukan['kode']?.toString() ?? '';
+              }
+            }
+          }
+        }
+      }
+      return '';
+    } catch (e) {
+      print('Error getting kode poli rujukan: $e');
+      return '';
+    }
+  }
+
+  // Fungsi untuk mendapatkan data rujukan sebagai Map
+  Map<String, dynamic>? _getRujukanData(PasienBpjsResponse result) {
+    try {
+      final rujukan = result.rujukan;
+      if (rujukan == null) return null;
+
+      if (rujukan is Map<String, dynamic>) {
+        final bpjs = rujukan['bpjs'];
+        if (bpjs is Map<String, dynamic>) {
+          final rujukanList = bpjs['rujukan'];
+          if (rujukanList is List && rujukanList.isNotEmpty) {
+            final firstRujukan = rujukanList[0];
+            if (firstRujukan is Map<String, dynamic>) {
+              return firstRujukan;
+            }
+          }
+        }
+      }
+      return null;
+    } catch (e) {
+      print('Error getting rujukan data: $e');
+      return null;
+    }
   }
 
   // Fungsi untuk cek BPJS
@@ -162,11 +252,40 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
               pasienData!['jenis_kelamin'] =
                   result.peserta!.jenisKelamin == 'Perempuan' ? 'P' : 'L';
             }
-            // Update poli rujukan jika ada
-            if (result.peserta!.poliRujukan != null) {
-              pasienData!['poli_rujukan'] = result.peserta!.poliRujukan;
-            }
           });
+        }
+
+        // AUTO SELECT POLI dari data rujukan
+        final kodePoliRujukan = _getKodePoliRujukan(result);
+
+        if (kodePoliRujukan.isNotEmpty) {
+          final matchedPoli = _getPoliByBpjsCode(kodePoliRujukan);
+
+          if (matchedPoli != null) {
+            setState(() {
+              selectedPoli = matchedPoli;
+            });
+
+            // Auto fetch dokter untuk poli yang dipilih
+            if (selectedTipe != null) {
+              context.read<AntrianApmBloc>().add(
+                FetchDokterEvent(
+                  idLayanan: matchedPoli.id,
+                  groupJaminan: selectedTipe == "UMUM" ? 1 : 2,
+                ),
+              );
+            }
+
+            TopToast.success(
+              context,
+              "✅ Poli otomatis dipilih: ${matchedPoli.nama}",
+            );
+          } else {
+            TopToast.info(
+              context,
+              "⚠️ Poli rujukan ($kodePoliRujukan) tidak ditemukan di sistem",
+            );
+          }
         }
       } else {
         TopToast.error(context, result.message ?? "Nomor BPJS tidak valid");
@@ -197,6 +316,33 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
     final alamat = getField(["alamat", "alamat_domisili", "alamat_pasien"]);
     final tglLahir = getField(["tgl_lahir"]);
     final jenisKelamin = getField(["jenis_kelamin"]);
+
+    // Ambil data rujukan untuk ditampilkan
+    Map<String, dynamic>? rujukanData;
+    bool hasRujukan = false;
+    String kodePoliRujukan = '';
+    String namaPoliRujukan = '';
+    String diagnosa = '';
+    String keluhan = '';
+    String tglKunjungan = '';
+
+    if (_bpjsCheckResult != null && _bpjsCheckResult!.status) {
+      rujukanData = _getRujukanData(_bpjsCheckResult!);
+      if (rujukanData != null) {
+        hasRujukan = true;
+        final poliRujukan = rujukanData['poliRujukan'] as Map<String, dynamic>?;
+        if (poliRujukan != null) {
+          kodePoliRujukan = poliRujukan['kode']?.toString() ?? '-';
+          namaPoliRujukan = poliRujukan['nama']?.toString() ?? '-';
+        }
+        final diagnosaData = rujukanData['diagnosa'] as Map<String, dynamic>?;
+        if (diagnosaData != null) {
+          diagnosa = diagnosaData['nama']?.toString() ?? '-';
+        }
+        keluhan = rujukanData['keluhan']?.toString() ?? '-';
+        tglKunjungan = rujukanData['tglKunjungan']?.toString() ?? '-';
+      }
+    }
 
     return BlocListener<AntrianApmBloc, AntrianApmState>(
       listener: (context, state) {
@@ -642,29 +788,84 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                                                   .peserta!
                                                   .jenisKelamin!,
                                             ),
-                                          if (_bpjsCheckResult!
-                                                  .peserta!
-                                                  .poliRujukan !=
-                                              null)
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                  // Tampilkan data rujukan jika ada
+                                  if (_bpjsCheckResult!.status &&
+                                      hasRujukan) ...[
+                                    const Divider(color: Colors.grey),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      "📋 Data Rujukan",
+                                      style: GoogleFonts.poppins(
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 13,
+                                        color: Colors.blue.shade800,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Container(
+                                      padding: const EdgeInsets.all(8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.blue.shade50,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          _detailBpjs("Diagnosa", diagnosa),
+                                          _detailBpjs("Keluhan", keluhan),
+                                          _detailBpjs(
+                                            "Poli Rujukan",
+                                            "$kodePoliRujukan - $namaPoliRujukan",
+                                          ),
+                                          if (tglKunjungan != '-')
                                             _detailBpjs(
-                                              "Poli Rujukan",
-                                              _bpjsCheckResult!
-                                                  .peserta!
-                                                  .poliRujukan!,
-                                            ),
-                                          if (_bpjsCheckResult!
-                                                  .peserta!
-                                                  .noTelp !=
-                                              null)
-                                            _detailBpjs(
-                                              "No Telp",
-                                              _bpjsCheckResult!
-                                                  .peserta!
-                                                  .noTelp!,
+                                              "Tgl Kunjungan",
+                                              tglKunjungan,
                                             ),
                                         ],
                                       ),
                                     ),
+                                    // Tampilkan poli otomatis terpilih
+                                    if (selectedPoli != null) ...[
+                                      const SizedBox(height: 8),
+                                      Container(
+                                        padding: const EdgeInsets.all(8),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green.shade100,
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.green.shade300,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.check_circle,
+                                              color: Colors.green.shade700,
+                                              size: 16,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                "✅ Poli otomatis dipilih: ${selectedPoli!.nama}",
+                                                style: GoogleFonts.poppins(
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: Colors.green.shade800,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
                                   ],
                                 ],
                               ),
@@ -700,6 +901,7 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                   ),
                   const SizedBox(height: 20),
 
+                  // Dropdown Poli dengan status disabled jika sudah otomatis terpilih
                   BlocBuilder<AntrianApmBloc, AntrianApmState>(
                     builder: (_, state) {
                       List<PoliModel> poliList = [];
@@ -714,14 +916,25 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                         return const SizedBox();
                       }
 
+                      final isDisabled =
+                          selectedTipe == "BPJS" &&
+                          _bpjsCheckResult?.status == true &&
+                          selectedPoli != null &&
+                          hasRujukan;
+
                       return CustomDropdown<PoliModel>(
-                        label: "Pilih Poli",
+                        label: isDisabled
+                            ? "Poli (Otomatis dari Rujukan)"
+                            : "Pilih Poli",
                         value: poliList.contains(selectedPoli)
                             ? selectedPoli
                             : null,
                         items: poliList,
                         display: (p) => p.nama,
+                        enabled: !isDisabled,
                         onChanged: (poli) {
+                          if (isDisabled) return;
+
                           setState(() {
                             selectedPoli = poli;
                             selectedDokter = null;

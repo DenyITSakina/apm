@@ -52,6 +52,16 @@ class TopToast {
       icon: Icons.error_outline,
     );
   }
+
+  // Tambahkan metode info
+  static void info(BuildContext context, String message) {
+    show(
+      context,
+      message,
+      backgroundColor: Colors.blue.shade600,
+      icon: Icons.info_outline,
+    );
+  }
 }
 
 class _ToastWidget extends StatefulWidget {
