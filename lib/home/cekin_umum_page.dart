@@ -58,11 +58,11 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
                   children: [
                     // const SizedBox(height: 30),
                     // _buildStepIndicator(),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 12),
                     _inputDisplay(),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 12),
                     _buildKeypadAndAction(),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 12),
                   ],
                 ),
               ),
@@ -76,8 +76,8 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
 
   Widget _buildHeader() {
     return Container(
-      height: 180,
-      padding: const EdgeInsets.only(top: 50, left: 20, right: 20),
+      height: 140,
+      padding: const EdgeInsets.only(top: 12, left: 20, right: 20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [primaryColor, primaryColor.withBlue(150)],
@@ -221,7 +221,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
   }
 
   Widget _stepLine(bool active) => Container(
-    width: 40,
+    width: 30,
     height: 2,
     color: active ? secondaryColor : Colors.grey.shade300,
     margin: const EdgeInsets.only(bottom: 20),
@@ -231,10 +231,10 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
     final hasText = controller.text.isNotEmpty;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),

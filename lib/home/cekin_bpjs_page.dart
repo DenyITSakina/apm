@@ -59,12 +59,12 @@ class _CekinBpjsState extends State<CekinBpjs> {
                   children: [
                     // const SizedBox(height: 30),
                     // _buildStepIndicator(),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 12),
                     _inputDisplay(),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 12),
                     _buildKeypadAndAction(),
                     if (hasil != null) _resultInfo(),
-                    const SizedBox(height: 40),
+                    const SizedBox(height: 12),
                   ],
                 ),
               ),
@@ -78,8 +78,8 @@ class _CekinBpjsState extends State<CekinBpjs> {
 
   Widget _buildHeader() {
     return Container(
-      height: 180,
-      padding: const EdgeInsets.only(top: 50, left: 20, right: 20),
+      height: 140,
+      padding: const EdgeInsets.only(top: 12, left: 20, right: 20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [primaryColor, primaryColor.withBlue(150)],
@@ -220,7 +220,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
   }
 
   Widget _stepLine(bool active) => Container(
-    width: 40,
+    width: 30,
     height: 2,
     color: active ? secondaryColor : Colors.grey.shade300,
     margin: const EdgeInsets.only(bottom: 20),
@@ -230,10 +230,10 @@ class _CekinBpjsState extends State<CekinBpjs> {
     final hasText = controller.text.isNotEmpty;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -255,7 +255,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
               color: Colors.teal.shade900,
             ),
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 7),
           Container(
             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
             decoration: BoxDecoration(
@@ -268,8 +268,6 @@ class _CekinBpjsState extends State<CekinBpjs> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.credit_card_rounded, color: primaryColor),
-                const SizedBox(width: 12),
                 Text(
                   hasText ? controller.text : "Masukkan nomor...",
                   style: GoogleFonts.montserrat(
@@ -290,7 +288,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
-      height: screenHeight * 0.45,
+      height: screenHeight * 0.48,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
