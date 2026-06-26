@@ -1,6 +1,6 @@
-import 'package:apm/blog/booking_bloc.dart';
-import 'package:apm/blog/booking_event.dart';
-import 'package:apm/blog/booking_state.dart';
+import 'package:apm/blog/booking/booking_bloc.dart';
+import 'package:apm/blog/booking/booking_event.dart';
+import 'package:apm/blog/booking/booking_state.dart';
 import 'package:apm/widget/keypad_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

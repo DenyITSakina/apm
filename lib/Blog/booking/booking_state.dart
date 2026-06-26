@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
-import '../../models/booking_model.dart';
-import '../../models/pasien_model.dart';
-import '../../models/dokter_model.dart';
-import '../../models/poli_model.dart';
+import '../../../models/booking_model.dart';
+import '../../../models/pasien_model.dart';
+import '../../../models/dokter_model.dart';
+import '../../../models/poli_model.dart';
 
 enum BookingStatus { initial, loading, loaded, loadingDokter, success, error }
 

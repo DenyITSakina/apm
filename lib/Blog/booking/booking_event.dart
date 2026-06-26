@@ -1,6 +1,6 @@
 // booking_event.dart
 import 'package:equatable/equatable.dart';
-import '../../models/booking_model.dart';
+import '../../../models/booking_model.dart';
 
 abstract class BookingEvent extends Equatable {
   const BookingEvent();
