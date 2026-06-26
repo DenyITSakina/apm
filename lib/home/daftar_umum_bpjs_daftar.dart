@@ -1,3 +1,4 @@
+import 'package:apm/api/booking_api_service.dart';
 import 'package:apm/dialog/sukses.dart';
 import 'package:apm/dialog/top_toast.dart';
 import 'package:apm/func/open_aplikasi_bpjsDaftar.dart';
@@ -8,6 +9,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../theme/format_text.dart';
 import '../../models/poli_model.dart';
 import '../../models/dokter_model.dart';
+import '../../models/pasien_model.dart';
 import '../Blog/antrian_apm_bloc.dart';
 
 class DaftarUmumBpjsDaftar extends StatefulWidget {
@@ -24,11 +26,41 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
   PoliModel? selectedPoli;
   DokterModel? selectedDokter;
   final TextEditingController tglController = TextEditingController();
+  final TextEditingController bpjsController = TextEditingController();
+
+  // Untuk validasi input BPJS
+  bool get isBpjsValid {
+    if (selectedTipe != "BPJS") return true;
+    final nomor = bpjsController.text.trim();
+    return nomor.length == 13 && nomor.isNotEmpty;
+  }
 
   Map<String, dynamic>? pasienData;
+  bool _isCheckingBpjs = false;
+  PasienBpjsResponse? _bpjsCheckResult;
 
-  bool get isFormValid =>
-      selectedTipe != null && selectedDokter != null && selectedPoli != null;
+  bool get isFormValid {
+    // Cek apakah semua field wajib terisi
+    if (selectedTipe == null ||
+        selectedDokter == null ||
+        selectedPoli == null) {
+      return false;
+    }
+
+    // Jika BPJS, cek validasi nomor BPJS
+    if (selectedTipe == "BPJS") {
+      final nomor = bpjsController.text.trim();
+      if (nomor.length != 13 || nomor.isEmpty) {
+        return false;
+      }
+      // BPJS harus sudah dicek dan valid
+      if (_bpjsCheckResult == null || !_bpjsCheckResult!.status) {
+        return false;
+      }
+    }
+
+    return true;
+  }
 
   @override
   void initState() {
@@ -48,6 +80,14 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
     } else {
       pasienData = Map<String, dynamic>.from(rawData);
     }
+
+    // Isi otomatis nomor BPJS dari data pasien jika ada
+    if (pasienData != null) {
+      final noBpjs = getField(["no_bpjs", "bpjs", "no_peserta"]);
+      if (noBpjs != "-" && noBpjs.trim().isNotEmpty) {
+        bpjsController.text = noBpjs.trim();
+      }
+    }
   }
 
   String getField(List<String> keys) {
@@ -65,6 +105,78 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
   bool get hasBpjs {
     final noBpjs = getField(["no_bpjs", "bpjs", "no_peserta"]);
     return noBpjs != "-" && noBpjs.trim().isNotEmpty;
+  }
+
+  // Fungsi untuk cek BPJS
+  Future<void> _checkBpjs() async {
+    final nomor = bpjsController.text.trim();
+
+    if (nomor.isEmpty) {
+      TopToast.error(context, "Silakan masukkan nomor BPJS terlebih dahulu");
+      return;
+    }
+
+    if (nomor.length != 13) {
+      TopToast.error(context, "Nomor BPJS harus 13 digit");
+      return;
+    }
+
+    setState(() {
+      _isCheckingBpjs = true;
+      _bpjsCheckResult = null;
+    });
+
+    try {
+      final result = await BookingApiService.cekPasienBpjs(nomor);
+
+      setState(() {
+        _bpjsCheckResult = result;
+        _isCheckingBpjs = false;
+      });
+
+      if (result.status) {
+        // Ambil nama dari peserta
+        String namaPasien = result.peserta?.nama ?? 'Data ditemukan';
+        TopToast.success(context, "✅ BPJS Valid: $namaPasien");
+
+        // Jika ada data pasien dari BPJS, update data pasien
+        if (result.peserta != null && pasienData != null) {
+          setState(() {
+            // Update nama jika ada
+            if (result.peserta!.nama.isNotEmpty) {
+              pasienData!['nama'] = result.peserta!.nama;
+            }
+            // Update no BPJS
+            pasienData!['no_bpjs'] = nomor;
+            // Update NIK jika ada
+            if (result.peserta!.nik.isNotEmpty) {
+              pasienData!['nik'] = result.peserta!.nik;
+            }
+            // Update tgl lahir jika ada
+            if (result.peserta!.tglLahir != null &&
+                result.peserta!.tglLahir!.isNotEmpty) {
+              pasienData!['tgl_lahir'] = result.peserta!.tglLahir;
+            }
+            // Update jenis kelamin jika ada
+            if (result.peserta!.jenisKelamin != null) {
+              pasienData!['jenis_kelamin'] =
+                  result.peserta!.jenisKelamin == 'Perempuan' ? 'P' : 'L';
+            }
+            // Update poli rujukan jika ada
+            if (result.peserta!.poliRujukan != null) {
+              pasienData!['poli_rujukan'] = result.peserta!.poliRujukan;
+            }
+          });
+        }
+      } else {
+        TopToast.error(context, result.message ?? "Nomor BPJS tidak valid");
+      }
+    } catch (e) {
+      setState(() {
+        _isCheckingBpjs = false;
+      });
+      TopToast.error(context, "Gagal mengecek BPJS: $e");
+    }
   }
 
   @override
@@ -214,6 +326,8 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                               selectedTipe = "UMUM";
                               selectedPoli = null;
                               selectedDokter = null;
+                              _bpjsCheckResult = null;
+                              bpjsController.clear();
                             });
                           },
                           style: ElevatedButton.styleFrom(
@@ -248,6 +362,17 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                                     selectedTipe = "BPJS";
                                     selectedPoli = null;
                                     selectedDokter = null;
+                                    _bpjsCheckResult = null;
+                                    // Isi otomatis dari data pasien jika ada
+                                    final noBpjs = getField([
+                                      "no_bpjs",
+                                      "bpjs",
+                                      "no_peserta",
+                                    ]);
+                                    if (noBpjs != "-" &&
+                                        noBpjs.trim().isNotEmpty) {
+                                      bpjsController.text = noBpjs.trim();
+                                    }
                                   });
                                 }
                               : null,
@@ -275,6 +400,291 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                       ),
                     ],
                   ),
+
+                  // TAMPILKAN INPUTAN NOMOR BPJS KETIKA PILIH BPJS
+                  if (selectedTipe == "BPJS") ...[
+                    const SizedBox(height: 20),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.green.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.green.shade200,
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.assignment_ind,
+                                color: Colors.green.shade700,
+                                size: 20,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                "Nomor BPJS Pasien",
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                  color: Colors.green.shade800,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+
+                          // Row dengan input dan tombol cek
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: TextField(
+                                  controller: bpjsController,
+                                  keyboardType: TextInputType.number,
+                                  maxLength: 13,
+                                  decoration: InputDecoration(
+                                    hintText: "Masukkan 13 digit nomor BPJS",
+                                    fillColor: Colors.white,
+                                    filled: true,
+                                    counterText: "",
+                                    prefixIcon: Icon(
+                                      Icons.numbers,
+                                      color: Colors.green.shade700,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color:
+                                            _bpjsCheckResult != null &&
+                                                _bpjsCheckResult!.status
+                                            ? Colors.green.shade300
+                                            : _bpjsCheckResult != null &&
+                                                  !_bpjsCheckResult!.status
+                                            ? Colors.red.shade300
+                                            : Colors.grey.shade300,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color:
+                                            _bpjsCheckResult != null &&
+                                                _bpjsCheckResult!.status
+                                            ? Colors.green.shade700
+                                            : Colors.grey.shade700,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    errorText:
+                                        bpjsController.text.isNotEmpty &&
+                                            bpjsController.text.trim().length !=
+                                                13
+                                        ? "Nomor BPJS harus 13 digit"
+                                        : null,
+                                    errorStyle: GoogleFonts.poppins(
+                                      fontSize: 12,
+                                      color: Colors.red.shade700,
+                                    ),
+                                  ),
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _bpjsCheckResult = null;
+                                    });
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              // Tombol Cek BPJS
+                              ElevatedButton(
+                                onPressed: _isCheckingBpjs ? null : _checkBpjs,
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      _bpjsCheckResult != null &&
+                                          _bpjsCheckResult!.status
+                                      ? Colors.green
+                                      : Colors.blue,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 20,
+                                    vertical: 16,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  elevation: 2,
+                                ),
+                                child: _isCheckingBpjs
+                                    ? const SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
+                                      )
+                                    : Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            _bpjsCheckResult != null &&
+                                                    _bpjsCheckResult!.status
+                                                ? Icons.check_circle
+                                                : Icons.search,
+                                            size: 20,
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            _bpjsCheckResult != null &&
+                                                    _bpjsCheckResult!.status
+                                                ? "Valid"
+                                                : "Cek",
+                                            style: GoogleFonts.poppins(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                              ),
+                            ],
+                          ),
+
+                          // Tampilkan status validasi dengan detail data BPJS
+                          if (_bpjsCheckResult != null) ...[
+                            const SizedBox(height: 8),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: _bpjsCheckResult!.status
+                                    ? Colors.green.shade100
+                                    : Colors.red.shade100,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        _bpjsCheckResult!.status
+                                            ? Icons.check_circle
+                                            : Icons.error,
+                                        color: _bpjsCheckResult!.status
+                                            ? Colors.green.shade700
+                                            : Colors.red.shade700,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          _bpjsCheckResult!.status
+                                              ? "✅ BPJS Valid"
+                                              : "❌ ${_bpjsCheckResult!.message ?? 'Nomor BPJS tidak valid'}",
+                                          style: GoogleFonts.poppins(
+                                            fontSize: 13,
+                                            color: _bpjsCheckResult!.status
+                                                ? Colors.green.shade800
+                                                : Colors.red.shade800,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  // Tampilkan detail data peserta jika valid
+                                  if (_bpjsCheckResult!.status &&
+                                      _bpjsCheckResult!.peserta != null) ...[
+                                    const SizedBox(height: 8),
+                                    Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: Colors.white.withOpacity(0.6),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          _detailBpjs(
+                                            "Nama",
+                                            _bpjsCheckResult!.peserta!.nama,
+                                          ),
+                                          _detailBpjs(
+                                            "NIK",
+                                            _bpjsCheckResult!.peserta!.nik,
+                                          ),
+                                          if (_bpjsCheckResult!
+                                                  .peserta!
+                                                  .tglLahir !=
+                                              null)
+                                            _detailBpjs(
+                                              "Tgl Lahir",
+                                              _bpjsCheckResult!
+                                                  .peserta!
+                                                  .tglLahir!,
+                                            ),
+                                          if (_bpjsCheckResult!
+                                                  .peserta!
+                                                  .jenisKelamin !=
+                                              null)
+                                            _detailBpjs(
+                                              "Jenis Kelamin",
+                                              _bpjsCheckResult!
+                                                  .peserta!
+                                                  .jenisKelamin!,
+                                            ),
+                                          if (_bpjsCheckResult!
+                                                  .peserta!
+                                                  .poliRujukan !=
+                                              null)
+                                            _detailBpjs(
+                                              "Poli Rujukan",
+                                              _bpjsCheckResult!
+                                                  .peserta!
+                                                  .poliRujukan!,
+                                            ),
+                                          if (_bpjsCheckResult!
+                                                  .peserta!
+                                                  .noTelp !=
+                                              null)
+                                            _detailBpjs(
+                                              "No Telp",
+                                              _bpjsCheckResult!
+                                                  .peserta!
+                                                  .noTelp!,
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                          ],
+
+                          const SizedBox(height: 4),
+                          Text(
+                            "Contoh: 0001234567890",
+                            style: GoogleFonts.poppins(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
 
                   const SizedBox(height: 20),
 
@@ -402,6 +812,8 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                                       tglController.text = DateTime.now()
                                           .toString()
                                           .split(" ")[0];
+                                      bpjsController.clear();
+                                      _bpjsCheckResult = null;
                                     });
                                     context.read<AntrianApmBloc>().add(
                                       const FetchPoliListEvent(),
@@ -450,35 +862,17 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
 
                   const SizedBox(height: 35),
 
+                  // TOMBOL DAFTAR DENGAN VALIDASI
                   SizedBox(
                     width: double.infinity,
                     height: 60,
                     child: ElevatedButton(
-                      // onPressed: isFormValid
-                      //     ? () {
-                      //         context.read<AntrianApmBloc>().add(
-                      //           LanjutKePendaftaranEvent(
-                      //             rm: rm,
-                      //             jaminan: selectedTipe!,
-                      //             idJadwalDokter: selectedDokter!.id.toString(),
-                      //             idDokter: selectedDokter!.idDokter.toString(),
-                      //             idLayanan: selectedPoli!.id.toString(),
-                      //             jenisAntrian: "pendaftaran",
-                      //           ),
-                      //         );
-                      //       }
-                      //     : null,
                       onPressed: isFormValid
                           ? () async {
+                              // Validasi BPJS
                               if (selectedTipe == "BPJS") {
-                                final noBpjs = getField([
-                                  "no_bpjs",
-                                  "bpjs",
-                                  "no_peserta",
-                                ]);
-                                final nomor = noBpjs.trim();
-
-                                if (nomor == null || nomor.length != 13) {
+                                final nomor = bpjsController.text.trim();
+                                if (nomor.isEmpty || nomor.length != 13) {
                                   TopToast.error(
                                     context,
                                     "Nomor BPJS harus 13 digit!",
@@ -486,6 +880,17 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                                   return;
                                 }
 
+                                // Pastikan BPJS sudah dicek dan valid
+                                if (_bpjsCheckResult == null ||
+                                    !_bpjsCheckResult!.status) {
+                                  TopToast.error(
+                                    context,
+                                    "Silakan cek validitas nomor BPJS terlebih dahulu!",
+                                  );
+                                  return;
+                                }
+
+                                // Buka aplikasi BPJS
                                 final sukses = await openExeFromMap(context, {
                                   "nomor": nomor,
                                 });
@@ -501,8 +906,6 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                                 LanjutKePendaftaranEvent(
                                   rm: rm,
                                   jaminan: selectedTipe!,
-                                  // idJadwalDokter: selectedDokter.toString(),
-                                  // idJadwalDokter: selectedDokter!.idJadwal,
                                   idJadwalDokter:
                                       selectedDokter!.idJadwalDetail,
                                   idDokter: selectedDokter!.idDokter.toString(),
@@ -549,6 +952,41 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                       ),
                     ),
                   ),
+
+                  // Menampilkan pesan error jika form belum lengkap
+                  if (!isFormValid && selectedTipe != null) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Colors.orange.shade50,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.orange.shade200,
+                          width: 1,
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.warning_amber_rounded,
+                            color: Colors.orange.shade700,
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              _getValidationMessage(),
+                              style: GoogleFonts.poppins(
+                                fontSize: 13,
+                                color: Colors.orange.shade800,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ],
@@ -556,6 +994,31 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
         ),
       ),
     );
+  }
+
+  String _getValidationMessage() {
+    if (selectedTipe == null) {
+      return "Silakan pilih jenis pendaftaran terlebih dahulu";
+    }
+    if (selectedTipe == "BPJS") {
+      final nomor = bpjsController.text.trim();
+      if (nomor.isEmpty) {
+        return "Silakan masukkan nomor BPJS (13 digit)";
+      }
+      if (nomor.length != 13) {
+        return "Nomor BPJS harus terdiri dari 13 digit";
+      }
+      if (_bpjsCheckResult == null || !_bpjsCheckResult!.status) {
+        return "Silakan cek validitas nomor BPJS terlebih dahulu";
+      }
+    }
+    if (selectedPoli == null) {
+      return "Silakan pilih poli tujuan";
+    }
+    if (selectedDokter == null) {
+      return "Silakan pilih dokter yang tersedia";
+    }
+    return "";
   }
 
   Widget _detail(String label, String value) => Padding(
@@ -580,36 +1043,43 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
     ),
   );
 
+  // Widget untuk menampilkan detail BPJS
+  Widget _detailBpjs(String label, String value) => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 2),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 90,
+          child: Text(
+            "$label:",
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Colors.grey.shade700,
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.black87,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+
   InputDecoration _inputStyle(String label) => InputDecoration(
     labelText: label,
     fillColor: Colors.white,
     filled: true,
     labelStyle: GoogleFonts.poppins(),
     border: OutlineInputBorder(borderRadius: BorderRadius.circular(18)),
-  );
-
-  Widget _dropdown<T>({
-    required String label,
-    required T? value,
-    required List<T> items,
-    required ValueChanged<T?> onChanged,
-    String Function(T)? display,
-  }) => DropdownButtonFormField<T>(
-    key: ValueKey(selectedTipe),
-    value: value,
-    decoration: _inputStyle(label),
-    items: items
-        .map(
-          (e) => DropdownMenuItem(
-            value: e,
-            child: Text(
-              display != null ? display(e) : e.toString(),
-              style: GoogleFonts.poppins(fontSize: 17),
-            ),
-          ),
-        )
-        .toList(),
-    onChanged: onChanged,
   );
 }
 
