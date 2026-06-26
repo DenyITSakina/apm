@@ -372,7 +372,7 @@ class _DashboardApmState extends State<DashboardApm>
                             ),
                             const SizedBox(width: 8),
                             Text(
-                              "Jam Operasional: 24 Jam",
+                              "Jam Operasional: 24 Jam | UGD",
                               style: GoogleFonts.poppins(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
