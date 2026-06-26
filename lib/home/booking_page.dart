@@ -41,7 +41,7 @@ class _BookingPageState extends State<BookingPage> {
         title: Column(
           children: [
             const Text(
-              "Pendaftaran",
+              "Booking Pasien",
               style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
             ),
 
