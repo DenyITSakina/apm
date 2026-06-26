@@ -158,7 +158,7 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "🩺 DATA PASIEN",
+                        "DATA PASIEN",
                         style: GoogleFonts.oswald(
                           fontWeight: FontWeight.bold,
                           fontSize: 22,

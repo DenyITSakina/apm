@@ -632,7 +632,7 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
               Expanded(
                 flex: 2,
                 child: SizedBox(
-                  height: 650,
+                  height: 550,
                   child: KeypadSection(
                     onNumberPressed: _appendNumber,
                     onBackspacePressed: _backspace,

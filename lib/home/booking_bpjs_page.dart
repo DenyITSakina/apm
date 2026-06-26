@@ -398,7 +398,7 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                             labelText: 'No BPJS',
                             hintText: 'Masukkan No BPJS (13 digit)',
                             border: const OutlineInputBorder(),
-                            prefixIcon: const Icon(Icons.card_membership),
+                            // prefixIcon: const Icon(Icons.card_membership),
                             suffixIcon: state.pasienBpjs != null
                                 ? const Icon(
                                     Icons.check_circle,
@@ -442,7 +442,23 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.blue,
                                 foregroundColor: Colors.white,
+                                minimumSize: const Size(
+                                  double.infinity,
+                                  30,
+                                ), // Full width, good height
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 25,
+                                  vertical: 25,
+                                ),
+                                textStyle: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
+
                               child: state.status == BookingStatus.loading
                                   ? const SizedBox(
                                       height: 20,
@@ -775,7 +791,7 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
               Expanded(
                 flex: 2,
                 child: SizedBox(
-                  height: 650,
+                  height: 550,
                   child: KeypadSection(
                     onNumberPressed: _appendNumber,
                     onBackspacePressed: _backspace,
