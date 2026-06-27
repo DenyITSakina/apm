@@ -401,10 +401,10 @@ class _DashboardApmState extends State<DashboardApm>
                   Container(
                     width: double.infinity,
                     margin: const EdgeInsets.symmetric(
-                      horizontal: 16,
+                      horizontal: 18,
                       vertical: 8,
                     ),
-                    padding: const EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
                       color: Colors.white12.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(12),
@@ -525,7 +525,7 @@ class _DashboardApmState extends State<DashboardApm>
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  "Untuk daftar poli hari ini itu bagi pasien yang akan melaukukan pemeriksaan pada hari ini juga (sekarang)",
+                                  "Untuk daftar poli hari ini itu bagi pasien yang akan melaukukan pemeriksaan pada hari ini juga (sekarang). Tipe pasien lama atau pasien baru",
                                   style: GoogleFonts.poppins(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
@@ -553,7 +553,7 @@ class _DashboardApmState extends State<DashboardApm>
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  "Bawa surat rujukan untuk pasien BPJS",
+                                  "Untuk booking bisa untuk pemeriksaan dihari lain, tipe pasien lama dan pasien baru. Bawa surat rujukan untuk pasien BPJS",
                                   style: GoogleFonts.poppins(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
@@ -582,7 +582,7 @@ class _DashboardApmState extends State<DashboardApm>
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  "Untuk informasi lebih lanjut, hubungi call center 1500-123",
+                                  "Untuk informasi lebih lanjut, hubungi petugas",
                                   style: GoogleFonts.poppins(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
@@ -599,7 +599,7 @@ class _DashboardApmState extends State<DashboardApm>
 
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                     decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.9),
                       border: Border(
@@ -657,7 +657,7 @@ class _DashboardApmState extends State<DashboardApm>
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
-                            vertical: 8,
+                            vertical: 3,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white.withOpacity(0.9),
