@@ -1,4 +1,5 @@
 import 'package:apm/blog/booking/booking_bloc.dart';
+import 'package:apm/func/open_aplikasi_bpjsDaftar.dart';
 import 'package:apm/home/booking_page.dart';
 import 'package:apm/home/daftar_umum_bpjs_page.dart';
 
@@ -338,6 +339,55 @@ class _DashboardApmState extends State<DashboardApm>
                                   description: "Booking untuk pasien",
                                   onTap: () {
                                     _showBookingTypeDialog(context);
+                                  },
+                                ),
+                                _buildServiceCard(
+                                  title: "BPJS DAFTAR",
+                                  image: "assets/images/bpjs.png",
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFF1565C0),
+                                      Color(0xFF1E88E5),
+                                      Color(0xFF42A5F5),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  icon: Icons.fingerprint,
+                                  description: "Panggil After.exe otomatis",
+                                  onTap: () async {
+                                    const String nomorBpjs = '0005658974521';
+
+                                    if (nomorBpjs.isEmpty) {
+                                      if (!context.mounted) return;
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Nomor BPJS kosong. Isi nomor BPJS dulu di halaman pendaftaran.',
+                                          ),
+                                        ),
+                                      );
+                                      return;
+                                    }
+
+                                    final sukses = await openExeFromMap(
+                                      context,
+                                      {"nomor": nomorBpjs},
+                                    );
+
+                                    if (!sukses && context.mounted) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Gagal membuka aplikasi BPJS.',
+                                          ),
+                                        ),
+                                      );
+                                    }
                                   },
                                 ),
                               ],

@@ -79,7 +79,7 @@ ambil_foto_coords = (953, 394)
 popup_ok_coords = (745, 439)
 
 EXPECTED_COLOR = (240, 240, 240)
-FRISTA_PATH = r"C:\frista_v3.0.2\frista\Frista.exe"
+# FRISTA_PATH = r"C:\frista_v3.0.2\frista\Frista.exe"
 AFTER_PATH = r"C:\Program Files (x86)\BPJS Kesehatan\Aplikasi Sidik Jari BPJS Kesehatan\After.exe"
 
 # Utility
@@ -120,8 +120,13 @@ def run_after(username, password, no_peserta):
     """Jalankan After.exe dan input NIK / login otomatis"""
     print(">>> Menjalankan After.exe...")
     try:
-        proc = subprocess.Popen([AFTER_PATH])
-        time.sleep(3)
+        # Cegah dobel: jika After.exe sudah berjalan, jangan buka instance baru
+        if not is_process_running("After.exe"):
+            proc = subprocess.Popen([AFTER_PATH])
+            time.sleep(3)
+        else:
+            proc = None
+            time.sleep(2)
 
         # Fokus window After.exe
         pyautogui.click(username_coords)

@@ -112,7 +112,10 @@ Future<void> openExe(BuildContext context, String noPeserta) async {
   try {
     Process? process;
 
-    if (!await isSidikJariRunning()) {
+    // Cegah dobel: hanya buka After.exe jika belum berjalan
+    if (await isSidikJariRunning()) {
+      debugPrint("After.exe sudah berjalan -> tidak membuka instance lagi");
+    } else {
       process = await Process.start(
         exePath,
         [],
