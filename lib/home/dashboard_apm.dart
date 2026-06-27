@@ -406,7 +406,7 @@ class _DashboardApmState extends State<DashboardApm>
                     ),
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.green.withOpacity(0.08),
+                      color: Colors.white12.withOpacity(0.08),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: Colors.red.withOpacity(0.5),
