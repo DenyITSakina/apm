@@ -5,6 +5,8 @@ import 'dart:io';
 import 'package:apm/dialog/top_toast.dart';
 import 'package:ffi/ffi.dart';
 import 'package:flutter/material.dart';
+import 'package:apm/api/vclaim_api_service.dart';
+
 import 'package:win32/win32.dart';
 
 Future<bool> isSidikJariRunning() async {
@@ -127,7 +129,31 @@ Future<void> openExe(BuildContext context, String noPeserta) async {
     await Future.delayed(const Duration(seconds: 2));
     focusWindow("After.exe");
 
-    await sendAutoLogin(username: "cicifitria", password: "Idaman10!");
+    // await sendAutoLogin(username: "cicifitria", password: "Idaman10!");
+
+    final accounts = await VclaimApiService.getVclaimAccounts();
+    if (accounts.isEmpty) {
+      if (context.mounted) {
+        TopToast.error(
+          context,
+          "Data VClaim accounts kosong. Auto-login dihentikan.",
+        );
+      }
+      return;
+    }
+
+    final account = accounts.first;
+    if (account.username.isEmpty || account.password.isEmpty) {
+      if (context.mounted) {
+        TopToast.error(
+          context,
+          "Username/password VClaim tidak valid. Auto-login dihentikan.",
+        );
+      }
+      return;
+    }
+
+    await sendAutoLogin(username: account.username, password: account.password);
 
     await Future.delayed(const Duration(seconds: 2));
     await sendNoPeserta(context, noPeserta);
