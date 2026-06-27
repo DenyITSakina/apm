@@ -156,7 +156,7 @@ class _DashboardApmState extends State<DashboardApm>
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 5),
                             Text(
                               "Peduli Sesama, Sakina Pilihanku",
                               textAlign: TextAlign.center,
@@ -168,7 +168,7 @@ class _DashboardApmState extends State<DashboardApm>
                                 letterSpacing: 0.5,
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            const SizedBox(height: 5),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -190,7 +190,7 @@ class _DashboardApmState extends State<DashboardApm>
                     ),
                   ),
 
-                  const SizedBox(height: 30),
+                  const SizedBox(height: 12),
 
                   AnimatedBuilder(
                     animation: _pulseController,
@@ -210,7 +210,7 @@ class _DashboardApmState extends State<DashboardApm>
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: 5),
                             Text(
                               "Silahkan pilih layanan yang Anda butuhkan",
                               textAlign: TextAlign.center,
@@ -226,7 +226,7 @@ class _DashboardApmState extends State<DashboardApm>
                     },
                   ),
 
-                  const SizedBox(height: 35),
+                  const SizedBox(height: 12),
 
                   Expanded(
                     child: Padding(
@@ -341,60 +341,259 @@ class _DashboardApmState extends State<DashboardApm>
                                     _showBookingTypeDialog(context);
                                   },
                                 ),
-                                _buildServiceCard(
-                                  title: "BPJS DAFTAR",
-                                  image: "assets/images/bpjs.png",
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFF1565C0),
-                                      Color(0xFF1E88E5),
-                                      Color(0xFF42A5F5),
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  icon: Icons.fingerprint,
-                                  description: "Panggil After.exe otomatis",
-                                  onTap: () async {
-                                    const String nomorBpjs = '0005658974521';
+                                // _buildServiceCard(
+                                //   title: "BPJS DAFTAR",
+                                //   image: "assets/images/bpjs.png",
+                                //   gradient: const LinearGradient(
+                                //     colors: [
+                                //       Color(0xFF1565C0),
+                                //       Color(0xFF1E88E5),
+                                //       Color(0xFF42A5F5),
+                                //     ],
+                                //     begin: Alignment.topLeft,
+                                //     end: Alignment.bottomRight,
+                                //   ),
+                                //   icon: Icons.fingerprint,
+                                //   description: "Panggil After.exe otomatis",
+                                //   onTap: () async {
+                                //     const String nomorBpjs = '0005658974521';
 
-                                    if (nomorBpjs.isEmpty) {
-                                      if (!context.mounted) return;
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            'Nomor BPJS kosong. Isi nomor BPJS dulu di halaman pendaftaran.',
-                                          ),
-                                        ),
-                                      );
-                                      return;
-                                    }
+                                //     if (nomorBpjs.isEmpty) {
+                                //       if (!context.mounted) return;
+                                //       ScaffoldMessenger.of(
+                                //         context,
+                                //       ).showSnackBar(
+                                //         const SnackBar(
+                                //           content: Text(
+                                //             'Nomor BPJS kosong. Isi nomor BPJS dulu di halaman pendaftaran.',
+                                //           ),
+                                //         ),
+                                //       );
+                                //       return;
+                                //     }
 
-                                    final sukses = await openExeFromMap(
-                                      context,
-                                      {"nomor": nomorBpjs},
-                                    );
+                                //     final sukses = await openExeFromMap(
+                                //       context,
+                                //       {"nomor": nomorBpjs},
+                                //     );
 
-                                    if (!sukses && context.mounted) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            'Gagal membuka aplikasi BPJS.',
-                                          ),
-                                        ),
-                                      );
-                                    }
-                                  },
-                                ),
+                                //     if (!sukses && context.mounted) {
+                                //       ScaffoldMessenger.of(
+                                //         context,
+                                //       ).showSnackBar(
+                                //         const SnackBar(
+                                //           content: Text(
+                                //             'Gagal membuka aplikasi BPJS.',
+                                //           ),
+                                //         ),
+                                //       );
+                                //     }
+                                //   },
+                                // ),
                               ],
                             );
                           },
                         ),
                       ),
+                    ),
+                  ),
+
+                  Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.red.withOpacity(0.5),
+                        width: 2,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.red.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        // Header dengan icon peringatan
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.warning_amber_rounded,
+                              color: Colors.red.shade700,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              "PERHATIAN PENTING",
+                              style: GoogleFonts.poppins(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.red.shade700,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          ],
+                        ),
+
+                        const Divider(
+                          color: Colors.red,
+                          thickness: 1,
+                          height: 20,
+                        ),
+
+                        // Informasi 1
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.only(top: 2),
+                                child: Icon(
+                                  Icons.verified_user,
+                                  color: Colors.red.shade600,
+                                  size: 18,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  "Chek in BPJS jika sudah melakukan booking / Sudah ada no booking. tipe pasien BPJS",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.red.shade800,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Informasi 2
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.only(top: 2),
+                                child: Icon(
+                                  Icons.access_time,
+                                  color: Colors.red.shade600,
+                                  size: 18,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  "Chek in UMUM jika sudah melakukan booking / Sudah ada no booking. Tipe pasien UMUM",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.red.shade800,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Informasi 3
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.only(top: 2),
+                                child: Icon(
+                                  Icons.assignment,
+                                  color: Colors.red.shade600,
+                                  size: 18,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  "Untuk daftar poli hari ini itu bagi pasien yang akan melaukukan pemeriksaan pada hari ini juga (sekarang)",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.red.shade800,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.only(top: 2),
+                                child: Icon(
+                                  Icons.ac_unit_sharp,
+                                  color: Colors.red.shade600,
+                                  size: 18,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  "Bawa surat rujukan untuk pasien BPJS",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.red.shade800,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Informasi 4
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                margin: const EdgeInsets.only(top: 2),
+                                child: Icon(
+                                  Icons.phone_in_talk,
+                                  color: Colors.red.shade600,
+                                  size: 18,
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  "Untuk informasi lebih lanjut, hubungi call center 1500-123",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.red.shade800,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
 
@@ -630,6 +829,7 @@ class _DashboardApmState extends State<DashboardApm>
                                   Text(
                                     title,
                                     textAlign: TextAlign.center,
+                                    overflow: TextOverflow.ellipsis,
                                     style: GoogleFonts.montserrat(
                                       fontSize: titleSize,
                                       fontWeight: FontWeight.w800,
