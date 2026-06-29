@@ -504,7 +504,7 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                                           ),
                                         ),
                                         Text(
-                                          '• Jika nomor BPJS tidak ditemukan, silakan hubungi petugas pendaftaran / font office',
+                                          '• Jika nomor BPJS tidak ditemukan, silakan hubungi petugas pendaftaran / front office',
                                           style: TextStyle(
                                             fontSize: 13,
                                             color: Colors.blue.shade800,
