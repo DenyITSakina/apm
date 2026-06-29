@@ -469,7 +469,7 @@ class _DashboardApmState extends State<DashboardApm>
                                 child: Text(
                                   "CEK-IN BPJS: Gunakan layanan ini jika Anda sudah memiliki nomor booking dan terdaftar sebagai peserta BPJS Kesehatan.",
                                   style: GoogleFonts.poppins(
-                                    fontSize: 13,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.black,
                                   ),
@@ -498,7 +498,7 @@ class _DashboardApmState extends State<DashboardApm>
                                 child: Text(
                                   "CEK-IN UMUM: Gunakan layanan ini jika Anda sudah memiliki nomor booking dan merupakan pasien umum (non-BPJS).",
                                   style: GoogleFonts.poppins(
-                                    fontSize: 13,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.black,
                                   ),
@@ -527,7 +527,7 @@ class _DashboardApmState extends State<DashboardApm>
                                 child: Text(
                                   "DAFTAR POLI HARI INI: Khusus untuk pasien yang ingin melakukan pemeriksaan langsung pada hari ini, baik pasien lama maupun pasien baru.",
                                   style: GoogleFonts.poppins(
-                                    fontSize: 13,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.black,
                                   ),
@@ -556,7 +556,7 @@ class _DashboardApmState extends State<DashboardApm>
                                 child: Text(
                                   "BOOKING: Untuk pemeriksaan di hari lain, dapat digunakan oleh pasien lama maupun baru. Pasien BPJS wajib membawa surat rujukan.",
                                   style: GoogleFonts.poppins(
-                                    fontSize: 13,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.black,
                                   ),
@@ -585,7 +585,7 @@ class _DashboardApmState extends State<DashboardApm>
                                 child: Text(
                                   "Informasi lebih lanjut? Silakan hubungi petugas kami yang siap membantu Anda.",
                                   style: GoogleFonts.poppins(
-                                    fontSize: 13,
+                                    fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                     color: Colors.black,
                                   ),
