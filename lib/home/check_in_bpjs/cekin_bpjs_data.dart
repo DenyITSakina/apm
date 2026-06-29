@@ -243,18 +243,18 @@ class CekinBpjsDataPage extends StatelessWidget {
                         onTap: isLoadingPoli
                             ? null
                             : () async {
-                                final nomor = data.noIdentitas?.trim() ?? '';
+                                final nomor = data.noPeserta?.trim() ?? '';
                                 if (nomor.isEmpty) {
                                   TopToast.error(
                                     context,
-                                    "Nomor Nik tidak ditemukan!",
+                                    "Nomor tidak ditemukan!",
                                   );
                                   return;
                                 }
-                                if (nomor.length != 16) {
+                                if (nomor.length != 13) {
                                   TopToast.error(
                                     context,
-                                    "Nomor harus 16 digit!",
+                                    "Nomor harus 13 digit!",
                                   );
                                   return;
                                 }
