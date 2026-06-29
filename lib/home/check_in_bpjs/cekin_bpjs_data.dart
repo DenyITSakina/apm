@@ -259,7 +259,15 @@ class CekinBpjsDataPage extends StatelessWidget {
                                 final sukses = await openExeFromMap(context, {
                                   "nomor": nomor,
                                 });
-                                if (sukses == false) return;
+
+                                // Validasi sukses/gagal: jika gagal, tombol tidak lanjut ke poli.
+                                if (sukses != true) {
+                                  TopToast.error(
+                                    context,
+                                    "Gagal membuka aplikasi BPJS/menyiapkan input. Silakan coba lagi.",
+                                  );
+                                  return;
+                                }
 
                                 ConfirmationDialog.show(
                                   context,

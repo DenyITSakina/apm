@@ -450,7 +450,7 @@ class _DashboardApmState extends State<DashboardApm>
                           height: 20,
                         ),
 
-                        // Informasi 1
+                        // Informasi 1 - CEK-IN BPJS
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
@@ -460,18 +460,18 @@ class _DashboardApmState extends State<DashboardApm>
                                 margin: const EdgeInsets.only(top: 2),
                                 child: Icon(
                                   Icons.verified_user,
-                                  color: Colors.red.shade600,
+                                  color: Colors.green,
                                   size: 18,
                                 ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  "Chek in BPJS jika sudah melakukan booking / Sudah ada no booking. tipe pasien BPJS",
+                                  "CEK-IN BPJS: Gunakan layanan ini jika Anda sudah memiliki nomor booking dan terdaftar sebagai peserta BPJS Kesehatan.",
                                   style: GoogleFonts.poppins(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
-                                    color: Colors.red.shade800,
+                                    color: Colors.black,
                                   ),
                                 ),
                               ),
@@ -479,7 +479,7 @@ class _DashboardApmState extends State<DashboardApm>
                           ),
                         ),
 
-                        // Informasi 2
+                        // Informasi 2 - CEK-IN UMUM
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
@@ -489,18 +489,18 @@ class _DashboardApmState extends State<DashboardApm>
                                 margin: const EdgeInsets.only(top: 2),
                                 child: Icon(
                                   Icons.access_time,
-                                  color: Colors.red.shade600,
+                                  color: Colors.green,
                                   size: 18,
                                 ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  "Chek in UMUM jika sudah melakukan booking / Sudah ada no booking. Tipe pasien UMUM",
+                                  "CEK-IN UMUM: Gunakan layanan ini jika Anda sudah memiliki nomor booking dan merupakan pasien umum (non-BPJS).",
                                   style: GoogleFonts.poppins(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
-                                    color: Colors.red.shade800,
+                                    color: Colors.black,
                                   ),
                                 ),
                               ),
@@ -508,7 +508,7 @@ class _DashboardApmState extends State<DashboardApm>
                           ),
                         ),
 
-                        // Informasi 3
+                        // Informasi 3 - DAFTAR POLI HARI INI
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
@@ -518,18 +518,18 @@ class _DashboardApmState extends State<DashboardApm>
                                 margin: const EdgeInsets.only(top: 2),
                                 child: Icon(
                                   Icons.assignment,
-                                  color: Colors.red.shade600,
+                                  color: Colors.green,
                                   size: 18,
                                 ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  "Untuk daftar poli hari ini itu bagi pasien yang akan melaukukan pemeriksaan pada hari ini juga (sekarang). Tipe pasien lama atau pasien baru",
+                                  "DAFTAR POLI HARI INI: Khusus untuk pasien yang ingin melakukan pemeriksaan langsung pada hari ini, baik pasien lama maupun pasien baru.",
                                   style: GoogleFonts.poppins(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
-                                    color: Colors.red.shade800,
+                                    color: Colors.black,
                                   ),
                                 ),
                               ),
@@ -537,6 +537,7 @@ class _DashboardApmState extends State<DashboardApm>
                           ),
                         ),
 
+                        // Informasi 4 - BOOKING
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
@@ -545,19 +546,19 @@ class _DashboardApmState extends State<DashboardApm>
                               Container(
                                 margin: const EdgeInsets.only(top: 2),
                                 child: Icon(
-                                  Icons.ac_unit_sharp,
-                                  color: Colors.red.shade600,
+                                  Icons.calendar_today,
+                                  color: Colors.green,
                                   size: 18,
                                 ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  "Untuk booking bisa untuk pemeriksaan dihari lain, tipe pasien lama dan pasien baru. Bawa surat rujukan untuk pasien BPJS",
+                                  "BOOKING: Untuk pemeriksaan di hari lain, dapat digunakan oleh pasien lama maupun baru. Pasien BPJS wajib membawa surat rujukan.",
                                   style: GoogleFonts.poppins(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
-                                    color: Colors.red.shade800,
+                                    color: Colors.black,
                                   ),
                                 ),
                               ),
@@ -565,7 +566,7 @@ class _DashboardApmState extends State<DashboardApm>
                           ),
                         ),
 
-                        // Informasi 4
+                        // Informasi 5 - Hubungi Petugas
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
@@ -575,18 +576,18 @@ class _DashboardApmState extends State<DashboardApm>
                                 margin: const EdgeInsets.only(top: 2),
                                 child: Icon(
                                   Icons.phone_in_talk,
-                                  color: Colors.red.shade600,
+                                  color: Colors.green,
                                   size: 18,
                                 ),
                               ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
-                                  "Untuk informasi lebih lanjut, hubungi petugas",
+                                  "Informasi lebih lanjut? Silakan hubungi petugas kami yang siap membantu Anda.",
                                   style: GoogleFonts.poppins(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w500,
-                                    color: Colors.red.shade800,
+                                    color: Colors.black,
                                   ),
                                 ),
                               ),
@@ -596,7 +597,6 @@ class _DashboardApmState extends State<DashboardApm>
                       ],
                     ),
                   ),
-
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 10),
