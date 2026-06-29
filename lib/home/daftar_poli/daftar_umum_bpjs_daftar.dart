@@ -29,7 +29,6 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
   final TextEditingController tglController = TextEditingController();
   final TextEditingController bpjsController = TextEditingController();
 
-  // Untuk validasi input BPJS
   bool get isBpjsValid {
     if (selectedTipe != "BPJS") return true;
     final nomor = bpjsController.text.trim();
@@ -42,20 +41,17 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
   List<PoliModel> _poliList = [];
 
   bool get isFormValid {
-    // Cek apakah semua field wajib terisi
     if (selectedTipe == null ||
         selectedDokter == null ||
         selectedPoli == null) {
       return false;
     }
 
-    // Jika BPJS, cek validasi nomor BPJS
     if (selectedTipe == "BPJS") {
       final nomor = bpjsController.text.trim();
       if (nomor.length != 13 || nomor.isEmpty) {
         return false;
       }
-      // BPJS harus sudah dicek dan valid
       if (_bpjsCheckResult == null || !_bpjsCheckResult!.status) {
         return false;
       }

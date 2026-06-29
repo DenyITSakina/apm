@@ -64,6 +64,8 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
                     _inputDisplay(),
                     const SizedBox(height: 12),
                     _buildKeypadAndAction(),
+                    const SizedBox(height: 2),
+                    _info(),
                     const SizedBox(height: 12),
                   ],
                 ),
@@ -78,7 +80,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
 
   Widget _buildHeader() {
     return Container(
-      height: 140,
+      height: 125,
       padding: const EdgeInsets.only(top: 12, left: 20, right: 20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -150,7 +152,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
                     : "CHECK-IN BPJS",
                 style: GoogleFonts.plusJakartaSans(
                   color: Colors.white,
-                  fontSize: 36,
+                  fontSize: 28,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.5,
                   shadows: [
@@ -258,7 +260,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
               color: Colors.grey.shade600,
             ),
           ),
-          const SizedBox(height: 15),
+          const SizedBox(height: 12),
           Container(
             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
             decoration: BoxDecoration(
@@ -269,9 +271,9 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
               ),
             ),
             child: Text(
-              hasText ? controller.text : "MASUKKAN NOMOR...",
+              hasText ? controller.text : "Masukkan Nomor...",
               style: GoogleFonts.plusJakartaSans(
-                fontSize: 24,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.5,
                 color: hasText ? Colors.black87 : Colors.grey.shade400,
@@ -299,7 +301,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
               onClearPressed: _onClearPressed,
             ),
           ),
-          const SizedBox(width: 20),
+          const SizedBox(width: 12),
           Expanded(flex: 1, child: _buildSubmitButton()),
         ],
       ),
@@ -388,6 +390,97 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
           ),
         );
       },
+    );
+  }
+
+  Widget _info() {
+    final primary = const Color(0xFF2563EB);
+    final bg = const Color(0xFFF8FAFC);
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 10),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: primary.withOpacity(0.12)),
+        boxShadow: [
+          BoxShadow(
+            color: primary.withOpacity(0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: primary.withOpacity(0.10),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              Icons.assignment_turned_in_outlined,
+              color: primary,
+              size: 25,
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Check-in UMUM",
+                  style: GoogleFonts.poppins(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
+                  ),
+                ),
+
+                const SizedBox(height: 2),
+
+                Text(
+                  "Masukkan nomor RM, No Booking atau menggunakan NIK -> lalu klik cari data",
+                  style: GoogleFonts.poppins(
+                    fontSize: 13,
+                    height: 1.2,
+                    color: Colors.grey.shade700,
+                  ),
+                ),
+
+                const SizedBox(height: 5),
+
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: primary.withOpacity(0.08),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Text(
+                    "Pasien UMUM",
+                    style: GoogleFonts.poppins(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: primary,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 
