@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../../Blog/antrian_apm_bloc.dart';
 import '../../widget/keypad_section.dart';
+import '../../api/booking_api_service.dart';
 
 class CekinBpjs extends StatefulWidget {
   final String selectType;
@@ -389,18 +390,58 @@ class _CekinBpjsState extends State<CekinBpjs> {
             return;
           }
 
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            pushBackSwipePage(
-              context: context,
-              page: BlocProvider.value(
-                value: context.read<AntrianApmBloc>(),
-                child: CekinBpjsDataPage(
-                  noBpjs: controller.text,
-                  data: state.apmData,
-                  jenisPasien: widget.selectType,
+          final rawNoPeserta = state.apmData.noPeserta?.trim() ?? '';
+          // Pastikan hanya angka saja (hindari kasus ada spasi/karakter lain)
+          final noPeserta = rawNoPeserta.replaceAll(RegExp(r'\D'), '');
+          if (rawNoPeserta.isEmpty) {
+            TopToast.error(context, 'Nomor peserta BPJS tidak ditemukan');
+            setState(() => _isProcessing = false);
+            return;
+          }
+          if (noPeserta.isEmpty) {
+            TopToast.error(context, 'Nomor peserta BPJS tidak valid');
+            setState(() => _isProcessing = false);
+            return;
+          }
+          if (noPeserta.length != 13) {
+            TopToast.error(context, 'Nomor BPJS harus 13 digit');
+            setState(() => _isProcessing = false);
+            return;
+          }
+
+          // VALIDASI KE SERVER: cek pasien BPJS sebelum masuk ke halaman data
+          WidgetsBinding.instance.addPostFrameCallback((_) async {
+            try {
+              final resp = await BookingApiService.cekPasienBpjs(noPeserta);
+              if (!mounted) return;
+
+              if (resp.status != true) {
+                TopToast.error(
+                  context,
+                  resp.message.isNotEmpty
+                      ? resp.message
+                      : 'Data BPJS tidak valid',
+                );
+                setState(() => _isProcessing = false);
+                return;
+              }
+
+              pushBackSwipePage(
+                context: context,
+                page: BlocProvider.value(
+                  value: context.read<AntrianApmBloc>(),
+                  child: CekinBpjsDataPage(
+                    noBpjs: controller.text,
+                    data: state.apmData,
+                    jenisPasien: widget.selectType,
+                  ),
                 ),
-              ),
-            );
+              );
+            } catch (e) {
+              if (!mounted) return;
+              TopToast.error(context, 'Gagal validasi data BPJS: $e');
+              setState(() => _isProcessing = false);
+            }
           });
         } else if (state is AntrianApmBlocked) {
           TopToast.warning(context, state.message);
