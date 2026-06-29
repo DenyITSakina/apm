@@ -435,6 +435,88 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                                   },
                                 ),
 
+                                // INFO BANTUAN DI BAWAH INPUTAN
+                                if (state.pasienBpjs == null) ...[
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.blue.shade50,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: Colors.blue.shade200,
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          children: [
+                                            Icon(
+                                              Icons.info_outline,
+                                              color: Colors.blue.shade700,
+                                              size: 18,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Text(
+                                              'Informasi Penting!',
+                                              style: TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.blue.shade700,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          '• Silahkan klik dulu no inputan baru mengisi lewat keypad',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.blue.shade800,
+                                            height: 1.5,
+                                          ),
+                                        ),
+                                        Text(
+                                          '• Pastikan nomor BPJS yang Anda masukkan sudah benar (13 digit angka)',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.blue.shade800,
+                                            height: 1.5,
+                                          ),
+                                        ),
+                                        Text(
+                                          '• Klik tombol "Cek Data BPJS" untuk memverifikasi kevalidan nomor Anda',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.blue.shade800,
+                                            height: 1.5,
+                                          ),
+                                        ),
+                                        Text(
+                                          '• Data yang terverifikasi akan otomatis mengisi formulir pendaftaran',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.blue.shade800,
+                                            height: 1.5,
+                                          ),
+                                        ),
+                                        Text(
+                                          '• Jika nomor BPJS tidak ditemukan, silakan hubungi petugas pendaftaran',
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.blue.shade800,
+                                            height: 1.5,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 12),
+                                ],
+
                                 if (state.pasienBpjs == null)
                                   SizedBox(
                                     width: double.infinity,
