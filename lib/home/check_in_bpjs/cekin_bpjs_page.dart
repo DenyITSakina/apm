@@ -17,6 +17,60 @@ class CekinBpjs extends StatefulWidget {
 }
 
 class _CekinBpjsState extends State<CekinBpjs> {
+  String _formatJamPeriksa(String jamPraktikRaw) {
+    final s = jamPraktikRaw.trim();
+    if (s.isEmpty) return '-';
+
+    final normalized = s.replaceAll('–', '-').replaceAll('—', '-');
+    return normalized;
+  }
+
+  bool _isTimeInRange(TimeOfDay now, String jamPraktikRaw) {
+    final s = jamPraktikRaw.trim();
+
+    //  if (s.isEmpty) return true;
+
+    if (s.isEmpty || s.toLowerCase() == 'null') return false;
+
+    final reg = RegExp(
+      r'(\d{1,2})(?:[\.:](\d{1,2}))?\s*[-–—]\s*(\d{1,2})(?:[\.:](\d{1,2}))?',
+    );
+    final match = reg.firstMatch(s);
+    if (match == null) {
+      final singleReg = RegExp(r'^(\d{1,2})(?:[\.:](\d{1,2}))?$');
+      final m2 = singleReg.firstMatch(s);
+      if (m2 == null) return true;
+      final startH = int.parse(m2.group(1)!);
+      final startM = m2.group(2) != null
+          ? int.parse(m2.group(2)!.padRight(2, '0'))
+          : 0;
+      final nowMinutes = now.hour * 60 + now.minute;
+      final startMinutes = startH * 60 + startM;
+      return nowMinutes >= startMinutes;
+    }
+
+    int toHourMinute(int h, String? mStr) {
+      final m = (mStr == null || mStr.isEmpty)
+          ? 0
+          : int.parse(mStr.padRight(2, '0'));
+      return h * 60 + m;
+    }
+
+    final startH = int.parse(match.group(1)!);
+    final startMStr = match.group(2);
+    final endH = int.parse(match.group(3)!);
+    final endMStr = match.group(4);
+
+    final nowMinutes = now.hour * 60 + now.minute;
+    final startMinutes = toHourMinute(startH, startMStr);
+    final endMinutes = toHourMinute(endH, endMStr);
+
+    if (endMinutes >= startMinutes) {
+      return nowMinutes >= startMinutes && nowMinutes <= endMinutes;
+    }
+    return nowMinutes >= startMinutes || nowMinutes <= endMinutes;
+  }
+
   final TextEditingController controller = TextEditingController();
   bool _isProcessing = false;
   String? hasil;
@@ -323,6 +377,18 @@ class _CekinBpjsState extends State<CekinBpjs> {
         if (state is AntrianApmError) {
           TopToast.error(context, state.pesan);
         } else if (state is AntrianApmValidated) {
+          final jamPraktikRaw = state.apmData.jamPraktik.trim();
+          final jamPeriksaText = _formatJamPeriksa(jamPraktikRaw);
+
+          final now = TimeOfDay.now();
+          final canCheck = _isTimeInRange(now, jamPraktikRaw);
+
+          if (!canCheck) {
+            TopToast.warning(context, 'Jam periksa anda $jamPeriksaText');
+            setState(() => _isProcessing = false);
+            return;
+          }
+
           WidgetsBinding.instance.addPostFrameCallback((_) {
             pushBackSwipePage(
               context: context,

@@ -15,6 +15,8 @@ class ApmAntrianModel {
   final String idJadwalDokter;
   final String idLayanan;
   final String namaDokter;
+  final String namaPoli;
+  final String jamPraktik;
   final int statusBooking;
 
   // Constructor dengan default values
@@ -35,6 +37,8 @@ class ApmAntrianModel {
     this.idJadwalDokter = '',
     this.idLayanan = '',
     this.namaDokter = '',
+    this.namaPoli = '',
+    this.jamPraktik = '',
     this.statusBooking = 0,
   });
 
@@ -60,6 +64,8 @@ class ApmAntrianModel {
       idLayanan:
           _toString(data, 'id_unit') ?? _toString(data, 'id_layanan') ?? '',
       namaDokter: _toString(data, 'nama_dokter') ?? '',
+      namaPoli: _toString(data, 'nama_poli') ?? '',
+      jamPraktik: _toString(data, 'jam_praktik') ?? '',
       statusBooking: _toInt(data, 'status_booking') ?? 0,
     );
   }
@@ -96,7 +102,7 @@ class ApmAntrianModel {
   String _getStatusText() {
     switch (statusBooking) {
       case 0:
-        return 'Menunggu';
+        return 'Menunggu Chek In';
       case 1:
         return 'Check-in FO';
       case 2:

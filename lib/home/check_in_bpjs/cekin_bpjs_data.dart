@@ -161,6 +161,9 @@ class CekinBpjsDataPage extends StatelessWidget {
                 _buildInfoRow("No. Booking", data.noBooking ?? "-"),
                 _buildInfoRow("No. BPJS", data.noPeserta),
                 _buildInfoRow("No. Nik", data.noIdentitas),
+                _buildInfoRow("Nama Poli", data.namaPoli),
+                _buildInfoRow("Nama Dokter", data.namaDokter),
+
                 _buildInfoRow("Jenis Pasien", "BPJS"),
                 const SizedBox(height: 20),
                 // Container(
