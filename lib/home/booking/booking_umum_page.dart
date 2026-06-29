@@ -11,8 +11,8 @@ import 'package:printing/printing.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 
-import '../models/booking_model.dart';
-import '../theme/format_text.dart';
+import '../../models/booking_model.dart';
+import '../../theme/format_text.dart';
 
 class BookingUmumPage extends StatefulWidget {
   const BookingUmumPage({super.key});

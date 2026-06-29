@@ -1,12 +1,12 @@
 import 'package:apm/blog/booking/booking_bloc.dart';
 import 'package:apm/func/open_aplikasi_bpjsDaftar.dart';
-import 'package:apm/home/booking_page.dart';
-import 'package:apm/home/daftar_umum_bpjs_page.dart';
+import 'package:apm/home/booking/booking_page.dart';
+import 'package:apm/home/daftar_poli/daftar_umum_bpjs_page.dart';
 
 import '../Blog/antrian_apm_bloc.dart';
-import 'package:apm/home/cekin_bpjs_page.dart';
+import 'package:apm/home/check_in_bpjs/cekin_bpjs_page.dart';
 
-import 'package:apm/home/cekin_umum_page.dart';
+import 'package:apm/home/check_in_umum/cekin_umum_page.dart';
 import 'package:flutter/material.dart';
 import 'package:full_swipe_back_gesture/full_swipe_back_gesture.dart';
 import 'package:google_fonts/google_fonts.dart';

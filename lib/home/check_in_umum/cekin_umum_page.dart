@@ -1,110 +1,77 @@
-import 'package:apm/home/daftar_umum_bpjs_daftar.dart';
-import 'package:apm/widget/keypad_section.dart';
 import 'package:apm/dialog/top_toast.dart';
+import 'package:apm/home/check_in_umum/cekin_umum_data.dart';
 import 'package:apm/func/navigation_helpers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import '../Blog/blog_pendaftran.dart';
+import '../../Blog/antrian_apm_bloc.dart';
+import '../../widget/keypad_section.dart';
 
-class PendaftaranPoliPage extends StatefulWidget {
+class CekinUmumPage extends StatefulWidget {
   final String selectType;
-
-  const PendaftaranPoliPage({super.key, required this.selectType});
+  const CekinUmumPage({super.key, required this.selectType});
 
   @override
-  State<PendaftaranPoliPage> createState() => _PendaftaranPoliPageState();
+  State<CekinUmumPage> createState() => _CekinUmumPageState();
 }
 
-class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
-  final TextEditingController bpjsController = TextEditingController();
-  bool loading = false;
-  String? hasil;
-
+class _CekinUmumPageState extends State<CekinUmumPage> {
+  final TextEditingController controller = TextEditingController();
+  bool _isProcessing = false;
   final Color primaryColor = const Color(0xFF0D8AAE);
   final Color secondaryColor = const Color(0xFF0ABF68);
+
   final Color bgColor = const Color(0xFFF8FAFC);
 
-  void _addDigit(String number) {
-    if (bpjsController.text.length < 16) {
-      setState(() => bpjsController.text += number);
-    }
+  void _onNumberPressed(String val) => setState(() => controller.text += val);
+
+  void _onBackspacePressed() {
+    if (controller.text.isEmpty) return;
+    setState(
+      () => controller.text = controller.text.substring(
+        0,
+        controller.text.length - 1,
+      ),
+    );
   }
 
-  void _removeDigit() {
-    if (bpjsController.text.isNotEmpty) {
-      setState(() {
-        bpjsController.text = bpjsController.text.substring(
-          0,
-          bpjsController.text.length - 1,
-        );
-      });
-    }
-  }
+  void _onClearPressed() => setState(() => controller.clear());
 
-  void _clearText() => setState(() => bpjsController.clear());
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgColor,
-      body: BlocListener<CekinBloc, CekinState>(
-        listener: (context, state) {
-          if (state is CekinLoading) {
-            setState(() => loading = true);
-          }
-          if (state is CekinSuccess) {
-            setState(() {
-              loading = false;
-              hasil = "Data Pasien ditemukan!";
-            });
-
-            TopToast.success(context, "Data Pasien ditemukan!");
-
-            Future.delayed(const Duration(milliseconds: 800), () {
-              pushBackSwipePage(
-                context: context,
-                page: DaftarUmumBpjsDaftar(data: state.data),
-              );
-            });
-          }
-          if (state is CekinFailed) {
-            setState(() {
-              loading = false;
-              hasil = "Data Pasien Tidak Ditemukan. Silahkan Ke Loket.";
-            });
-
-            TopToast.error(
-              context,
-              "Data Pasien Tidak Ditemukan. Silahkan Ke Loket.",
-            );
-          }
-        },
-        child: Column(
-          children: [
-            _buildHeader(),
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 12),
-                      _inputDisplay(),
-                      const SizedBox(height: 12),
-                      _bodyKeypadWithButton(),
-                      if (hasil != null) _resultInfo(),
-                      const SizedBox(height: 12),
-                    ],
-                  ),
+      body: Column(
+        children: [
+          _buildHeader(),
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    // const SizedBox(height: 30),
+                    // _buildStepIndicator(),
+                    const SizedBox(height: 12),
+                    _inputDisplay(),
+                    const SizedBox(height: 12),
+                    _buildKeypadAndAction(),
+                    const SizedBox(height: 12),
+                  ],
                 ),
               ),
             ),
-            _footer(),
-          ],
-        ),
+          ),
+          _footer(),
+        ],
       ),
     );
   }
@@ -178,7 +145,9 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
               ),
 
               Text(
-                "PENDAFTARAN POLI",
+                widget.selectType.toUpperCase() == "UMUM"
+                    ? "CHECK-IN UMUM"
+                    : "CHECK-IN BPJS",
                 style: GoogleFonts.plusJakartaSans(
                   color: Colors.white,
                   fontSize: 36,
@@ -196,7 +165,7 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
 
               const SizedBox(height: 4),
               Text(
-                "Silakan masukkan data pendaftaran Anda",
+                "Silakan masukkan data Anda",
                 style: GoogleFonts.plusJakartaSans(
                   color: Colors.white.withOpacity(0.8),
                   fontSize: 12,
@@ -210,8 +179,58 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
     );
   }
 
+  Widget _buildStepIndicator() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _stepCircle("1", "Input", true),
+        _stepLine(true),
+        _stepCircle("2", "Verifikasi", false),
+        _stepLine(false),
+        _stepCircle("3", "Selesai", false),
+      ],
+    );
+  }
+
+  Widget _stepCircle(String num, String label, bool active) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: active ? secondaryColor : Colors.grey.shade300,
+            shape: BoxShape.circle,
+          ),
+          child: Text(
+            num,
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 10,
+            fontWeight: FontWeight.w600,
+            color: active ? secondaryColor : Colors.grey,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _stepLine(bool active) => Container(
+    width: 30,
+    height: 2,
+    color: active ? secondaryColor : Colors.grey.shade300,
+    margin: const EdgeInsets.only(bottom: 20),
+  );
+
   Widget _inputDisplay() {
-    final hasText = bpjsController.text.isNotEmpty;
+    final hasText = controller.text.isNotEmpty;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(12),
@@ -230,16 +249,16 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Text(
-            widget.selectType == "bpjs"
-                ? "NOMOR KARTU BPJS / NIK"
-                : "NOMOR REKAM MEDIS (NO RM)",
+            widget.selectType.toLowerCase() == "bpjs"
+                ? "NOMOR BPJS / NIK / RM / NO BOOKING"
+                : "NOMOR REKAM MEDIS / NIK / NO BOOKING",
             style: GoogleFonts.plusJakartaSans(
               fontSize: 13,
               fontWeight: FontWeight.w700,
               color: Colors.grey.shade600,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 15),
           Container(
             padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
             decoration: BoxDecoration(
@@ -250,11 +269,11 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
               ),
             ),
             child: Text(
-              hasText ? bpjsController.text : "0000 0000 0000",
+              hasText ? controller.text : "MASUKKAN NOMOR...",
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                letterSpacing: 2,
+                letterSpacing: 1.5,
                 color: hasText ? Colors.black87 : Colors.grey.shade400,
               ),
             ),
@@ -264,7 +283,7 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
     );
   }
 
-  Widget _bodyKeypadWithButton() {
+  Widget _buildKeypadAndAction() {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
@@ -275,9 +294,9 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
           Expanded(
             flex: 3,
             child: KeypadSection(
-              onNumberPressed: _addDigit,
-              onBackspacePressed: _removeDigit,
-              onClearPressed: _clearText,
+              onNumberPressed: _onNumberPressed,
+              onBackspacePressed: _onBackspacePressed,
+              onClearPressed: _onClearPressed,
             ),
           ),
           const SizedBox(width: 20),
@@ -288,114 +307,87 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
   }
 
   Widget _buildSubmitButton() {
-    final bool isEnabled = bpjsController.text.isNotEmpty && !loading;
+    return BlocConsumer<AntrianApmBloc, AntrianApmState>(
+      // Samakan listener dengan kode pertama
+      listenWhen: (previous, current) =>
+          current is AntrianApmError ||
+          current is AntrianApmValidated ||
+          current is AntrianApmBlocked,
+      listener: (context, state) {
+        _isProcessing = false;
+        if (state is AntrianApmError) {
+          TopToast.error(context, state.pesan);
+        } else if (state is AntrianApmValidated) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            pushBackSwipePage(
+              context: context,
+              page: BlocProvider.value(
+                value: context.read<AntrianApmBloc>(),
+                child: CekinUmumDataPage(
+                  noRm: controller.text,
+                  data: state.apmData,
+                  jenisPasien: widget.selectType,
+                ),
+              ),
+            );
+          });
+        } else if (state is AntrianApmBlocked) {
+          TopToast.warning(context, state.message);
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state is AntrianApmLoading || _isProcessing;
+        final bool isEnabled = controller.text.isNotEmpty && !isLoading;
 
-    return Material(
-      color: isEnabled ? secondaryColor : Colors.grey.shade300,
-      borderRadius: BorderRadius.circular(20),
-      elevation: isEnabled ? 8 : 0,
-      shadowColor: secondaryColor.withOpacity(0.5),
-      child: InkWell(
-        onTap: isEnabled
-            ? () {
-                final nomor = bpjsController.text.trim();
-
-                if (widget.selectType == "bpjs") {
-                  if (nomor.length != 13 && nomor.length != 16) {
-                    TopToast.warning(
-                      context,
-                      "Nomor BPJS harus 13 digit atau NIK 16 digit",
+        return Material(
+          color: isEnabled ? secondaryColor : Colors.grey.shade300,
+          borderRadius: BorderRadius.circular(20),
+          elevation: isEnabled ? 8 : 0,
+          shadowColor: secondaryColor.withOpacity(0.5),
+          child: InkWell(
+            onTap: isEnabled
+                ? () {
+                    setState(() => _isProcessing = true);
+                    context.read<AntrianApmBloc>().add(
+                      ValidateAntrianEvent(
+                        noAntrian: controller.text,
+                        jenisAntrian: widget.selectType.toLowerCase(),
+                      ),
                     );
-                    return;
                   }
-
-                  if (!RegExp(r'^[0-9]+$').hasMatch(nomor)) {
-                    TopToast.warning(
-                      context,
-                      "Nomor hanya boleh terdiri dari angka",
-                    );
-                    return;
-                  }
-                } else {
-                  if (nomor.isEmpty) {
-                    TopToast.warning(
-                      context,
-                      "Silakan masukkan nomor rekam medis",
-                    );
-                    return;
-                  }
-                }
-
-                context.read<CekinBloc>().add(
-                  CekNomorEvent(nomor: nomor, jenis: widget.selectType),
-                );
-              }
-            : null,
-        borderRadius: BorderRadius.circular(20),
-        child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              loading
-                  ? LoadingAnimationWidget.fourRotatingDots(
+                : null,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              padding: const EdgeInsets.symmetric(vertical: 20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  isLoading
+                      ? LoadingAnimationWidget.fourRotatingDots(
+                          color: Colors.white,
+                          size: 45,
+                        )
+                      : const Icon(
+                          Icons.search_rounded,
+                          size: 45,
+                          color: Colors.white,
+                        ),
+                  const SizedBox(height: 10),
+                  Text(
+                    "CARI DATA",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.plusJakartaSans(
                       color: Colors.white,
-                      size: 45,
-                    )
-                  : const Icon(
-                      Icons.arrow_forward_rounded,
-                      size: 40,
-                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
                     ),
-              const SizedBox(height: 10),
-              Text(
-                "LANJUT",
-                textAlign: TextAlign.center,
-                style: GoogleFonts.plusJakartaSans(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _resultInfo() {
-    final sukses = hasil!.contains("✔️") || hasil!.contains("ditemukan");
-    return Padding(
-      padding: const EdgeInsets.only(top: 20),
-      child: Container(
-        padding: const EdgeInsets.all(15),
-        decoration: BoxDecoration(
-          color: sukses ? Colors.green.shade50 : Colors.red.shade50,
-          borderRadius: BorderRadius.circular(15),
-          border: Border.all(
-            color: sukses ? Colors.green.shade200 : Colors.red.shade200,
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              sukses ? Icons.check_circle : Icons.error,
-              color: sukses ? Colors.green : Colors.red,
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                hasil!,
-                style: GoogleFonts.plusJakartaSans(
-                  color: sukses ? Colors.green.shade900 : Colors.red.shade900,
-                  fontWeight: FontWeight.w600,
-                ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -414,7 +406,7 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
           // Teks tengah
           Center(
             child: Text(
-              "RSU Sakina Idaman •  Pelayanan Pendaftaran Pasien Umum/BPJS",
+              "RSU Sakina Idaman • Pelayanan Umum",
               style: GoogleFonts.poppins(
                 fontSize: 13,
                 color: Colors.white,

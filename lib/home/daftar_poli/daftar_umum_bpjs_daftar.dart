@@ -7,11 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import '../../theme/format_text.dart';
-import '../../models/poli_model.dart';
-import '../../models/dokter_model.dart';
-import '../../models/pasien_model.dart';
-import '../Blog/antrian_apm_bloc.dart';
+import '../../../theme/format_text.dart';
+import '../../../models/poli_model.dart';
+import '../../../models/dokter_model.dart';
+import '../../../models/pasien_model.dart';
+import '../../Blog/antrian_apm_bloc.dart';
 
 class DaftarUmumBpjsDaftar extends StatefulWidget {
   final Map<String, dynamic> data;

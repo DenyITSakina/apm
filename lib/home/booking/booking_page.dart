@@ -1,8 +1,8 @@
 import 'package:apm/blog/booking/booking_bloc.dart';
 import 'package:apm/blog/booking/booking_event.dart';
 import 'package:apm/blog/booking/booking_state.dart';
-import 'package:apm/home/booking_bpjs_page.dart';
-import 'package:apm/home/booking_umum_page.dart';
+import 'package:apm/home/booking/booking_bpjs_page.dart';
+import 'package:apm/home/booking/booking_umum_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';

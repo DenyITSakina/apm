@@ -13,8 +13,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:apm/func/open_aplikasi_bpjsDaftar.dart';
 import 'package:apm/dialog/top_toast.dart';
 
-import '../models/booking_model.dart';
-import '../theme/format_text.dart';
+import '../../models/booking_model.dart';
+import '../../theme/format_text.dart';
 
 class BookingBpjsPage extends StatefulWidget {
   const BookingBpjsPage({Key? key}) : super(key: key);

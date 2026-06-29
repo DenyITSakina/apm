@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import '../dialog/konfirmasi.dart';
-import '../dialog/sukses.dart';
-import '../models/apm_antrian_model.dart';
+import '../../dialog/konfirmasi.dart';
+import '../../dialog/sukses.dart';
+import '../../models/apm_antrian_model.dart';
 
 class CekinBpjsDataPage extends StatelessWidget {
   final String noBpjs;

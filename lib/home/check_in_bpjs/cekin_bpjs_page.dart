@@ -1,12 +1,12 @@
 import 'package:apm/dialog/top_toast.dart';
-import 'package:apm/home/cekin_bpjs_data.dart';
+import 'package:apm/home/check_in_bpjs/cekin_bpjs_data.dart';
 import 'package:apm/func/navigation_helpers.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import '../Blog/antrian_apm_bloc.dart';
-import '../widget/keypad_section.dart';
+import '../../Blog/antrian_apm_bloc.dart';
+import '../../widget/keypad_section.dart';
 
 class CekinBpjs extends StatefulWidget {
   final String selectType;
