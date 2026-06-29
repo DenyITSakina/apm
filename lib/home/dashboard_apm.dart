@@ -738,7 +738,6 @@ class _DashboardApmState extends State<DashboardApm>
           scale: scale,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              // Lebar layout card (dipengaruhi parent Row/scroll)
               final maxW = constraints.maxWidth.isFinite
                   ? constraints.maxWidth
                   : MediaQuery.of(context).size.width;
@@ -747,8 +746,8 @@ class _DashboardApmState extends State<DashboardApm>
                   : (maxW < 700 ? 300.0 : 320.0);
 
               final w = cardWidth;
-              final circleSize = w * 0.41; // ~120 pada w~280
-              final pad = w * 0.085; // ~24 pada w~280
+              final circleSize = w * 0.41;
+              final pad = w * 0.085;
 
               final titleSize = (w * 0.075).clamp(18.0, 24.0);
               final descSize = (w * 0.045).clamp(12.0, 14.5);
@@ -784,8 +783,8 @@ class _DashboardApmState extends State<DashboardApm>
                         child: Stack(
                           children: [
                             Positioned(
-                              top: -20,
-                              right: -20,
+                              top: -15,
+                              right: -15,
                               child: Icon(
                                 icon,
                                 size: iconDecoSize,
