@@ -77,8 +77,8 @@ class CekinBpjsDataPage extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           child: Column(
             children: [
-              _logoHeader(),
-              const SizedBox(height: 20),
+              // _logoHeader(),
+              // const SizedBox(height: 20),
               _buildCardData(),
               const SizedBox(height: 30),
               _buildButtons(context),
@@ -135,7 +135,7 @@ class CekinBpjsDataPage extends StatelessWidget {
                 end: Alignment.bottomRight,
               ),
               borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(20),
+                top: Radius.circular(12),
               ),
             ),
             child: Text(
@@ -148,50 +148,37 @@ class CekinBpjsDataPage extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(12),
             child: Column(
               children: [
+                _buildInfoRow("Nama Pasien", formatNama(data.pasien)),
                 _buildInfoRow(
-                  Icons.person,
-                  "Nama Pasien",
-                  formatNama(data.pasien),
-                ),
-                _buildInfoRow(
-                  Icons.cake,
                   "Tanggal Lahir",
                   formatTglBlnTahun(data.tglLahir),
                 ),
-                _buildInfoRow(
-                  Icons.home,
-                  "Alamat",
-                  formatNama(data.alamatDomisili),
-                ),
-                _buildInfoRow(Icons.badge, "Nomor RM", data.rm ?? "-"),
-                _buildInfoRow(
-                  Icons.book_online,
-                  "No. Booking",
-                  data.noBooking ?? "-",
-                ),
-                _buildInfoRow(Icons.book_online, "No. BPJS", data.noPeserta),
-                _buildInfoRow(Icons.book_online, "No. Nik", data.noIdentitas),
-                _buildInfoRow(Icons.local_hospital, "Jenis Pasien", "BPJS"),
+                _buildInfoRow("Alamat", formatNama(data.alamatDomisili)),
+                _buildInfoRow("Nomor RM", data.rm ?? "-"),
+                _buildInfoRow("No. Booking", data.noBooking ?? "-"),
+                _buildInfoRow("No. BPJS", data.noPeserta),
+                _buildInfoRow("No. Nik", data.noIdentitas),
+                _buildInfoRow("Jenis Pasien", "BPJS"),
                 const SizedBox(height: 20),
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.teal.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    "Silahkan pilih POLI atau Loket untuk melanjutkan check-in.",
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.teal.shade900,
-                    ),
-                  ),
-                ),
+                // Container(
+                //   padding: const EdgeInsets.all(12),
+                //   decoration: BoxDecoration(
+                //     color: Colors.teal.shade50,
+                //     borderRadius: BorderRadius.circular(12),
+                //   ),
+                //   child: Text(
+                //     "Silahkan pilih POLI atau Loket untuk melanjutkan check-in.",
+                //     textAlign: TextAlign.center,
+                //     style: GoogleFonts.poppins(
+                //       fontSize: 14,
+                //       fontWeight: FontWeight.w500,
+                //       color: Colors.teal.shade900,
+                //     ),
+                //   ),
+                // ),
               ],
             ),
           ),
@@ -200,22 +187,21 @@ class CekinBpjsDataPage extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String title, String value) {
+  Widget _buildInfoRow(String title, String value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 22, color: Colors.teal.shade700),
-          const SizedBox(width: 12),
           Expanded(
-            flex: 3,
+            flex: 4,
             child: Text(
               "$title:",
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.w600,
-                fontSize: 17,
+                fontSize: 15,
                 color: Colors.teal.shade700,
+                height: 1.2,
               ),
             ),
           ),
@@ -225,9 +211,9 @@ class CekinBpjsDataPage extends StatelessWidget {
               value,
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.w500,
-                fontSize: 17,
+                fontSize: 15,
                 color: Colors.teal.shade900,
-                height: 1.4,
+                height: 1.2,
               ),
             ),
           ),
@@ -312,7 +298,7 @@ class CekinBpjsDataPage extends StatelessWidget {
                                     size: 15,
                                   )
                                 : Text(
-                                    "PILIH POLI",
+                                    "LANJUT PILIH KE POLI",
                                     style: GoogleFonts.oswald(
                                       fontSize: 20,
                                       fontWeight: FontWeight.w700,
@@ -361,7 +347,7 @@ class CekinBpjsDataPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        "Konsultasi dengan dokter",
+                        "Konsultasi dengan dokter / Langsung tunggu di Poli",
                         style: GoogleFonts.poppins(
                           fontSize: 10,
                           fontWeight: FontWeight.w500,
@@ -420,7 +406,7 @@ class CekinBpjsDataPage extends StatelessWidget {
                                     size: 15,
                                   )
                                 : Text(
-                                    "PILIH LOKET",
+                                    "PILIH KE LOKET",
                                     style: GoogleFonts.oswald(
                                       fontSize: 20,
                                       fontWeight: FontWeight.w700,
@@ -453,7 +439,7 @@ class CekinBpjsDataPage extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              "Untuk administrasi",
+                              "Administrasi & pendaftaran",
                               style: GoogleFonts.poppins(
                                 fontSize: 10,
                                 fontWeight: FontWeight.w500,
@@ -517,21 +503,20 @@ class CekinBpjsDataPage extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Informasi Pelayanan",
+                          "Informasi",
                           style: GoogleFonts.poppins(
-                            fontSize: 12,
+                            fontSize: 14,
                             fontWeight: FontWeight.w600,
                             color: Colors.amber.shade900,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          "• Untuk layanan POLI, pastikan nomor BPJS Anda valid (13 digit)\n"
-                          "• Nomor BPJS akan diverifikasi sebelum melanjutkan\n",
+                          "Pilih Poli langsung menuju poli yang di pilih lalu tunggu no antrian di panggil.\nPilih Loket jika ingin memerlukan bantuan silahkan menuju fo (front office).",
                           style: GoogleFonts.poppins(
-                            fontSize: 10,
+                            fontSize: 13,
                             color: Colors.amber.shade900,
-                            height: 1.5,
+                            height: 1.4,
                           ),
                         ),
                       ],

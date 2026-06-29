@@ -212,7 +212,7 @@ class CekinUmumDataPage extends StatelessWidget {
               children: [
                 ...infoItems.map((item) => _buildInfoRow(item)),
                 const SizedBox(height: 12),
-                _buildInfoNote(),
+                // _buildInfoNote(),
               ],
             ),
           ),
@@ -289,24 +289,24 @@ class CekinUmumDataPage extends StatelessWidget {
     return value.isEmpty ? '-' : value;
   }
 
-  Widget _buildInfoNote() {
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.teal.shade50,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        "Silahkan melanjutkan ke proses pemilihan poli atau loket untuk check-in.",
-        textAlign: TextAlign.center,
-        style: GoogleFonts.poppins(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: Colors.teal.shade900,
-        ),
-      ),
-    );
-  }
+  // Widget _buildInfoNote() {
+  //   return Container(
+  //     padding: const EdgeInsets.all(12),
+  //     decoration: BoxDecoration(
+  //       color: Colors.teal.shade50,
+  //       borderRadius: BorderRadius.circular(12),
+  //     ),
+  //     child: Text(
+  //       "Silahkan melanjutkan ke proses pemilihan poli atau loket untuk check-in.",
+  //       textAlign: TextAlign.center,
+  //       style: GoogleFonts.poppins(
+  //         fontSize: 14,
+  //         fontWeight: FontWeight.w500,
+  //         color: Colors.teal.shade900,
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildButtons(BuildContext context) {
     return BlocBuilder<AntrianApmBloc, AntrianApmState>(
@@ -374,7 +374,7 @@ class CekinUmumDataPage extends StatelessWidget {
                       size: 15,
                     )
                   : Text(
-                      "PILIH POLI",
+                      "LANJUT PILIH KE POLI",
                       style: GoogleFonts.oswald(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
@@ -443,7 +443,7 @@ class CekinUmumDataPage extends StatelessWidget {
                       size: 15,
                     )
                   : Text(
-                      "PILIH LOKET",
+                      "PILIH KE LOKET",
                       style: GoogleFonts.oswald(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
