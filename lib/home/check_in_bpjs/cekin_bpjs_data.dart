@@ -173,6 +173,7 @@ class CekinBpjsDataPage extends StatelessWidget {
                   data.noBooking ?? "-",
                 ),
                 _buildInfoRow(Icons.book_online, "No. BPJS", data.noPeserta),
+                _buildInfoRow(Icons.book_online, "No. Nik", data.noIdentitas),
                 _buildInfoRow(Icons.local_hospital, "Jenis Pasien", "BPJS"),
                 const SizedBox(height: 20),
                 Container(
@@ -253,18 +254,18 @@ class CekinBpjsDataPage extends StatelessWidget {
                         onTap: isLoadingPoli
                             ? null
                             : () async {
-                                final nomor = data.noPeserta?.trim() ?? '';
+                                final nomor = data.noIdentitas?.trim() ?? '';
                                 if (nomor.isEmpty) {
                                   TopToast.error(
                                     context,
-                                    "Nomor BPJS tidak ditemukan!",
+                                    "Nomor Nik tidak ditemukan!",
                                   );
                                   return;
                                 }
-                                if (nomor.length != 13) {
+                                if (nomor.length != 16) {
                                   TopToast.error(
                                     context,
-                                    "Nomor BPJS harus 13 digit!",
+                                    "Nomor harus 16 digit!",
                                   );
                                   return;
                                 }
