@@ -63,11 +63,11 @@ class CekinUmumDataPage extends StatelessWidget {
         backgroundColor: const Color(0xFFF5F9FA),
         appBar: _buildAppBar(context),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
-              _buildLogoHeader(),
-              const SizedBox(height: 20),
+              // _buildLogoHeader(),
+              // const SizedBox(height: 20),
               _buildCardData(),
               const SizedBox(height: 30),
               _buildButtons(context),
@@ -155,24 +155,23 @@ class CekinUmumDataPage extends StatelessWidget {
     );
   }
 
-  Widget _buildLogoHeader() {
-    return Center(
-      child: Column(
-        children: [
-          Image.asset('assets/images/logo_sakina.png', height: 80),
-          const SizedBox(height: 12),
-          Text(
-            "RSU Sakina Idaman",
-            style: GoogleFonts.montserrat(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.teal.shade900,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildLogoHeader() {
+  //   return Center(
+  //     child: Column(
+  //       children: [
+  //         Image.asset('assets/images/logo_sakina.png', height: 50),
+  //         Text(
+  //           "RSU Sakina Idaman",
+  //           style: GoogleFonts.montserrat(
+  //             fontSize: 20,
+  //             fontWeight: FontWeight.bold,
+  //             color: Colors.teal.shade900,
+  //           ),
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget _buildCardData() {
     final infoItems = [
@@ -208,11 +207,11 @@ class CekinUmumDataPage extends StatelessWidget {
         children: [
           _buildCardHeader(),
           Padding(
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(12),
             child: Column(
               children: [
                 ...infoItems.map((item) => _buildInfoRow(item)),
-                const SizedBox(height: 20),
+                const SizedBox(height: 12),
                 _buildInfoNote(),
               ],
             ),
@@ -235,17 +234,15 @@ class CekinUmumDataPage extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
       ),
       child: Row(
         children: [
-          const Icon(Icons.person_pin_rounded, size: 38, color: Colors.white),
-          const SizedBox(width: 12),
           Text(
             _title,
             style: GoogleFonts.oswald(
               fontSize: 20,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
           ),
@@ -260,26 +257,24 @@ class CekinUmumDataPage extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(item.icon, size: 22, color: Colors.teal.shade700),
-          const SizedBox(width: 12),
           Expanded(
-            flex: 3,
+            flex: 4,
             child: Text(
               "${item.label}:",
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.w600,
-                fontSize: 17,
+                fontSize: 14,
                 color: Colors.teal.shade700,
               ),
             ),
           ),
           Expanded(
-            flex: 25,
+            flex: 20,
             child: Text(
               _getDisplayValue(item.value),
               style: GoogleFonts.poppins(
                 fontWeight: FontWeight.w500,
-                fontSize: 17,
+                fontSize: 14,
                 color: Colors.teal.shade900,
                 height: 1.4,
               ),
@@ -296,7 +291,7 @@ class CekinUmumDataPage extends StatelessWidget {
 
   Widget _buildInfoNote() {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.teal.shade50,
         borderRadius: BorderRadius.circular(12),
@@ -305,7 +300,7 @@ class CekinUmumDataPage extends StatelessWidget {
         "Silahkan melanjutkan ke proses pemilihan poli atau loket untuk check-in.",
         textAlign: TextAlign.center,
         style: GoogleFonts.poppins(
-          fontSize: 16,
+          fontSize: 14,
           fontWeight: FontWeight.w500,
           color: Colors.teal.shade900,
         ),
@@ -324,7 +319,7 @@ class CekinUmumDataPage extends StatelessWidget {
             Row(
               children: [
                 Expanded(child: _buildPoliButton(context, isLoadingPoli)),
-                const SizedBox(width: 16),
+                const SizedBox(width: 12),
                 Expanded(child: _buildLoketButton(context, isLoadingLoket)),
               ],
             ),
@@ -487,9 +482,9 @@ class CekinUmumDataPage extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              "Pasien baru: Pilih LOKET terlebih dahulu untuk pendaftaran.\nPasien lama: Bisa langsung pilih POLI atau LOKET.",
+              "Pilih Poli langsung menuju poli yang di pilih lalu menunggu no antrian di panggil.\nPilih Loket jika ingin memerlukan bantuan silahkan menuju fo (front office)",
               style: GoogleFonts.poppins(
-                fontSize: 10,
+                fontSize: 12,
                 color: Colors.amber.shade900,
                 fontWeight: FontWeight.w500,
               ),

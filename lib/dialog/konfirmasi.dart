@@ -136,7 +136,7 @@ class _ConfirmationDialogState extends State<ConfirmationDialog>
                 Row(
                   children: [
                     _dialogButton(
-                      label: "❌ BATAL",
+                      label: "BATAL",
                       color: Colors.white,
                       fontColor: Colors.red.shade600,
                       fontSize: fontSize,
@@ -144,7 +144,7 @@ class _ConfirmationDialogState extends State<ConfirmationDialog>
                     ),
                     const SizedBox(width: 12),
                     _dialogButton(
-                      label: "LANJUT ✅",
+                      label: "LANJUT",
                       color: Colors.white,
                       fontColor: primaryColor,
                       fontSize: fontSize,

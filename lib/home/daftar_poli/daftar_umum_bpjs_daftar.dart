@@ -368,15 +368,15 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
           ),
         ),
         body: SingleChildScrollView(
-          padding: const EdgeInsets.all(22),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Info Pasien Card
               Container(
-                padding: const EdgeInsets.all(22),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(12),
                   gradient: LinearGradient(
                     colors: [Colors.teal.shade600, Colors.teal.shade300],
                   ),
@@ -389,7 +389,7 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                   ],
                 ),
                 child: DefaultTextStyle(
-                  style: GoogleFonts.poppins(color: Colors.white, fontSize: 16),
+                  style: GoogleFonts.poppins(color: Colors.white, fontSize: 14),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -421,8 +421,8 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
               Text(
                 "Form Pendaftaran",
                 style: GoogleFonts.oswald(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 25,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 7),
@@ -431,9 +431,9 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Pilih Jenis Pendaftaran (silahkan klik salah satu untuk melanjutkan pendaftaran)",
+                    "Pilih Jenis Pendaftaran (silahkan klik terlebih dahulu salah satu untuk melanjutkan pendaftaran)",
                     style: GoogleFonts.poppins(
-                      fontSize: 18,
+                      fontSize: 14,
                       fontWeight: FontWeight.normal,
                       color: Colors.black,
                     ),
@@ -1339,7 +1339,7 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         SizedBox(
-          width: 100,
+          width: 150,
           child: Text(
             "$label:",
             style: const TextStyle(fontWeight: FontWeight.w600),
