@@ -496,7 +496,7 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                                           ),
                                         ),
                                         Text(
-                                          '• Data yang terverifikasi akan otomatis mengisi formulir pendaftaran',
+                                          '• Data yang terverifikasi akan otomatis mengisi formulir booking',
                                           style: TextStyle(
                                             fontSize: 13,
                                             color: Colors.blue.shade800,
@@ -504,7 +504,7 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                                           ),
                                         ),
                                         Text(
-                                          '• Jika nomor BPJS tidak ditemukan, silakan hubungi petugas pendaftaran',
+                                          '• Jika nomor BPJS tidak ditemukan, silakan hubungi petugas pendaftaran / font office',
                                           style: TextStyle(
                                             fontSize: 13,
                                             color: Colors.blue.shade800,
