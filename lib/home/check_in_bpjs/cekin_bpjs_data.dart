@@ -241,182 +241,11 @@ class CekinBpjsDataPage extends StatelessWidget {
         final isLoadingPoli = state is AntrianApmLoading;
         final isLoadingLoket = state is AntrianApmPrinting;
 
-        // return Row(
-        //   children: [
-        //     // Expanded(
-        //     //   child: GestureDetector(
-        //     //     onTap: isLoadingPoli
-        //     //         ? null
-        //     //         : () {
-        //     //             ConfirmationDialog.show(
-        //     //               context,
-        //     //               title: "Menuju Poli",
-        //     //               message:
-        //     //                   "Anda yakin ingin melanjutkan ke pelayanan POLI?",
-        //     //               onConfirm: () {
-        //     //                 context.read<AntrianApmBloc>().add(
-        //     //                   LanjutKePoliEvent(
-        //     //                     noRm: data.rm,
-        //     //                     jenisAntrian: jenisPasien.toLowerCase(),
-        //     //                   ),
-        //     //                 );
-        //     //               },
-        //     //             );
-        //     //           },
-        //     //     child: Container(
-        //     //       padding: const EdgeInsets.symmetric(vertical: 24),
-        //     //       decoration: BoxDecoration(
-        //     //         gradient: const LinearGradient(
-        //     //           colors: [Color(0xFF0ABF68), Color(0xFF089E59)],
-        //     //         ),
-        //     //         borderRadius: BorderRadius.circular(14),
-        //     //         boxShadow: [
-        //     //           BoxShadow(
-        //     //             color: Colors.black.withOpacity(0.08),
-        //     //             blurRadius: 8,
-        //     //             offset: const Offset(0, 4),
-        //     //           ),
-        //     //         ],
-        //     //       ),
-        //     //       child: Center(
-        //     //         child: isLoadingPoli
-        //     //             ? const CircularProgressIndicator(color: Colors.white)
-        //     //             : Text(
-        //     //                 "PILIH POLI",
-        //     //                 style: GoogleFonts.oswald(
-        //     //                   fontSize: 20,
-        //     //                   fontWeight: FontWeight.w700,
-        //     //                   color: Colors.white,
-        //     //                   letterSpacing: 1,
-        //     //                 ),
-        //     //               ),
-        //     //       ),
-        //     //     ),
-        //     //   ),
-        //     // ),
-        //     Expanded(
-        //       child: GestureDetector(
-        //         onTap: isLoadingPoli
-        //             ? null
-        //             : () async {
-        //                 final nomor = data.noPeserta.trim();
-        //                 if (nomor == null || nomor.length != 13) {
-        //                   TopToast.error(context, "Nomor BPJS harus 13 digit!");
-        //                   return;
-        //                 }
-
-        //                 final sukses = await openExeFromMap(context, {
-        //                   "nomor": nomor,
-        //                 });
-        //                 if (sukses == false) return;
-        //                 ConfirmationDialog.show(
-        //                   context,
-        //                   title: "Menuju Poli",
-        //                   message:
-        //                       "Anda yakin ingin melanjutkan ke pelayanan POLI?",
-        //                   onConfirm: () {
-        //                     context.read<AntrianApmBloc>().add(
-        //                       LanjutKePoliEvent(
-        //                         noRm: data.rm,
-        //                         jenisAntrian: jenisPasien.toLowerCase(),
-        //                       ),
-        //                     );
-        //                   },
-        //                 );
-        //               },
-        //         child: Container(
-        //           padding: const EdgeInsets.symmetric(vertical: 24),
-        //           decoration: BoxDecoration(
-        //             gradient: const LinearGradient(
-        //               colors: [Color(0xFF0ABF68), Color(0xFF089E59)],
-        //             ),
-        //             borderRadius: BorderRadius.circular(14),
-        //             boxShadow: [
-        //               BoxShadow(
-        //                 color: Colors.black.withOpacity(0.08),
-        //                 blurRadius: 8,
-        //                 offset: const Offset(0, 4),
-        //               ),
-        //             ],
-        //           ),
-        //           child: Center(
-        //             child: isLoadingPoli
-        //                 ? const CircularProgressIndicator(color: Colors.white)
-        //                 : Text(
-        //                     "PILIH POLI",
-        //                     style: GoogleFonts.oswald(
-        //                       fontSize: 20,
-        //                       fontWeight: FontWeight.w700,
-        //                       color: Colors.white,
-        //                       letterSpacing: 1,
-        //                     ),
-        //                   ),
-        //           ),
-        //         ),
-        //       ),
-        //     ),
-
-        //     const SizedBox(width: 16),
-        //     Expanded(
-        //       child: GestureDetector(
-        //         onTap: isLoadingLoket
-        //             ? null
-        //             : () {
-        //                 ConfirmationDialog.show(
-        //                   context,
-        //                   title: "Menuju Loket",
-        //                   message:
-        //                       "Anda yakin ingin melanjutkan ke pelayanan LOKET?",
-        //                   onConfirm: () {
-        //                     context.read<AntrianApmBloc>().add(
-        //                       LanjutKeLoketEvent(
-        //                         apmData: data,
-        //                         jenisAntrian: jenisPasien.toLowerCase(),
-        //                         noBooking: data.noBooking ?? '',
-        //                       ),
-        //                     );
-        //                   },
-        //                 );
-        //               },
-        //         child: Container(
-        //           padding: const EdgeInsets.symmetric(vertical: 24),
-        //           decoration: BoxDecoration(
-        //             gradient: const LinearGradient(
-        //               colors: [Color(0xFF0D8AAE), Color(0xFF0ABF68)],
-        //             ),
-        //             borderRadius: BorderRadius.circular(14),
-        //             boxShadow: [
-        //               BoxShadow(
-        //                 color: Colors.black.withOpacity(0.08),
-        //                 blurRadius: 8,
-        //                 offset: const Offset(0, 4),
-        //               ),
-        //             ],
-        //           ),
-        //           child: Center(
-        //             child: isLoadingLoket
-        //                 ? const CircularProgressIndicator(color: Colors.white)
-        //                 : Text(
-        //                     "PILIH LOKET",
-        //                     style: GoogleFonts.oswald(
-        //                       fontSize: 20,
-        //                       fontWeight: FontWeight.w700,
-        //                       color: Colors.white,
-        //                       letterSpacing: 1,
-        //                     ),
-        //                   ),
-        //           ),
-        //         ),
-        //       ),
-        //     ),
-        //   ],
-        // );
         return Column(
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Tombol POLI (dengan validasi BPJS)
                 Expanded(
                   child: Column(
                     children: [
@@ -697,8 +526,7 @@ class CekinBpjsDataPage extends StatelessWidget {
                         const SizedBox(height: 4),
                         Text(
                           "• Untuk layanan POLI, pastikan nomor BPJS Anda valid (13 digit)\n"
-                          "• Nomor BPJS akan diverifikasi sebelum melanjutkan\n"
-                          "• Pilih LOKET untuk keperluan administrasi dan pendaftaran",
+                          "• Nomor BPJS akan diverifikasi sebelum melanjutkan\n",
                           style: GoogleFonts.poppins(
                             fontSize: 10,
                             color: Colors.amber.shade900,
