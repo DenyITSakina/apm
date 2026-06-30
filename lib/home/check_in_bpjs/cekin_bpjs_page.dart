@@ -8,6 +8,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../../Blog/antrian_apm_bloc.dart';
 import '../../widget/keypad_section.dart';
 import '../../api/booking_api_service.dart';
+import '../../models/apm_antrian_model.dart';
 
 class CekinBpjs extends StatefulWidget {
   final String selectType;
@@ -426,13 +427,27 @@ class _CekinBpjsState extends State<CekinBpjs> {
                 return;
               }
 
+              final peserta = resp.peserta;
+              final apmDataFromBpjs = ApmAntrianModel(
+                // rm: '',
+                pasien: peserta?.nama ?? '',
+                alamatDomisili: peserta?.alamat ?? '',
+                tglLahir: peserta?.tglLahir ?? '',
+                noPeserta: peserta?.noPeserta ?? noPeserta,
+                noIdentitas: peserta?.nik ?? '',
+                // namaPoli: peserta?.poliRujukan ?? '',
+                // Field ini tidak tersedia dari response cek-rujukan saat ini
+                // noBooking: '',
+                // namaDokter: '',
+              );
+
               pushBackSwipePage(
                 context: context,
                 page: BlocProvider.value(
                   value: context.read<AntrianApmBloc>(),
                   child: CekinBpjsDataPage(
-                    noBpjs: controller.text,
-                    data: state.apmData,
+                    noBpjs: noPeserta,
+                    data: apmDataFromBpjs,
                     jenisPasien: widget.selectType,
                   ),
                 ),
