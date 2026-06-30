@@ -392,7 +392,6 @@ class _CekinBpjsState extends State<CekinBpjs> {
           }
 
           final rawNoPeserta = state.apmData.noPeserta?.trim() ?? '';
-          // Pastikan hanya angka saja (hindari kasus ada spasi/karakter lain)
           final noPeserta = rawNoPeserta.replaceAll(RegExp(r'\D'), '');
           if (rawNoPeserta.isEmpty) {
             TopToast.error(context, 'Nomor peserta BPJS tidak ditemukan');

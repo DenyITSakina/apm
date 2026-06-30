@@ -75,12 +75,14 @@ class LanjutKePoliEvent extends AntrianApmEvent {
   final String? noBoking;
   final String? noRm;
   final String? noKtp;
+  final String? noPeserta;
   final String jenisAntrian;
 
   const LanjutKePoliEvent({
     this.noBoking,
     this.noRm,
     this.noKtp,
+    this.noPeserta,
     required this.jenisAntrian,
   });
 
@@ -554,7 +556,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     emit(const AntrianApmLoading());
 
     try {
-      final no = event.noBoking ?? event.noRm ?? event.noKtp ?? '';
+      final no = event.noPeserta ?? event.noRm ?? event.noKtp ?? '';
       if (no.isEmpty) {
         emit(const AntrianApmError('Nomor pasien tidak boleh kosong'));
         return;
