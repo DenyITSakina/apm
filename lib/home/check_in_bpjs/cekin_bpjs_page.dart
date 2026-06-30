@@ -429,16 +429,17 @@ class _CekinBpjsState extends State<CekinBpjs> {
 
               final peserta = resp.peserta;
               final apmDataFromBpjs = ApmAntrianModel(
-                // rm: '',
+                rm: state.apmData.rm,
                 pasien: peserta?.nama ?? '',
                 alamatDomisili: peserta?.alamat ?? '',
                 tglLahir: peserta?.tglLahir ?? '',
                 noPeserta: peserta?.noPeserta ?? noPeserta,
                 noIdentitas: peserta?.nik ?? '',
-                // namaPoli: peserta?.poliRujukan ?? '',
-                // Field ini tidak tersedia dari response cek-rujukan saat ini
-                // noBooking: '',
-                // namaDokter: '',
+                namaPoli: state.apmData.namaPoli,
+                // ambil dari ApmAntrianModel (hasil ValidateAntrianEvent)
+                noBooking: state.apmData.noBooking,
+                namaDokter: state.apmData.namaDokter,
+                // field lain tidak tersedia dari resp
               );
 
               pushBackSwipePage(
