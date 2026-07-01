@@ -460,7 +460,7 @@ class _DashboardApmState extends State<DashboardApm>
                                 margin: const EdgeInsets.only(top: 2),
                                 child: Icon(
                                   Icons.verified_user,
-                                  color: Colors.green,
+                                  color: Colors.teal,
                                   size: 18,
                                 ),
                               ),
@@ -489,7 +489,7 @@ class _DashboardApmState extends State<DashboardApm>
                                 margin: const EdgeInsets.only(top: 2),
                                 child: Icon(
                                   Icons.access_time,
-                                  color: Colors.green,
+                                  color: Colors.teal,
                                   size: 18,
                                 ),
                               ),
@@ -518,7 +518,7 @@ class _DashboardApmState extends State<DashboardApm>
                                 margin: const EdgeInsets.only(top: 2),
                                 child: Icon(
                                   Icons.assignment,
-                                  color: Colors.green,
+                                  color: Colors.teal,
                                   size: 18,
                                 ),
                               ),
@@ -547,7 +547,7 @@ class _DashboardApmState extends State<DashboardApm>
                                 margin: const EdgeInsets.only(top: 2),
                                 child: Icon(
                                   Icons.calendar_today,
-                                  color: Colors.green,
+                                  color: Colors.teal,
                                   size: 18,
                                 ),
                               ),
@@ -576,7 +576,7 @@ class _DashboardApmState extends State<DashboardApm>
                                 margin: const EdgeInsets.only(top: 2),
                                 child: Icon(
                                   Icons.phone_in_talk,
-                                  color: Colors.green,
+                                  color: Colors.teal,
                                   size: 18,
                                 ),
                               ),
