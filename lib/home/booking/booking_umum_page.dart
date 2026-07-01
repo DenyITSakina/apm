@@ -849,51 +849,234 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        title: const Row(
-          children: [
-            Icon(Icons.check_circle, color: Colors.green),
-            SizedBox(width: 8),
-            Text('Booking Berhasil'),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildInfoRow('No. Antrian', data.noAntrian),
-            _buildInfoRow('Kode Booking', data.kodeBooking),
-            _buildInfoRow(
-              'Nama Pasien',
-              data.namaPasien.isNotEmpty ? data.namaPasien : '-',
-            ),
-            _buildInfoRow('Tanggal Periksa', data.tanggalPeriksa),
-            _buildInfoRow('Unit', unitName),
-            _buildInfoRow('Dokter', dokterName),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () async {
-              // Cetak tiket PDF dengan tampilan sesuai contoh struk.
-              await _printBookingTicket(
-                kodeBooking: data.kodeBooking,
-                namaPoli: unitName,
-                tanggalPeriksa: data.tanggalPeriksa,
-                namaDokter: dokterName,
-                jamPraktek: data.jamBooking,
-                qrData: data.kodeBooking,
-              );
+      builder: (dialogContext) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        elevation: 0,
+        backgroundColor: Colors.transparent,
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: 5,
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Header dengan animasi
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Colors.green, Colors.greenAccent],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.green.withOpacity(0.4),
+                      blurRadius: 15,
+                      spreadRadius: 2,
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.check_circle_sharp,
+                  color: Colors.white,
+                  size: 50,
+                ),
+              ),
+              const SizedBox(height: 20),
 
-              Navigator.pop(dialogContext);
-              Navigator.pop(context);
-              context.read<BookingBloc>().add(ResetBookingEvent());
-            },
-            child: const Text('OK'),
+              // Title
+              const Text(
+                'Booking Berhasil!',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green,
+                  letterSpacing: 0.5,
+                ),
+              ),
+              const SizedBox(height: 8),
+
+              // Subtitle
+              const Text(
+                'Booking anda telah terkonfirmasi',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              const SizedBox(height: 24),
+
+              Container(
+                height: 2,
+                width: 60,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.green.shade300, Colors.green.shade700],
+                  ),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200, width: 1),
+                ),
+                child: Column(
+                  children: [
+                    _buildInfoRow(
+                      Icons.numbers,
+                      'No. Antrian',
+                      data.noAntrian,
+                      isHighlighted: true,
+                    ),
+                    _buildDivider(),
+                    _buildInfoRow(
+                      Icons.qr_code,
+                      'Kode Booking',
+                      data.kodeBooking,
+                      isHighlighted: true,
+                    ),
+                    _buildDivider(),
+                    _buildInfoRow(
+                      Icons.person,
+                      'Nama Pasien',
+                      data.namaPasien.isNotEmpty ? data.namaPasien : '-',
+                    ),
+                    _buildDivider(),
+                    _buildInfoRow(
+                      Icons.calendar_today,
+                      'Tanggal Periksa',
+                      data.tanggalPeriksa,
+                    ),
+                    _buildDivider(),
+                    _buildInfoRow(Icons.local_hospital, 'Unit', unitName),
+                    _buildDivider(),
+                    _buildInfoRow(Icons.medical_services, 'Dokter', dokterName),
+                    _buildDivider(),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Button
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await _printBookingTicket(
+                      kodeBooking: data.kodeBooking,
+                      namaPoli: unitName,
+                      tanggalPeriksa: data.tanggalPeriksa,
+                      namaDokter: dokterName,
+                      jamPraktek: data.jamBooking,
+                      qrData: data.kodeBooking,
+                    );
+
+                    Navigator.pop(dialogContext);
+                    Navigator.pop(context);
+                    context.read<BookingBloc>().add(ResetBookingEvent());
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    backgroundColor: Colors.green,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 3,
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.print, size: 20),
+                      SizedBox(width: 10),
+                      Text(
+                        'Cetak Tiket',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(
+    IconData icon,
+    String label,
+    String value, {
+    bool isHighlighted = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: isHighlighted
+                  ? Colors.green.shade50
+                  : Colors.grey.shade200,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              size: 20,
+              color: isHighlighted ? Colors.green : Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
+                color: isHighlighted ? Colors.green.shade700 : Colors.black87,
+              ),
+              textAlign: TextAlign.end,
+            ),
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildDivider() {
+    return Divider(height: 1, thickness: 1, color: Colors.grey.shade200);
   }
 
   Future<void> _printBookingTicket({
@@ -1003,24 +1186,5 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
     );
 
     await Printing.layoutPdf(onLayout: (format) async => pdf.save());
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 110,
-            child: Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ),
-          Expanded(child: Text(': $value')),
-        ],
-      ),
-    );
   }
 }
