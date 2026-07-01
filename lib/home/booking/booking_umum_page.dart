@@ -506,12 +506,17 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
                                           ? const Icon(Icons.keyboard)
                                           : null,
                                     ),
+                                    maxLength: 12,
+                                    keyboardType: TextInputType.number,
                                     validator: (v) {
                                       if (v == null || v.isEmpty) {
                                         return 'No HP wajib';
                                       }
                                       if (!RegExp(r'^[0-9]+$').hasMatch(v)) {
                                         return 'No HP harus berupa angka';
+                                      }
+                                      if (v.length > 12) {
+                                        return 'No HP maksimal 12 digit';
                                       }
                                       return null;
                                     },
@@ -849,132 +854,91 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => Dialog(
+      builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.3),
-                spreadRadius: 5,
-                blurRadius: 20,
-                offset: const Offset(0, 10),
+        elevation: 8,
+        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+        titlePadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        title: Column(
+          children: [
+            Text(
+              'Booking Berhasil!',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2E7D32),
+                letterSpacing: 0.5,
               ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Booking anda telah terkonfirmasi',
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Divider(height: 24, thickness: 1, color: Color(0xFFE8F5E9)),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFF1F8E9), Colors.white],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE8F5E9), width: 1),
+              ),
+              child: Column(
+                children: [
+                  _buildInfoRow(
+                    Icons.numbers,
+                    'No. Antrian',
+                    data.noAntrian,
+                    isHighlighted: true,
+                  ),
+                  _buildDivider(),
+                  _buildInfoRow(
+                    Icons.qr_code_2,
+                    'Kode Booking',
+                    data.kodeBooking,
+                    isHighlighted: true,
+                  ),
+                  _buildDivider(),
+                  _buildInfoRow(
+                    Icons.person,
+                    'Nama Pasien',
+                    data.namaPasien.isNotEmpty ? data.namaPasien : '-',
+                  ),
+                  _buildDivider(),
+                  _buildInfoRow(
+                    Icons.calendar_today,
+                    'Tanggal Periksa',
+                    data.tanggalPeriksa,
+                  ),
+                  _buildDivider(),
+                  _buildInfoRow(Icons.local_hospital, 'Unit', unitName),
+                  _buildDivider(),
+                  _buildInfoRow(Icons.medical_services, 'Dokter', dokterName),
+                  _buildDivider(),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          Row(
             children: [
-              // Header dengan animasi
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    colors: [Colors.green, Colors.greenAccent],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.green.withOpacity(0.4),
-                      blurRadius: 15,
-                      spreadRadius: 2,
-                    ),
-                  ],
-                ),
-                child: const Icon(
-                  Icons.check_circle_sharp,
-                  color: Colors.white,
-                  size: 50,
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Title
-              const Text(
-                'Booking Berhasil!',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              const SizedBox(height: 8),
-
-              // Subtitle
-              const Text(
-                'Booking anda telah terkonfirmasi',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
-              ),
-              const SizedBox(height: 24),
-
-              Container(
-                height: 2,
-                width: 60,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [Colors.green.shade300, Colors.green.shade700],
-                  ),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade200, width: 1),
-                ),
-                child: Column(
-                  children: [
-                    _buildInfoRow(
-                      Icons.numbers,
-                      'No. Antrian',
-                      data.noAntrian,
-                      isHighlighted: true,
-                    ),
-                    _buildDivider(),
-                    _buildInfoRow(
-                      Icons.qr_code,
-                      'Kode Booking',
-                      data.kodeBooking,
-                      isHighlighted: true,
-                    ),
-                    _buildDivider(),
-                    _buildInfoRow(
-                      Icons.person,
-                      'Nama Pasien',
-                      data.namaPasien.isNotEmpty ? data.namaPasien : '-',
-                    ),
-                    _buildDivider(),
-                    _buildInfoRow(
-                      Icons.calendar_today,
-                      'Tanggal Periksa',
-                      data.tanggalPeriksa,
-                    ),
-                    _buildDivider(),
-                    _buildInfoRow(Icons.local_hospital, 'Unit', unitName),
-                    _buildDivider(),
-                    _buildInfoRow(Icons.medical_services, 'Dokter', dokterName),
-                    _buildDivider(),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 20),
-
-              // Button
-              SizedBox(
-                width: double.infinity,
+              Expanded(
+                flex: 4,
                 child: ElevatedButton(
                   onPressed: () async {
                     await _printBookingTicket(
@@ -991,23 +955,23 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
                     context.read<BookingBloc>().add(ResetBookingEvent());
                   },
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 20),
-                    backgroundColor: Colors.green,
+                    backgroundColor: const Color(0xFF43A047),
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    elevation: 3,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    elevation: 2,
                   ),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.print, size: 20),
-                      SizedBox(width: 10),
+                      Icon(Icons.print, size: 18),
+                      SizedBox(width: 8),
                       Text(
                         'Cetak Tiket',
                         style: TextStyle(
-                          fontSize: 16,
+                          fontSize: 14,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -1017,7 +981,7 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }
@@ -1029,21 +993,23 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
     bool isHighlighted = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               color: isHighlighted
-                  ? Colors.green.shade50
-                  : Colors.grey.shade200,
+                  ? const Color(0xFFE8F5E9)
+                  : const Color(0xFFF5F5F5),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
               icon,
-              size: 20,
-              color: isHighlighted ? Colors.green : Colors.grey.shade600,
+              size: 18,
+              color: isHighlighted
+                  ? const Color(0xFF43A047)
+                  : Colors.grey.shade600,
             ),
           ),
           const SizedBox(width: 12),
@@ -1052,7 +1018,7 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
             child: Text(
               label,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 color: Colors.grey.shade600,
                 fontWeight: FontWeight.w500,
               ),
@@ -1063,9 +1029,9 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
             child: Text(
               value,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
-                color: isHighlighted ? Colors.green.shade700 : Colors.black87,
+                color: isHighlighted ? const Color(0xFF2E7D32) : Colors.black87,
               ),
               textAlign: TextAlign.end,
             ),

@@ -391,7 +391,7 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
                       !_isDataLoaded) {
                     setState(() {
                       _isDataLoaded = true;
-                      _noBpjsController.clear();
+                      // _noBpjsController.clear();
                     });
 
                     final kodePoliRujukan = state.pasienBpjs!.kodePoliRujukan;
@@ -1259,49 +1259,199 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
       context: context,
       barrierDismissible: false,
       builder: (dialogContext) => AlertDialog(
-        title: const Row(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        elevation: 8,
+        contentPadding: const EdgeInsets.fromLTRB(24, 20, 24, 16),
+        titlePadding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        title: Column(
           children: [
-            Icon(Icons.check_circle, color: Colors.green),
-            SizedBox(width: 8),
-            Text('Booking Berhasil'),
+            Text(
+              'Booking Berhasil!',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2E7D32),
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Booking anda telah terkonfirmasi',
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoRow('No. Antrian', data.noAntrian),
-            _buildInfoRow('Kode Booking', data.kodeBooking),
-            _buildInfoRow(
-              'Nama Pasien',
-              data.namaPasien.isNotEmpty ? data.namaPasien : '-',
+            Divider(height: 24, thickness: 1, color: Color(0xFFE8F5E9)),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFF1F8E9), Colors.white],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE8F5E9), width: 1),
+              ),
+              child: Column(
+                children: [
+                  _buildInfoRow(
+                    Icons.numbers,
+                    'No. Antrian',
+                    data.noAntrian,
+                    isHighlighted: true,
+                  ),
+                  _buildDivider(),
+                  _buildInfoRow(
+                    Icons.qr_code_2,
+                    'Kode Booking',
+                    data.kodeBooking,
+                    isHighlighted: true,
+                  ),
+                  _buildDivider(),
+                  _buildInfoRow(
+                    Icons.person,
+                    'Nama Pasien',
+                    data.namaPasien.isNotEmpty ? data.namaPasien : '-',
+                  ),
+                  _buildDivider(),
+                  _buildInfoRow(
+                    Icons.calendar_today,
+                    'Tanggal Periksa',
+                    data.tanggalPeriksa,
+                  ),
+                  _buildDivider(),
+                  _buildInfoRow(Icons.local_hospital, 'Unit', unitName),
+                  _buildDivider(),
+                  _buildInfoRow(Icons.medical_services, 'Dokter', dokterName),
+                  _buildDivider(),
+                  // _buildInfoRow(
+                  //   Icons.access_time,
+                  //   'Jam Praktek',
+                  //   data.jamBooking,
+                  // ),
+                ],
+              ),
             ),
-            _buildInfoRow('Tanggal Periksa', data.tanggalPeriksa),
-            _buildInfoRow('Unit', unitName),
-            _buildInfoRow('Dokter', dokterName),
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () async {
-              await _printBookingTicket(
-                kodeBooking: data.kodeBooking,
-                namaPoli: unitName,
-                tanggalPeriksa: data.tanggalPeriksa,
-                namaDokter: dokterName,
-                jamPraktek: data.jamBooking,
-                qrData: data.kodeBooking,
-              );
+          Row(
+            children: [
+              Expanded(
+                flex: 3,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    await _printBookingTicket(
+                      kodeBooking: data.kodeBooking,
+                      namaPoli: unitName,
+                      tanggalPeriksa: data.tanggalPeriksa,
+                      namaDokter: dokterName,
+                      jamPraktek: data.jamBooking,
+                      qrData: data.kodeBooking,
+                    );
 
-              Navigator.pop(dialogContext);
-              Navigator.pop(context);
-              context.read<BookingBloc>().add(ResetBookingEvent());
-            },
-            child: const Text('OK'),
+                    Navigator.pop(dialogContext);
+                    Navigator.pop(context);
+                    context.read<BookingBloc>().add(ResetBookingEvent());
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF43A047),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    elevation: 2,
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.print, size: 18),
+                      SizedBox(width: 8),
+                      Text(
+                        'Cetak Tiket',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
+  }
+
+  Widget _buildInfoRow(
+    IconData icon,
+    String label,
+    String value, {
+    bool isHighlighted = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: isHighlighted
+                  ? const Color(0xFFE8F5E9)
+                  : const Color(0xFFF5F5F5),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              size: 18,
+              color: isHighlighted
+                  ? const Color(0xFF43A047)
+                  : Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: isHighlighted ? FontWeight.bold : FontWeight.normal,
+                color: isHighlighted ? const Color(0xFF2E7D32) : Colors.black87,
+              ),
+              textAlign: TextAlign.end,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Divider(height: 1, thickness: 1, color: Colors.grey.shade200);
   }
 
   Future<void> _printBookingTicket({
@@ -1411,24 +1561,5 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
     );
 
     await Printing.layoutPdf(onLayout: (format) async => pdf.save());
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 110,
-            child: Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.w600),
-            ),
-          ),
-          Expanded(child: Text(': $value')),
-        ],
-      ),
-    );
   }
 }
