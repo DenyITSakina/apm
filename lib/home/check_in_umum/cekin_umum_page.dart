@@ -213,7 +213,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
               ),
               const SizedBox(height: 4),
               Text(
-                "Silakan masukkan data Anda",
+                "Silahkan masukkan data Anda",
                 style: GoogleFonts.plusJakartaSans(
                   color: Colors.white.withOpacity(0.8),
                   fontSize: 12,
@@ -465,8 +465,8 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
                 const SizedBox(height: 2),
                 Text(
                   widget.selectType.toLowerCase() == "bpjs"
-                      ? "Masukkan nomor BPJS, NIK, RM atau No Booking"
-                      : "Masukkan nomor RM, No Booking atau menggunakan NIK",
+                      ? "Scan barcode atau masukkan nomor BPJS, NIK, RM atau No Booking"
+                      : "Scan barcode atau masukkan nomor RM, No Booking atau menggunakan NIK",
                   style: GoogleFonts.poppins(
                     fontSize: 13,
                     height: 1.2,

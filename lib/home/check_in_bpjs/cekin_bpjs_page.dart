@@ -274,7 +274,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
               ),
               const SizedBox(height: 4),
               Text(
-                "Silahkan masukkan No BPJS Anda",
+                "Silahkan masukkan No BPJS Anda / atau scan barcode BPJS",
                 style: GoogleFonts.plusJakartaSans(
                   color: Colors.white.withOpacity(0.8),
                   fontSize: 12,
@@ -669,7 +669,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  "Masukkan nomor BPJS atau menggunakan NIK -> lalu klik cek BPJS",
+                  "Scan barcode atau masukkan nomor BPJS atau menggunakan NIK -> lalu klik cek BPJS",
                   style: GoogleFonts.poppins(
                     fontSize: 13,
                     height: 1.2,

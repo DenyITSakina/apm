@@ -138,7 +138,7 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
               setState(() {
                 loading = false;
                 hasil = "Data Pasien ditemukan!";
-                // Clear input setelah berhasil
+
                 bpjsController.clear();
               });
 
@@ -523,7 +523,7 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  "Pendaftran poli bisa untuk pasien umum dan bpjs -> masukkan nomor RM -> lalu klik lanjut untuk verifikasi data",
+                  "Pengisian bisa scan barcode, pendaftran poli bisa untuk pasien umum dan bpjs -> masukkan nomor RM -> lalu klik lanjut untuk verifikasi data",
                   style: GoogleFonts.poppins(
                     fontSize: 13,
                     height: 1.2,
