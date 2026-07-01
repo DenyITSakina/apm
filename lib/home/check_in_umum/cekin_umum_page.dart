@@ -2,7 +2,6 @@ import 'package:apm/dialog/top_toast.dart';
 import 'package:apm/home/check_in_umum/cekin_umum_data.dart';
 import 'package:apm/func/navigation_helpers.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -28,7 +27,6 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
   @override
   void initState() {
     super.initState();
-    // Fokus otomatis untuk scanner
     Future.delayed(const Duration(milliseconds: 300), () {
       _focusNode.requestFocus();
     });
@@ -43,8 +41,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
 
   void _onNumberPressed(String val) {
     final current = controller.text;
-    // Batasi panjang input (contoh: max 20 karakter)
-    if (current.length >= 20) return;
+    if (current.length >= 16) return;
 
     setState(() {
       controller.text = current + val;
@@ -356,8 +353,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
               page: BlocProvider.value(
                 value: context.read<AntrianApmBloc>(),
                 child: CekinUmumDataPage(
-                  noRm: controller
-                      .text, // Perhatikan: ini akan kosong karena sudah di-clear
+                  noRm: controller.text,
                   data: state.apmData,
                   jenisPasien: widget.selectType,
                 ),

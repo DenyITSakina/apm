@@ -83,7 +83,6 @@ class _CekinBpjsState extends State<CekinBpjs> {
   @override
   void initState() {
     super.initState();
-    // Fokus otomatis untuk scanner
     Future.delayed(const Duration(milliseconds: 300), () {
       _focusNode.requestFocus();
     });
@@ -98,8 +97,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
 
   void _onNumberPressed(String val) {
     final current = controller.text;
-    // Batasi panjang input (contoh: max 20 karakter untuk BPJS/NIK)
-    if (current.length >= 20) return;
+    if (current.length >= 16) return;
 
     setState(() {
       controller.text = current + val;
@@ -493,13 +491,11 @@ class _CekinBpjsState extends State<CekinBpjs> {
             return;
           }
 
-          // Clear input setelah berhasil divalidasi
           setState(() {
             controller.clear();
             hasil = null;
           });
 
-          // VALIDASI KE SERVER: cek pasien BPJS sebelum masuk ke halaman data
           WidgetsBinding.instance.addPostFrameCallback((_) async {
             try {
               final resp = await BookingApiService.cekPasienBpjs(noPeserta);
