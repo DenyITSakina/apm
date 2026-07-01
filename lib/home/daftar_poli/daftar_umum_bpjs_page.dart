@@ -19,6 +19,7 @@ class PendaftaranPoliPage extends StatefulWidget {
 
 class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
   final TextEditingController bpjsController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
   bool loading = false;
   String? hasil;
 
@@ -26,86 +27,169 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
   final Color secondaryColor = const Color(0xFF0ABF68);
   final Color bgColor = const Color(0xFFF8FAFC);
 
+  @override
+  void initState() {
+    super.initState();
+    Future.delayed(const Duration(milliseconds: 300), () {
+      _focusNode.requestFocus();
+    });
+  }
+
+  @override
+  void dispose() {
+    bpjsController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   void _addDigit(String number) {
-    if (bpjsController.text.length < 16) {
-      setState(() => bpjsController.text += number);
-    }
+    final current = bpjsController.text;
+    if (current.length >= 16) return;
+
+    setState(() {
+      bpjsController.text = current + number;
+      bpjsController.selection = TextSelection.fromPosition(
+        TextPosition(offset: bpjsController.text.length),
+      );
+    });
+
+    _focusNode.requestFocus();
   }
 
   void _removeDigit() {
-    if (bpjsController.text.isNotEmpty) {
-      setState(() {
-        bpjsController.text = bpjsController.text.substring(
-          0,
-          bpjsController.text.length - 1,
-        );
-      });
-    }
+    final current = bpjsController.text;
+    if (current.isEmpty) return;
+
+    setState(() {
+      bpjsController.text = current.substring(0, current.length - 1);
+      bpjsController.selection = TextSelection.fromPosition(
+        TextPosition(offset: bpjsController.text.length),
+      );
+    });
+
+    _focusNode.requestFocus();
   }
 
-  void _clearText() => setState(() => bpjsController.clear());
+  void _clearText() {
+    setState(() {
+      bpjsController.clear();
+      hasil = null;
+    });
+
+    _refocusScanner();
+  }
+
+  void _refocusScanner() {
+    Future.delayed(const Duration(milliseconds: 150), () {
+      if (!mounted) return;
+      FocusScope.of(context).requestFocus(_focusNode);
+    });
+  }
+
+  void _submitData() {
+    if (bpjsController.text.isEmpty || loading) {
+      if (bpjsController.text.isEmpty) {
+        TopToast.warning(context, "Silakan masukkan nomor terlebih dahulu");
+      }
+      return;
+    }
+
+    final nomor = bpjsController.text.trim();
+
+    if (widget.selectType == "bpjs") {
+      if (nomor.length != 13 && nomor.length != 16) {
+        TopToast.warning(
+          context,
+          "Nomor BPJS harus 13 digit atau NIK 16 digit",
+        );
+        _refocusScanner();
+        return;
+      }
+
+      if (!RegExp(r'^[0-9]+$').hasMatch(nomor)) {
+        TopToast.warning(context, "Nomor hanya boleh terdiri dari angka");
+        _refocusScanner();
+        return;
+      }
+    } else {
+      if (nomor.isEmpty) {
+        TopToast.warning(context, "Silakan masukkan nomor rekam medis");
+        _refocusScanner();
+        return;
+      }
+    }
+
+    context.read<CekinBloc>().add(
+      CekNomorEvent(nomor: nomor, jenis: widget.selectType),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgColor,
-      body: BlocListener<CekinBloc, CekinState>(
-        listener: (context, state) {
-          if (state is CekinLoading) {
-            setState(() => loading = true);
-          }
-          if (state is CekinSuccess) {
-            setState(() {
-              loading = false;
-              hasil = "Data Pasien ditemukan!";
-            });
+      body: SafeArea(
+        child: BlocListener<CekinBloc, CekinState>(
+          listener: (context, state) {
+            if (state is CekinLoading) {
+              setState(() => loading = true);
+            }
+            if (state is CekinSuccess) {
+              setState(() {
+                loading = false;
+                hasil = "Data Pasien ditemukan!";
+                // Clear input setelah berhasil
+                bpjsController.clear();
+              });
 
-            TopToast.success(context, "Data Pasien ditemukan!");
+              TopToast.success(context, "Data Pasien ditemukan!");
 
-            Future.delayed(const Duration(milliseconds: 800), () {
-              pushBackSwipePage(
-                context: context,
-                page: DaftarUmumBpjsDaftar(data: state.data),
+              Future.delayed(const Duration(milliseconds: 800), () {
+                pushBackSwipePage(
+                  context: context,
+                  page: DaftarUmumBpjsDaftar(data: state.data),
+                );
+              });
+            }
+            if (state is CekinFailed) {
+              setState(() {
+                loading = false;
+                hasil = "Data Pasien Tidak Ditemukan. Silahkan Ke Loket.";
+              });
+
+              TopToast.error(
+                context,
+                "Data Pasien Tidak Ditemukan. Silahkan Ke Loket.",
               );
-            });
-          }
-          if (state is CekinFailed) {
-            setState(() {
-              loading = false;
-              hasil = "Data Pasien Tidak Ditemukan. Silahkan Ke Loket.";
-            });
-
-            TopToast.error(
-              context,
-              "Data Pasien Tidak Ditemukan. Silahkan Ke Loket.",
-            );
-          }
-        },
-        child: Column(
-          children: [
-            _buildHeader(),
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 12),
-                      _inputDisplay(),
-                      const SizedBox(height: 12),
-                      _bodyKeypadWithButton(),
-                      if (hasil != null) _resultInfo(),
-                      const SizedBox(height: 5),
-                      _info(),
-                      const SizedBox(height: 12),
-                    ],
+              _refocusScanner();
+            }
+          },
+          child: Column(
+            children: [
+              _buildHeader(),
+              Expanded(
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 12),
+                        _inputDisplay(),
+                        const SizedBox(height: 12),
+                        _bodyKeypadWithButton(),
+                        if (hasil != null) _resultInfo(),
+                        const SizedBox(height: 5),
+                        _info(),
+                        const SizedBox(height: 12),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-            _footer(),
-          ],
+              _footer(),
+            ],
+          ),
         ),
       ),
     );
@@ -163,7 +247,6 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
                       ),
                     ),
                   ),
-
                   Image.asset(
                     'assets/images/logo_sakina.png',
                     height: 42,
@@ -174,11 +257,9 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
                       size: 30,
                     ),
                   ),
-
                   const SizedBox(width: 40),
                 ],
               ),
-
               Text(
                 "PENDAFTARAN POLI",
                 style: GoogleFonts.plusJakartaSans(
@@ -195,7 +276,6 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 4),
               Text(
                 "Silakan masukkan data pendaftaran Anda",
@@ -231,6 +311,31 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // Hidden TextField untuk scanner
+          SizedBox(
+            width: 0,
+            height: 0,
+            child: TextField(
+              controller: bpjsController,
+              focusNode: _focusNode,
+              autofocus: true,
+              showCursor: false,
+              keyboardType: TextInputType.text,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                isCollapsed: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+              style: const TextStyle(color: Colors.transparent, fontSize: 1),
+              cursorColor: Colors.transparent,
+              onSubmitted: (value) {
+                _submitData();
+              },
+              // Mencegah keyboard muncul
+              enableInteractiveSelection: false,
+              enableIMEPersonalizedLearning: false,
+            ),
+          ),
           Text(
             widget.selectType == "bpjs"
                 ? "NOMOR KARTU BPJS / NIK"
@@ -298,41 +403,7 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
       elevation: isEnabled ? 8 : 0,
       shadowColor: secondaryColor.withOpacity(0.5),
       child: InkWell(
-        onTap: isEnabled
-            ? () {
-                final nomor = bpjsController.text.trim();
-
-                if (widget.selectType == "bpjs") {
-                  if (nomor.length != 13 && nomor.length != 16) {
-                    TopToast.warning(
-                      context,
-                      "Nomor BPJS harus 13 digit atau NIK 16 digit",
-                    );
-                    return;
-                  }
-
-                  if (!RegExp(r'^[0-9]+$').hasMatch(nomor)) {
-                    TopToast.warning(
-                      context,
-                      "Nomor hanya boleh terdiri dari angka",
-                    );
-                    return;
-                  }
-                } else {
-                  if (nomor.isEmpty) {
-                    TopToast.warning(
-                      context,
-                      "Silakan masukkan nomor rekam medis",
-                    );
-                    return;
-                  }
-                }
-
-                context.read<CekinBloc>().add(
-                  CekNomorEvent(nomor: nomor, jenis: widget.selectType),
-                );
-              }
-            : null,
+        onTap: isEnabled ? _submitData : null,
         borderRadius: BorderRadius.circular(20),
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 20),
@@ -437,9 +508,7 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
               size: 25,
             ),
           ),
-
           const SizedBox(width: 12),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -452,9 +521,7 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
                     color: Colors.black87,
                   ),
                 ),
-
                 const SizedBox(height: 2),
-
                 Text(
                   "Pendaftran poli bisa untuk pasien umum dan bpjs -> masukkan nomor RM -> lalu klik lanjut untuk verifikasi data",
                   style: GoogleFonts.poppins(
@@ -463,9 +530,7 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
                     color: Colors.grey.shade700,
                   ),
                 ),
-
                 const SizedBox(height: 5),
-
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -504,7 +569,6 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
       ),
       child: Stack(
         children: [
-          // Teks tengah
           Center(
             child: Text(
               "RSU Sakina Idaman •  Pelayanan Pendaftaran Pasien Umum/BPJS",
@@ -515,8 +579,6 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
               ),
             ),
           ),
-
-          // Teks kanan pojok
           Positioned(
             right: 0,
             top: 0,
