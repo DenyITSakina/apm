@@ -2,6 +2,7 @@ import 'package:apm/dialog/top_toast.dart';
 import 'package:apm/home/check_in_umum/cekin_umum_data.dart';
 import 'package:apm/func/navigation_helpers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -18,62 +19,114 @@ class CekinUmumPage extends StatefulWidget {
 
 class _CekinUmumPageState extends State<CekinUmumPage> {
   final TextEditingController controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
   bool _isProcessing = false;
   final Color primaryColor = const Color(0xFF0D8AAE);
   final Color secondaryColor = const Color(0xFF0ABF68);
-
   final Color bgColor = const Color(0xFFF8FAFC);
 
-  void _onNumberPressed(String val) => setState(() => controller.text += val);
-
-  void _onBackspacePressed() {
-    if (controller.text.isEmpty) return;
-    setState(
-      () => controller.text = controller.text.substring(
-        0,
-        controller.text.length - 1,
-      ),
-    );
+  @override
+  void initState() {
+    super.initState();
+    // Fokus otomatis untuk scanner
+    Future.delayed(const Duration(milliseconds: 300), () {
+      _focusNode.requestFocus();
+    });
   }
-
-  void _onClearPressed() => setState(() => controller.clear());
 
   @override
   void dispose() {
     controller.dispose();
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  void _onNumberPressed(String val) {
+    final current = controller.text;
+    // Batasi panjang input (contoh: max 20 karakter)
+    if (current.length >= 20) return;
+
+    setState(() {
+      controller.text = current + val;
+      controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: controller.text.length),
+      );
+    });
+
+    _focusNode.requestFocus();
+  }
+
+  void _onBackspacePressed() {
+    final current = controller.text;
+    if (current.isEmpty) return;
+
+    setState(() {
+      controller.text = current.substring(0, current.length - 1);
+      controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: controller.text.length),
+      );
+    });
+
+    _focusNode.requestFocus();
+  }
+
+  void _onClearPressed() {
+    setState(() {
+      controller.clear();
+    });
+
+    _refocusScanner();
+  }
+
+  void _refocusScanner() {
+    Future.delayed(const Duration(milliseconds: 150), () {
+      if (!mounted) return;
+      FocusScope.of(context).requestFocus(_focusNode);
+    });
+  }
+
+  void _submitData() {
+    if (controller.text.isEmpty || _isProcessing) return;
+
+    setState(() => _isProcessing = true);
+    context.read<AntrianApmBloc>().add(
+      ValidateAntrianEvent(
+        noAntrian: controller.text,
+        jenisAntrian: widget.selectType.toLowerCase(),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgColor,
-      body: Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                child: Column(
-                  children: [
-                    // const SizedBox(height: 30),
-                    // _buildStepIndicator(),
-                    const SizedBox(height: 12),
-                    _inputDisplay(),
-                    const SizedBox(height: 12),
-                    _buildKeypadAndAction(),
-                    const SizedBox(height: 2),
-                    _info(),
-                    const SizedBox(height: 12),
-                  ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(),
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 12),
+                      _inputDisplay(),
+                      const SizedBox(height: 12),
+                      _buildKeypadAndAction(),
+                      const SizedBox(height: 2),
+                      _info(),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          _footer(),
-        ],
+            _footer(),
+          ],
+        ),
       ),
     );
   }
@@ -130,7 +183,6 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
                       ),
                     ),
                   ),
-
                   Image.asset(
                     'assets/images/logo_sakina.png',
                     height: 42,
@@ -141,11 +193,9 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
                       size: 30,
                     ),
                   ),
-
                   const SizedBox(width: 40),
                 ],
               ),
-
               Text(
                 widget.selectType.toUpperCase() == "UMUM"
                     ? "CHECK-IN UMUM"
@@ -164,7 +214,6 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 4),
               Text(
                 "Silakan masukkan data Anda",
@@ -180,56 +229,6 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
       ),
     );
   }
-
-  Widget _buildStepIndicator() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _stepCircle("1", "Input", true),
-        _stepLine(true),
-        _stepCircle("2", "Verifikasi", false),
-        _stepLine(false),
-        _stepCircle("3", "Selesai", false),
-      ],
-    );
-  }
-
-  Widget _stepCircle(String num, String label, bool active) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: active ? secondaryColor : Colors.grey.shade300,
-            shape: BoxShape.circle,
-          ),
-          child: Text(
-            num,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            color: active ? secondaryColor : Colors.grey,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _stepLine(bool active) => Container(
-    width: 30,
-    height: 2,
-    color: active ? secondaryColor : Colors.grey.shade300,
-    margin: const EdgeInsets.only(bottom: 20),
-  );
 
   Widget _inputDisplay() {
     final hasText = controller.text.isNotEmpty;
@@ -250,6 +249,31 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // Hidden TextField untuk scanner
+          SizedBox(
+            width: 0,
+            height: 0,
+            child: TextField(
+              controller: controller,
+              focusNode: _focusNode,
+              autofocus: true,
+              showCursor: false,
+              keyboardType: TextInputType.text,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                isCollapsed: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+              style: const TextStyle(color: Colors.transparent, fontSize: 1),
+              cursorColor: Colors.transparent,
+              onSubmitted: (value) {
+                _submitData();
+              },
+              // Mencegah keyboard muncul
+              enableInteractiveSelection: false,
+              enableIMEPersonalizedLearning: false,
+            ),
+          ),
           Text(
             widget.selectType.toLowerCase() == "bpjs"
                 ? "NOMOR BPJS / NIK / RM / NO BOOKING"
@@ -310,23 +334,30 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
 
   Widget _buildSubmitButton() {
     return BlocConsumer<AntrianApmBloc, AntrianApmState>(
-      // Samakan listener dengan kode pertama
       listenWhen: (previous, current) =>
           current is AntrianApmError ||
           current is AntrianApmValidated ||
           current is AntrianApmBlocked,
       listener: (context, state) {
-        _isProcessing = false;
+        setState(() => _isProcessing = false);
+
         if (state is AntrianApmError) {
           TopToast.error(context, state.pesan);
+          _refocusScanner();
         } else if (state is AntrianApmValidated) {
+          // Clear input setelah berhasil
+          setState(() {
+            controller.clear();
+          });
+
           WidgetsBinding.instance.addPostFrameCallback((_) {
             pushBackSwipePage(
               context: context,
               page: BlocProvider.value(
                 value: context.read<AntrianApmBloc>(),
                 child: CekinUmumDataPage(
-                  noRm: controller.text,
+                  noRm: controller
+                      .text, // Perhatikan: ini akan kosong karena sudah di-clear
                   data: state.apmData,
                   jenisPasien: widget.selectType,
                 ),
@@ -335,6 +366,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
           });
         } else if (state is AntrianApmBlocked) {
           TopToast.warning(context, state.message);
+          _refocusScanner();
         }
       },
       builder: (context, state) {
@@ -347,17 +379,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
           elevation: isEnabled ? 8 : 0,
           shadowColor: secondaryColor.withOpacity(0.5),
           child: InkWell(
-            onTap: isEnabled
-                ? () {
-                    setState(() => _isProcessing = true);
-                    context.read<AntrianApmBloc>().add(
-                      ValidateAntrianEvent(
-                        noAntrian: controller.text,
-                        jenisAntrian: widget.selectType.toLowerCase(),
-                      ),
-                    );
-                  }
-                : null,
+            onTap: isEnabled ? _submitData : null,
             borderRadius: BorderRadius.circular(20),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 20),
@@ -429,35 +451,33 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
               size: 25,
             ),
           ),
-
           const SizedBox(width: 12),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Check-in UMUM",
+                  widget.selectType.toUpperCase() == "UMUM"
+                      ? "Check-in UMUM"
+                      : "Check-in BPJS",
                   style: GoogleFonts.poppins(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: Colors.black87,
                   ),
                 ),
-
                 const SizedBox(height: 2),
-
                 Text(
-                  "Masukkan nomor RM, No Booking atau menggunakan NIK -> lalu klik cari data",
+                  widget.selectType.toLowerCase() == "bpjs"
+                      ? "Masukkan nomor BPJS, NIK, RM atau No Booking"
+                      : "Masukkan nomor RM, No Booking atau menggunakan NIK",
                   style: GoogleFonts.poppins(
                     fontSize: 13,
                     height: 1.2,
                     color: Colors.grey.shade700,
                   ),
                 ),
-
                 const SizedBox(height: 5),
-
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -468,7 +488,9 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
                     borderRadius: BorderRadius.circular(30),
                   ),
                   child: Text(
-                    "Pasien UMUM",
+                    widget.selectType.toUpperCase() == "UMUM"
+                        ? "Pasien UMUM"
+                        : "Pasien BPJS",
                     style: GoogleFonts.poppins(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -496,10 +518,9 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
       ),
       child: Stack(
         children: [
-          // Teks tengah
           Center(
             child: Text(
-              "RSU Sakina Idaman • Pelayanan Umum",
+              "RSU Sakina Idaman • Pelayanan ${widget.selectType.toUpperCase() == "UMUM" ? "Umum" : "BPJS"}",
               style: GoogleFonts.poppins(
                 fontSize: 13,
                 color: Colors.white,
@@ -507,8 +528,6 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
               ),
             ),
           ),
-
-          // Teks kanan pojok
           Positioned(
             right: 0,
             top: 0,
