@@ -292,7 +292,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
               ),
             ),
             child: Text(
-              hasText ? controller.text : "Masukkan Nomor...",
+              hasText ? controller.text : "Masukkan nomor / Scan barcode",
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,

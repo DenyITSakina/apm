@@ -357,11 +357,11 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
               ),
             ),
             child: Text(
-              hasText ? bpjsController.text : "Masukkan Nomor...",
+              hasText ? bpjsController.text : "Masukkan nomor / Scan barcode",
               style: GoogleFonts.plusJakartaSans(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                letterSpacing: 2,
+                letterSpacing: 1.5,
                 color: hasText ? Colors.black87 : Colors.grey.shade400,
               ),
             ),

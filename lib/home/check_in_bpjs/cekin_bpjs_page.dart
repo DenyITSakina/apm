@@ -406,10 +406,11 @@ class _CekinBpjsState extends State<CekinBpjs> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  hasText ? controller.text : "Masukkan nomor...",
-                  style: GoogleFonts.montserrat(
+                  hasText ? controller.text : "Masukkan nomor / Scan barcode",
+                  style: GoogleFonts.plusJakartaSans(
                     fontSize: 20,
-                    fontWeight: hasText ? FontWeight.w700 : FontWeight.w500,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.5,
                     color: hasText ? Colors.black87 : Colors.grey.shade400,
                   ),
                 ),
