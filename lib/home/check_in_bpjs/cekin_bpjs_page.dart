@@ -549,7 +549,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
   }
 
   Widget _info() {
-    final primary = const Color(0xFF2563EB);
+    final primary = Colors.teal;
     final bg = const Color(0xFFF8FAFC);
 
     return Container(
