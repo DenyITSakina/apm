@@ -19,6 +19,15 @@ class CekinBpjs extends StatefulWidget {
 }
 
 class _CekinBpjsState extends State<CekinBpjs> {
+  final TextEditingController controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  bool _isProcessing = false;
+  String? hasil;
+
+  final Color primaryColor = const Color(0xFF0D8AAE);
+  final Color secondaryColor = const Color(0xFF0ABF68);
+  final Color bgColor = const Color(0xFFF8FAFC);
+
   String _formatJamPeriksa(String jamPraktikRaw) {
     final s = jamPraktikRaw.trim();
     if (s.isEmpty) return '-';
@@ -29,8 +38,6 @@ class _CekinBpjsState extends State<CekinBpjs> {
 
   bool _isTimeInRange(TimeOfDay now, String jamPraktikRaw) {
     final s = jamPraktikRaw.trim();
-
-    //  if (s.isEmpty) return true;
 
     if (s.isEmpty || s.toLowerCase() == 'null') return false;
 
@@ -73,65 +80,115 @@ class _CekinBpjsState extends State<CekinBpjs> {
     return nowMinutes >= startMinutes || nowMinutes <= endMinutes;
   }
 
-  final TextEditingController controller = TextEditingController();
-  bool _isProcessing = false;
-  String? hasil;
-
-  final Color primaryColor = const Color(0xFF0D8AAE);
-  final Color secondaryColor = const Color(0xFF0ABF68);
-  final Color bgColor = const Color(0xFFF8FAFC);
-
-  void _add(String val) => setState(() => controller.text += val);
-  void _remove() {
-    if (controller.text.isNotEmpty) {
-      setState(
-        () => controller.text = controller.text.substring(
-          0,
-          controller.text.length - 1,
-        ),
-      );
-    }
+  @override
+  void initState() {
+    super.initState();
+    // Fokus otomatis untuk scanner
+    Future.delayed(const Duration(milliseconds: 300), () {
+      _focusNode.requestFocus();
+    });
   }
-
-  void _clear() => setState(() => controller.clear());
 
   @override
   void dispose() {
     controller.dispose();
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  void _onNumberPressed(String val) {
+    final current = controller.text;
+    // Batasi panjang input (contoh: max 20 karakter untuk BPJS/NIK)
+    if (current.length >= 20) return;
+
+    setState(() {
+      controller.text = current + val;
+      controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: controller.text.length),
+      );
+    });
+
+    _focusNode.requestFocus();
+  }
+
+  void _onBackspacePressed() {
+    final current = controller.text;
+    if (current.isEmpty) return;
+
+    setState(() {
+      controller.text = current.substring(0, current.length - 1);
+      controller.selection = TextSelection.fromPosition(
+        TextPosition(offset: controller.text.length),
+      );
+    });
+
+    _focusNode.requestFocus();
+  }
+
+  void _onClearPressed() {
+    setState(() {
+      controller.clear();
+      hasil = null;
+    });
+
+    _refocusScanner();
+  }
+
+  void _refocusScanner() {
+    Future.delayed(const Duration(milliseconds: 150), () {
+      if (!mounted) return;
+      FocusScope.of(context).requestFocus(_focusNode);
+    });
+  }
+
+  void _submitData() {
+    if (controller.text.isEmpty || _isProcessing) {
+      if (controller.text.isEmpty) {
+        TopToast.error(context, "Silahkan Masukkan Nomor Terlebih Dahulu..");
+      }
+      return;
+    }
+
+    setState(() => _isProcessing = true);
+    context.read<AntrianApmBloc>().add(
+      ValidateAntrianEvent(
+        noAntrian: controller.text,
+        jenisAntrian: widget.selectType.toLowerCase(),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: bgColor,
-      body: Column(
-        children: [
-          _buildHeader(),
-          Expanded(
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: Column(
-                  children: [
-                    // const SizedBox(height: 30),
-                    // _buildStepIndicator(),
-                    const SizedBox(height: 12),
-                    _inputDisplay(),
-                    const SizedBox(height: 12),
-                    _buildKeypadAndAction(),
-                    if (hasil != null) _resultInfo(),
-                    const SizedBox(height: 2),
-                    _info(),
-                    const SizedBox(height: 12),
-                  ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(),
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 12),
+                      _inputDisplay(),
+                      const SizedBox(height: 12),
+                      _buildKeypadAndAction(),
+                      if (hasil != null) _resultInfo(),
+                      const SizedBox(height: 2),
+                      _info(),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-          _footer(),
-        ],
+            _footer(),
+          ],
+        ),
       ),
     );
   }
@@ -188,7 +245,6 @@ class _CekinBpjsState extends State<CekinBpjs> {
                       ),
                     ),
                   ),
-
                   Image.asset(
                     'assets/images/logo_sakina.png',
                     height: 42,
@@ -202,7 +258,6 @@ class _CekinBpjsState extends State<CekinBpjs> {
                   const SizedBox(width: 40),
                 ],
               ),
-
               Text(
                 "CHECK-IN BPJS",
                 style: GoogleFonts.plusJakartaSans(
@@ -219,7 +274,6 @@ class _CekinBpjsState extends State<CekinBpjs> {
                   ],
                 ),
               ),
-
               const SizedBox(height: 4),
               Text(
                 "Silahkan masukkan No BPJS Anda",
@@ -305,6 +359,31 @@ class _CekinBpjsState extends State<CekinBpjs> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
+          // Hidden TextField untuk scanner
+          SizedBox(
+            width: 0,
+            height: 0,
+            child: TextField(
+              controller: controller,
+              focusNode: _focusNode,
+              autofocus: true,
+              showCursor: false,
+              keyboardType: TextInputType.text,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                isCollapsed: true,
+                contentPadding: EdgeInsets.zero,
+              ),
+              style: const TextStyle(color: Colors.transparent, fontSize: 1),
+              cursorColor: Colors.transparent,
+              onSubmitted: (value) {
+                _submitData();
+              },
+              // Mencegah keyboard muncul
+              enableInteractiveSelection: false,
+              enableIMEPersonalizedLearning: false,
+            ),
+          ),
           Text(
             widget.selectType == "bpjs"
                 ? "NOMOR KARTU BPJS / NIK"
@@ -355,9 +434,9 @@ class _CekinBpjsState extends State<CekinBpjs> {
           Expanded(
             flex: 3,
             child: KeypadSection(
-              onNumberPressed: _add,
-              onBackspacePressed: _remove,
-              onClearPressed: _clear,
+              onNumberPressed: _onNumberPressed,
+              onBackspacePressed: _onBackspacePressed,
+              onClearPressed: _onClearPressed,
             ),
           ),
           const SizedBox(width: 20),
@@ -378,6 +457,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
 
         if (state is AntrianApmError) {
           TopToast.error(context, state.pesan);
+          _refocusScanner();
         } else if (state is AntrianApmValidated) {
           final jamPraktikRaw = state.apmData.jamPraktik.trim();
           final jamPeriksaText = _formatJamPeriksa(jamPraktikRaw);
@@ -388,6 +468,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
           if (!canCheck) {
             TopToast.warning(context, 'Jam periksa anda $jamPeriksaText');
             setState(() => _isProcessing = false);
+            _refocusScanner();
             return;
           }
 
@@ -396,18 +477,27 @@ class _CekinBpjsState extends State<CekinBpjs> {
           if (rawNoPeserta.isEmpty) {
             TopToast.error(context, 'Nomor peserta BPJS tidak ditemukan');
             setState(() => _isProcessing = false);
+            _refocusScanner();
             return;
           }
           if (noPeserta.isEmpty) {
             TopToast.error(context, 'Nomor peserta BPJS tidak valid');
             setState(() => _isProcessing = false);
+            _refocusScanner();
             return;
           }
           if (noPeserta.length != 13) {
             TopToast.error(context, 'Nomor BPJS harus 13 digit');
             setState(() => _isProcessing = false);
+            _refocusScanner();
             return;
           }
+
+          // Clear input setelah berhasil divalidasi
+          setState(() {
+            controller.clear();
+            hasil = null;
+          });
 
           // VALIDASI KE SERVER: cek pasien BPJS sebelum masuk ke halaman data
           WidgetsBinding.instance.addPostFrameCallback((_) async {
@@ -423,6 +513,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
                       : 'Data BPJS tidak valid',
                 );
                 setState(() => _isProcessing = false);
+                _refocusScanner();
                 return;
               }
 
@@ -435,10 +526,8 @@ class _CekinBpjsState extends State<CekinBpjs> {
                 noPeserta: peserta?.noPeserta ?? noPeserta,
                 noIdentitas: peserta?.nik ?? '',
                 namaPoli: state.apmData.namaPoli,
-                // ambil dari ApmAntrianModel (hasil ValidateAntrianEvent)
                 noBooking: state.apmData.noBooking,
                 namaDokter: state.apmData.namaDokter,
-                // field lain tidak tersedia dari resp
               );
 
               pushBackSwipePage(
@@ -456,10 +545,12 @@ class _CekinBpjsState extends State<CekinBpjs> {
               if (!mounted) return;
               TopToast.error(context, 'Gagal validasi data BPJS: $e');
               setState(() => _isProcessing = false);
+              _refocusScanner();
             }
           });
         } else if (state is AntrianApmBlocked) {
           TopToast.warning(context, state.message);
+          _refocusScanner();
         }
       },
       builder: (context, state) {
@@ -471,24 +562,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
           borderRadius: BorderRadius.circular(20),
           elevation: isEnabled ? 8 : 0,
           child: InkWell(
-            onTap: isEnabled
-                ? () {
-                    setState(() => _isProcessing = true);
-                    context.read<AntrianApmBloc>().add(
-                      ValidateAntrianEvent(
-                        noAntrian: controller.text,
-                        jenisAntrian: widget.selectType.toLowerCase(),
-                      ),
-                    );
-                  }
-                : () {
-                    if (controller.text.isEmpty) {
-                      TopToast.error(
-                        context,
-                        "Silahkan Masukkan Nomor Terlebih Dahulu..",
-                      );
-                    }
-                  },
+            onTap: isEnabled ? _submitData : null,
             borderRadius: BorderRadius.circular(20),
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 20),
@@ -584,9 +658,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
               size: 25,
             ),
           ),
-
           const SizedBox(width: 12),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -599,9 +671,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
                     color: Colors.black87,
                   ),
                 ),
-
                 const SizedBox(height: 2),
-
                 Text(
                   "Masukkan nomor BPJS atau menggunakan NIK -> lalu klik cek BPJS",
                   style: GoogleFonts.poppins(
@@ -610,9 +680,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
                     color: Colors.grey.shade700,
                   ),
                 ),
-
                 const SizedBox(height: 5),
-
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
@@ -651,7 +719,6 @@ class _CekinBpjsState extends State<CekinBpjs> {
       ),
       child: Stack(
         children: [
-          // Teks tengah
           Center(
             child: Text(
               "RSU Sakina Idaman • Pelayanan BPJS",
@@ -662,8 +729,6 @@ class _CekinBpjsState extends State<CekinBpjs> {
               ),
             ),
           ),
-
-          // Teks kanan pojok
           Positioned(
             right: 0,
             top: 0,
