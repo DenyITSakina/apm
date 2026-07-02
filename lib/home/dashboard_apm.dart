@@ -2,6 +2,7 @@ import 'package:apm/blog/booking/booking_bloc.dart';
 import 'package:apm/func/open_aplikasi_bpjsDaftar.dart';
 import 'package:apm/home/booking/booking_page.dart';
 import 'package:apm/home/daftar_poli/daftar_umum_bpjs_page.dart';
+import 'package:apm/home/test/cetak_tiket.dart';
 
 import '../Blog/antrian_apm_bloc.dart';
 import 'package:apm/home/check_in_bpjs/cekin_bpjs_page.dart';
@@ -340,6 +341,26 @@ class _DashboardApmState extends State<DashboardApm>
                                   onTap: () {
                                     _showBookingTypeDialog(context);
                                   },
+                                ),
+
+                                _buildServiceCard(
+                                  title: "Test Tiket",
+                                  image: "assets/images/booking.png",
+                                  gradient: const LinearGradient(
+                                    colors: [
+                                      Color(0xFFBF360C),
+                                      Color(0xFFE65100),
+                                      Color(0xFFF57C00),
+                                    ],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  icon: Icons.calendar_month,
+                                  description: "Booking untuk pasien",
+                                  onTap: () => _navigateTo(
+                                    context,
+                                    const AntrianCard(pasien: {}),
+                                  ),
                                 ),
                                 // _buildServiceCard(
                                 //   title: "BPJS DAFTAR",

@@ -963,59 +963,785 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     ],
   );
 
+  // pw.Widget _buildPoliTicket(
+  //   ApmAntrianPoliModel m,
+  //   String qrData,
+  //   String date,
+  //   String time,
+  // ) {
+  //   return pw.Column(
+  //     crossAxisAlignment: pw.CrossAxisAlignment.center,
+  //     children: [
+  //       _buildHeader(),
+  //       pw.Row(
+  //         mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+  //         children: [
+  //           pw.Expanded(
+  //             child: pw.Column(
+  //               crossAxisAlignment: pw.CrossAxisAlignment.start,
+  //               children: [
+  //                 pw.Text(
+  //                   formatNama(m.nama.toUpperCase()),
+  //                   style: pw.TextStyle(
+  //                     fontSize: 10,
+  //                     fontWeight: pw.FontWeight.bold,
+  //                   ),
+  //                 ),
+  //                 pw.Text(
+  //                   'RM: ${m.rm}',
+  //                   style: const pw.TextStyle(fontSize: 9),
+  //                 ),
+  //               ],
+  //             ),
+  //           ),
+  //           pw.SizedBox(
+  //             width: 50,
+  //             height: 50,
+  //             child: pw.BarcodeWidget(
+  //               barcode: pw.Barcode.qrCode(),
+  //               data: qrData,
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //       pw.Divider(thickness: 1),
+  //       pw.Text('No. Antrian Poli', style: const pw.TextStyle(fontSize: 9)),
+  //       pw.Text(
+  //         formatNama(m.namaPoli),
+  //         style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+  //       ),
+  //       pw.Text(
+  //         m.noChekinPoli,
+  //         style: pw.TextStyle(fontSize: 35, fontWeight: pw.FontWeight.bold),
+  //       ),
+  //       pw.Text('$date / $time', style: const pw.TextStyle(fontSize: 8)),
+  //     ],
+  //   );
+  // }
+
   pw.Widget _buildPoliTicket(
     ApmAntrianPoliModel m,
     String qrData,
     String date,
     String time,
   ) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.center,
-      children: [
-        _buildHeader(),
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+    // Helper: Build info row
+    pw.Widget infoRow(String label, String value) {
+      return pw.Padding(
+        padding: const pw.EdgeInsets.symmetric(vertical: 1),
+        child: pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
           children: [
-            pw.Expanded(
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(
-                    formatNama(m.nama.toUpperCase()),
-                    style: pw.TextStyle(
-                      fontSize: 10,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-                  pw.Text(
-                    'RM: ${m.rm}',
-                    style: const pw.TextStyle(fontSize: 9),
-                  ),
-                ],
+            pw.SizedBox(
+              width: 65,
+              child: pw.Text(
+                label,
+                style: pw.TextStyle(
+                  fontSize: 10,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
             ),
-            pw.SizedBox(
-              width: 50,
-              height: 50,
-              child: pw.BarcodeWidget(
-                barcode: pw.Barcode.qrCode(),
-                data: qrData,
-              ),
+            pw.Expanded(
+              child: pw.Text(': $value', style: pw.TextStyle(fontSize: 10)),
             ),
           ],
         ),
-        pw.Divider(thickness: 1),
-        pw.Text('No. Antrian Poli', style: const pw.TextStyle(fontSize: 9)),
-        pw.Text(
-          formatNama(m.namaPoli),
-          style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+      );
+    }
+
+    // HEADER
+    pw.Widget header = pw.Container(
+      decoration: pw.BoxDecoration(
+        border: pw.Border(
+          bottom: pw.BorderSide(width: 2, color: PdfColors.black),
         ),
-        pw.Text(
-          m.noChekinPoli,
-          style: pw.TextStyle(fontSize: 35, fontWeight: pw.FontWeight.bold),
+      ),
+      child: pw.Row(
+        children: [
+          pw.SizedBox(
+            width: 35 * 3.78,
+            height: 20 * 3.78,
+            child: pw.Container(
+              decoration: pw.BoxDecoration(
+                border: pw.Border.all(width: 1, color: PdfColors.black),
+              ),
+              child: pw.Center(
+                child: pw.Text(
+                  'LOGO',
+                  style: pw.TextStyle(
+                    fontSize: 7,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+          pw.SizedBox(width: 6),
+          pw.Expanded(
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  'RSU SAKINA IDAMAN',
+                  style: pw.TextStyle(
+                    fontWeight: pw.FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                ),
+                pw.Text(
+                  'Jl. Nyi Tjondro Loekito No.60 | Telp. 0274 501 8021 - 0274 502 9090',
+                  style: pw.TextStyle(fontSize: 9),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // LEFT SECTION
+    pw.Widget leftSection = pw.Container(
+      decoration: pw.BoxDecoration(
+        border: pw.Border.all(width: 1.5, color: PdfColors.black),
+      ),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          // Patient Information
+          pw.Padding(
+            padding: const pw.EdgeInsets.all(3),
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                infoRow('RM', '${m.rm}'),
+                infoRow('Nama', formatNama(m.nama)),
+                infoRow('Tgl Lahir', '-'),
+                infoRow('Telp', '-'),
+                infoRow('Poli', formatNama(m.namaPoli)),
+                infoRow('Dokter', '-'),
+              ],
+            ),
+          ),
+          // Queue Container with QR
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(
+                top: pw.BorderSide(width: 1.5, color: PdfColors.black),
+              ),
+            ),
+            padding: const pw.EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+            child: pw.Row(
+              children: [
+                pw.Expanded(
+                  child: pw.Column(
+                    children: [
+                      pw.Text(
+                        'NO ANTRIAN',
+                        style: pw.TextStyle(
+                          fontSize: 11,
+                          fontWeight: pw.FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      pw.Text(
+                        m.noAntrianPoli,
+                        style: pw.TextStyle(
+                          fontSize: 42,
+                          fontWeight: pw.FontWeight.bold,
+                          height: 1,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                pw.SizedBox(width: 6),
+                pw.SizedBox(
+                  width: 75,
+                  height: 75,
+                  child: pw.BarcodeWidget(
+                    barcode: pw.Barcode.qrCode(),
+                    data: qrData,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // RIGHT SECTION - Form Table
+    // Use Container with Row/Column layout instead of Table to avoid TableCell issues
+    pw.Widget rightTable = pw.Container(
+      decoration: pw.BoxDecoration(
+        border: pw.Border(
+          left: pw.BorderSide(width: 1, color: PdfColors.black),
+          right: pw.BorderSide(width: 1, color: PdfColors.black),
+          bottom: pw.BorderSide(width: 1, color: PdfColors.black),
         ),
-        pw.Text('$date / $time', style: const pw.TextStyle(fontSize: 8)),
+      ),
+      child: pw.Column(
+        children: [
+          // Header Row
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              color: PdfColors.grey300,
+              border: pw.Border(
+                bottom: pw.BorderSide(width: 1, color: PdfColors.black),
+              ),
+            ),
+            child: pw.Row(
+              children: [
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(
+                      'Ket.',
+                      textAlign: pw.TextAlign.center,
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                pw.Container(width: 1, height: 30, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(
+                      'No.',
+                      textAlign: pw.TextAlign.center,
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                pw.Container(width: 1, height: 30, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 3,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(
+                      'Prosedur',
+                      textAlign: pw.TextAlign.center,
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Row: A - Konsultasi
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(
+                bottom: pw.BorderSide(width: 1, color: PdfColors.black),
+              ),
+            ),
+            child: pw.Row(
+              children: [
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(
+                      'A',
+                      textAlign: pw.TextAlign.center,
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text('', textAlign: pw.TextAlign.center),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 3,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(
+                      'Konsultasi',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Row: 1
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(
+                bottom: pw.BorderSide(width: 1, color: PdfColors.black),
+              ),
+            ),
+            child: pw.Row(
+              children: [
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(''),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text('1', textAlign: pw.TextAlign.center),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 3,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(''),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Row: 2
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(
+                bottom: pw.BorderSide(width: 1, color: PdfColors.black),
+              ),
+            ),
+            child: pw.Row(
+              children: [
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(''),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text('2', textAlign: pw.TextAlign.center),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 3,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(''),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Row: B - Tindakan Medis
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(
+                bottom: pw.BorderSide(width: 1, color: PdfColors.black),
+              ),
+            ),
+            child: pw.Row(
+              children: [
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(
+                      'B',
+                      textAlign: pw.TextAlign.center,
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text('', textAlign: pw.TextAlign.center),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 3,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(
+                      'Tindakan Medis',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Row: 1
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(
+                bottom: pw.BorderSide(width: 1, color: PdfColors.black),
+              ),
+            ),
+            child: pw.Row(
+              children: [
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(''),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text('1', textAlign: pw.TextAlign.center),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 3,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(''),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Row: 2
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(
+                bottom: pw.BorderSide(width: 1, color: PdfColors.black),
+              ),
+            ),
+            child: pw.Row(
+              children: [
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(''),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text('2', textAlign: pw.TextAlign.center),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 3,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(''),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Row: C - Penunjang Medis
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(
+                bottom: pw.BorderSide(width: 1, color: PdfColors.black),
+              ),
+            ),
+            child: pw.Row(
+              children: [
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(
+                      'C',
+                      textAlign: pw.TextAlign.center,
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text('', textAlign: pw.TextAlign.center),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 3,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(
+                      'Penunjang Medis',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Row: 1
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(
+                bottom: pw.BorderSide(width: 1, color: PdfColors.black),
+              ),
+            ),
+            child: pw.Row(
+              children: [
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(''),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text('1', textAlign: pw.TextAlign.center),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 3,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(''),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Row: 2
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(
+                bottom: pw.BorderSide(width: 1, color: PdfColors.black),
+              ),
+            ),
+            child: pw.Row(
+              children: [
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(''),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text('2', textAlign: pw.TextAlign.center),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 3,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(''),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Row: D - Resep
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(
+                bottom: pw.BorderSide(width: 1, color: PdfColors.black),
+              ),
+            ),
+            child: pw.Row(
+              children: [
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(
+                      'D',
+                      textAlign: pw.TextAlign.center,
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text('', textAlign: pw.TextAlign.center),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 3,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(
+                      'Resep',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          // Row: E - Lain-lain
+          pw.Container(
+            child: pw.Row(
+              children: [
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(
+                      'E',
+                      textAlign: pw.TextAlign.center,
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 1,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text('', textAlign: pw.TextAlign.center),
+                  ),
+                ),
+                pw.Container(width: 1, height: 25, color: PdfColors.black),
+                pw.Expanded(
+                  flex: 3,
+                  child: pw.Container(
+                    padding: const pw.EdgeInsets.all(3),
+                    child: pw.Text(
+                      'Lain-lain',
+                      style: pw.TextStyle(
+                        fontSize: 9,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
+    pw.Widget rightSection = pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Container(
+          decoration: pw.BoxDecoration(
+            border: pw.Border.all(width: 1.5, color: PdfColors.black),
+            color: PdfColors.grey300,
+          ),
+          padding: const pw.EdgeInsets.all(3),
+          child: pw.Center(
+            child: pw.Text(
+              'FORMULIR KENDALI TINDAKAN RAWAT JALAN',
+              style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+              textAlign: pw.TextAlign.center,
+            ),
+          ),
+        ),
+        rightTable,
       ],
+    );
+
+    // FOOTER
+    pw.Widget footer = pw.Container(
+      decoration: pw.BoxDecoration(
+        border: pw.Border(top: pw.BorderSide(width: 1, color: PdfColors.black)),
+      ),
+      padding: const pw.EdgeInsets.only(top: 3),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.end,
+        children: [pw.Text('Generated: $date $time')],
+      ),
+    );
+
+    // MAIN LAYOUT
+    return pw.Container(
+      padding: const pw.EdgeInsets.all(2),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          header,
+          pw.SizedBox(height: 3),
+          pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Expanded(flex: 35, child: leftSection),
+              pw.SizedBox(width: 4),
+              pw.Expanded(flex: 65, child: rightSection),
+            ],
+          ),
+          pw.SizedBox(height: 4),
+          footer,
+        ],
+      ),
     );
   }
 
