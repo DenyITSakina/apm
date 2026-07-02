@@ -1227,8 +1227,14 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                               'Nama',
                               formatNama(m.nama.toUpperCase()),
                             ),
-                            _buildCardInfoRow('Tgl Lahir', '-'),
-                            _buildCardInfoRow('Telp', '-'),
+                            _buildCardInfoRow(
+                              'Tgl Lahir',
+                              m.tanggalLahir ?? '-',
+                            ),
+                            _buildCardInfoRow(
+                              'Tgl Admisi',
+                              '${m.tanggalBooking} ${m.jamBooking}' ?? '-',
+                            ),
                             _buildCardInfoRow('Poli', formatNama(m.namaPoli)),
                             _buildCardInfoRow('Dokter', '-'),
                           ],
@@ -1259,7 +1265,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                                     ),
                                   ),
                                   pw.Text(
-                                    m.noChekinPoli,
+                                    m.noAntrianPoli,
                                     style: pw.TextStyle(
                                       fontSize: 24,
                                       fontWeight: pw.FontWeight.bold,

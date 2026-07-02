@@ -6,6 +6,9 @@ class ApmAntrianPoliModel {
   String noChekinPoli;
   String namaPoli;
   int idDokter;
+  String tanggalLahir;
+  String tanggalBooking;
+  String jamBooking;
   String idJadwalDokter;
   int idLayanan;
 
@@ -17,6 +20,10 @@ class ApmAntrianPoliModel {
     required this.rm,
     required this.namaPoli,
     required this.idDokter,
+    required this.tanggalLahir,
+    required this.jamBooking,
+    required this.tanggalBooking,
+
     required this.idJadwalDokter,
     required this.idLayanan,
   });
@@ -43,18 +50,25 @@ class ApmAntrianPoliModel {
   // }
 
   factory ApmAntrianPoliModel.fromJson(Map<String, dynamic> json) {
-    final data = json['data'] ?? {};
+    // API sekarang bentuknya:
+    // json['data']['data'] = payload utama
+    // json['data']['no_checkin'] = nilai root tambahan
+    final rootData = (json['data'] as Map<String, dynamic>?) ?? {};
+    final data = (rootData['data'] as Map<String, dynamic>?) ?? rootData;
 
     return ApmAntrianPoliModel(
       noBooking: data['id']?.toString() ?? '',
       noAntrianPoli: data['no_antrian']?.toString() ?? '',
-      noChekinPoli: json['no_checkin']?.toString() ?? '', // ambil dari root
+      noChekinPoli: rootData['no_checkin']?.toString() ?? '',
       nama: data['nama'] ?? '',
       rm: data['rm']?.toString() ?? '',
       namaPoli: data['nama_poli'] ?? '',
       idDokter: int.tryParse(data['id_dokter']?.toString() ?? '0') ?? 0,
       idJadwalDokter: data['id_jadwal_dokter']?.toString() ?? '',
       idLayanan: int.tryParse(data['id_unit']?.toString() ?? '0') ?? 0,
+      tanggalLahir: data['tanggal_lahir']?.toString() ?? '',
+      tanggalBooking: data['tanggal_booking']?.toString() ?? '',
+      jamBooking: data['jam_booking']?.toString() ?? '',
     );
   }
 }
