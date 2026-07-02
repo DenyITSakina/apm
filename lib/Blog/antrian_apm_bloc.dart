@@ -963,59 +963,375 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     ],
   );
 
+  pw.Widget _buildCardHeader() {
+    return pw.Container(
+      decoration: pw.BoxDecoration(
+        border: pw.Border(bottom: pw.BorderSide(width: 2)),
+      ),
+      child: pw.Row(
+        children: [
+          pw.Container(
+            width: 20,
+            height: 20,
+            decoration: pw.BoxDecoration(
+              border: pw.Border.all(width: 1),
+              color: PdfColors.grey200,
+            ),
+            child: pw.Center(
+              child: pw.Text(
+                'RS',
+                style: pw.TextStyle(
+                  fontSize: 8,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          pw.SizedBox(width: 4),
+          pw.Expanded(
+            child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  'RSU SAKINA IDAMAN',
+                  style: pw.TextStyle(
+                    fontSize: 10,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+                pw.Text(
+                  'Jl. Nyi Tjondro Loekito No.60 | Telp. 0274 501 8021 - 0274 502 9090',
+                  style: const pw.TextStyle(fontSize: 7),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildCardInfoRow(String label, String value) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 1),
+      child: pw.Row(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          pw.SizedBox(
+            width: 30,
+            child: pw.Text(
+              label,
+              style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
+            ),
+          ),
+          pw.Text(': $value', style: const pw.TextStyle(fontSize: 8)),
+        ],
+      ),
+    );
+  }
+
+  pw.Widget _buildCardFormTable() {
+    return pw.Table(
+      border: pw.TableBorder.all(width: 1),
+      columnWidths: const {
+        0: pw.FixedColumnWidth(25),
+        1: pw.FixedColumnWidth(25),
+        2: pw.FlexColumnWidth(),
+      },
+      children: [
+        pw.TableRow(
+          decoration: pw.BoxDecoration(color: PdfColors.grey200),
+          children: [
+            _buildCardTableCell(
+              'Ket.',
+              textAlign: pw.TextAlign.center,
+              fontWeight: pw.FontWeight.bold,
+            ),
+            _buildCardTableCell(
+              'No.',
+              textAlign: pw.TextAlign.center,
+              fontWeight: pw.FontWeight.bold,
+            ),
+            _buildCardTableCell(
+              'Prosedur',
+              textAlign: pw.TextAlign.center,
+              fontWeight: pw.FontWeight.bold,
+            ),
+          ],
+        ),
+        pw.TableRow(
+          children: [
+            _buildCardTableCell(
+              'A',
+              textAlign: pw.TextAlign.center,
+              fontWeight: pw.FontWeight.bold,
+            ),
+            _buildCardTableCell('', textAlign: pw.TextAlign.center),
+            _buildCardTableCell('Konsultasi', fontWeight: pw.FontWeight.bold),
+          ],
+        ),
+        pw.TableRow(
+          children: [
+            _buildCardTableCell(''),
+            _buildCardTableCell('1', textAlign: pw.TextAlign.center),
+            _buildCardTableCell(''),
+          ],
+        ),
+        pw.TableRow(
+          children: [
+            _buildCardTableCell(''),
+            _buildCardTableCell('2', textAlign: pw.TextAlign.center),
+            _buildCardTableCell(''),
+          ],
+        ),
+        pw.TableRow(
+          children: [
+            _buildCardTableCell(
+              'B',
+              textAlign: pw.TextAlign.center,
+              fontWeight: pw.FontWeight.bold,
+            ),
+            _buildCardTableCell('', textAlign: pw.TextAlign.center),
+            _buildCardTableCell(
+              'Tindakan Medis',
+              fontWeight: pw.FontWeight.bold,
+            ),
+          ],
+        ),
+        pw.TableRow(
+          children: [
+            _buildCardTableCell(''),
+            _buildCardTableCell('1', textAlign: pw.TextAlign.center),
+            _buildCardTableCell(''),
+          ],
+        ),
+        pw.TableRow(
+          children: [
+            _buildCardTableCell(''),
+            _buildCardTableCell('2', textAlign: pw.TextAlign.center),
+            _buildCardTableCell(''),
+          ],
+        ),
+        pw.TableRow(
+          children: [
+            _buildCardTableCell(
+              'C',
+              textAlign: pw.TextAlign.center,
+              fontWeight: pw.FontWeight.bold,
+            ),
+            _buildCardTableCell('', textAlign: pw.TextAlign.center),
+            _buildCardTableCell(
+              'Penunjang Medis',
+              fontWeight: pw.FontWeight.bold,
+            ),
+          ],
+        ),
+        pw.TableRow(
+          children: [
+            _buildCardTableCell(''),
+            _buildCardTableCell('1', textAlign: pw.TextAlign.center),
+            _buildCardTableCell(''),
+          ],
+        ),
+        pw.TableRow(
+          children: [
+            _buildCardTableCell(''),
+            _buildCardTableCell('2', textAlign: pw.TextAlign.center),
+            _buildCardTableCell(''),
+          ],
+        ),
+        pw.TableRow(
+          children: [
+            _buildCardTableCell(
+              'D',
+              textAlign: pw.TextAlign.center,
+              fontWeight: pw.FontWeight.bold,
+            ),
+            _buildCardTableCell('', textAlign: pw.TextAlign.center),
+            _buildCardTableCell('Resep', fontWeight: pw.FontWeight.bold),
+          ],
+        ),
+        pw.TableRow(
+          children: [
+            _buildCardTableCell(
+              'E',
+              textAlign: pw.TextAlign.center,
+              fontWeight: pw.FontWeight.bold,
+            ),
+            _buildCardTableCell('', textAlign: pw.TextAlign.center),
+            _buildCardTableCell('Lain-lain', fontWeight: pw.FontWeight.bold),
+          ],
+        ),
+      ],
+    );
+  }
+
+  pw.Widget _buildCardTableCell(
+    String text, {
+    pw.TextAlign textAlign = pw.TextAlign.left,
+    pw.FontWeight fontWeight = pw.FontWeight.normal,
+  }) {
+    return pw.Padding(
+      padding: const pw.EdgeInsets.all(3),
+      child: pw.Text(
+        text,
+        textAlign: textAlign,
+        style: pw.TextStyle(fontSize: 7, fontWeight: fontWeight),
+      ),
+    );
+  }
+
   pw.Widget _buildPoliTicket(
     ApmAntrianPoliModel m,
     String qrData,
     String date,
     String time,
   ) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.center,
-      children: [
-        _buildHeader(),
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-          children: [
-            pw.Expanded(
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(
-                    formatNama(m.nama.toUpperCase()),
-                    style: pw.TextStyle(
-                      fontSize: 10,
-                      fontWeight: pw.FontWeight.bold,
+    return pw.Container(
+      width: 150 * PdfPageFormat.mm,
+      padding: const pw.EdgeInsets.all(2),
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
+        children: [
+          _buildCardHeader(),
+          pw.SizedBox(height: 3),
+          pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Expanded(
+                flex: 45,
+                child: pw.Container(
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(width: 1.5),
+                  ),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(3),
+                        child: pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            _buildCardInfoRow('RM', m.rm),
+                            _buildCardInfoRow(
+                              'Nama',
+                              formatNama(m.nama.toUpperCase()),
+                            ),
+                            _buildCardInfoRow('Tgl Lahir', '-'),
+                            _buildCardInfoRow('Telp', '-'),
+                            _buildCardInfoRow('Poli', formatNama(m.namaPoli)),
+                            _buildCardInfoRow('Dokter', '-'),
+                          ],
+                        ),
+                      ),
+                      pw.Container(
+                        decoration: pw.BoxDecoration(
+                          border: pw.Border(top: pw.BorderSide(width: 1.5)),
+                        ),
+                        padding: const pw.EdgeInsets.symmetric(
+                          vertical: 6,
+                          horizontal: 4,
+                        ),
+                        child: pw.Row(
+                          children: [
+                            pw.Expanded(
+                              child: pw.Column(
+                                crossAxisAlignment:
+                                    pw.CrossAxisAlignment.center,
+                                children: [
+                                  pw.Text(
+                                    'NO ANTRIAN',
+                                    style: pw.TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: pw.FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  pw.SizedBox(height: 2),
+                                  pw.Text(
+                                    m.noChekinPoli,
+                                    style: pw.TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: pw.FontWeight.bold,
+                                      height: 1,
+                                    ),
+                                    textAlign: pw.TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            pw.SizedBox(width: 6),
+                            pw.SizedBox(
+                              width: 42,
+                              height: 42,
+                              child: pw.BarcodeWidget(
+                                barcode: pw.Barcode.qrCode(),
+                                data: qrData,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              pw.SizedBox(width: 4),
+              pw.Expanded(
+                flex: 80,
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Container(
+                      decoration: pw.BoxDecoration(
+                        border: pw.Border.all(width: 1.5),
+                        color: PdfColors.grey300,
+                      ),
+                      padding: const pw.EdgeInsets.all(3),
+                      child: pw.Center(
+                        child: pw.Text(
+                          'FORMULIR KENDALI TINDAKAN RAWAT JALAN',
+                          style: pw.TextStyle(
+                            fontSize: 8,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                          textAlign: pw.TextAlign.center,
+                        ),
+                      ),
                     ),
-                  ),
-                  pw.Text(
-                    'RM: ${m.rm}',
-                    style: const pw.TextStyle(fontSize: 9),
-                  ),
-                ],
+                    pw.Container(
+                      decoration: pw.BoxDecoration(
+                        border: pw.Border(
+                          left: pw.BorderSide(width: 1.5),
+                          right: pw.BorderSide(width: 1.5),
+                          bottom: pw.BorderSide(width: 1.5),
+                        ),
+                      ),
+                      child: _buildCardFormTable(),
+                    ),
+                  ],
+                ),
               ),
+            ],
+          ),
+          pw.SizedBox(height: 4),
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(top: pw.BorderSide(width: 1)),
             ),
-            pw.SizedBox(
-              width: 50,
-              height: 50,
-              child: pw.BarcodeWidget(
-                barcode: pw.Barcode.qrCode(),
-                data: qrData,
-              ),
+            padding: const pw.EdgeInsets.only(top: 3),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.end,
+              children: [
+                pw.Text(
+                  'Generated: $date $time',
+                  style: const pw.TextStyle(fontSize: 7),
+                ),
+              ],
             ),
-          ],
-        ),
-        pw.Divider(thickness: 1),
-        pw.Text('No. Antrian Poli', style: const pw.TextStyle(fontSize: 9)),
-        pw.Text(
-          formatNama(m.namaPoli),
-          style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
-        ),
-        pw.Text(
-          m.noChekinPoli,
-          style: pw.TextStyle(fontSize: 35, fontWeight: pw.FontWeight.bold),
-        ),
-        pw.Text('$date / $time', style: const pw.TextStyle(fontSize: 8)),
-      ],
+          ),
+        ],
+      ),
     );
   }
 
