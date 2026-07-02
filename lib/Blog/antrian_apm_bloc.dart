@@ -1209,7 +1209,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Expanded(
-                flex: 40,
+                flex: 35,
                 child: pw.Container(
                   decoration: pw.BoxDecoration(
                     border: pw.Border.all(width: 1.5),
@@ -1236,7 +1236,10 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                               '${m.tanggalBooking} ${m.jamBooking}' ?? '-',
                             ),
                             _buildCardInfoRow('Poli', formatNama(m.namaPoli)),
-                            _buildCardInfoRow('Dokter', '-'),
+                            _buildCardInfoRow(
+                              'Dokter',
+                              m.namadokter.isNotEmpty ? m.namadokter : '-',
+                            ),
                           ],
                         ),
                       ),
@@ -1278,8 +1281,8 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                             ),
                             pw.SizedBox(width: 3),
                             pw.SizedBox(
-                              width: 45,
-                              height: 45,
+                              width: 60,
+                              height: 60,
                               child: pw.BarcodeWidget(
                                 barcode: pw.Barcode.qrCode(),
                                 data: qrData,

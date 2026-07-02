@@ -6,6 +6,7 @@ class ApmAntrianPoliModel {
   String noChekinPoli;
   String namaPoli;
   int idDokter;
+  String namadokter;
   String tanggalLahir;
   String tanggalBooking;
   String jamBooking;
@@ -20,6 +21,7 @@ class ApmAntrianPoliModel {
     required this.rm,
     required this.namaPoli,
     required this.idDokter,
+    required this.namadokter,
     required this.tanggalLahir,
     required this.jamBooking,
     required this.tanggalBooking,
@@ -62,12 +64,16 @@ class ApmAntrianPoliModel {
       noChekinPoli: rootData['no_checkin']?.toString() ?? '',
       nama: data['nama'] ?? '',
       rm: data['rm']?.toString() ?? '',
-      namaPoli: data['nama_poli'] ?? '',
+      namaPoli: data['nama'] ?? '',
       idDokter: int.tryParse(data['id_dokter']?.toString() ?? '0') ?? 0,
+      namadokter:
+          data['namadokter']?.toString() ??
+          data['namadokter']?.toString() ??
+          '',
       idJadwalDokter: data['id_jadwal_dokter']?.toString() ?? '',
       idLayanan: int.tryParse(data['id_unit']?.toString() ?? '0') ?? 0,
-      tanggalLahir: data['tanggal_lahir']?.toString() ?? '',
-      tanggalBooking: data['tanggal_booking']?.toString() ?? '',
+      tanggalLahir: data['tgl_lahir']?.toString() ?? '',
+      tanggalBooking: data['tgl_booking']?.toString() ?? '',
       jamBooking: data['jam_booking']?.toString() ?? '',
     );
   }
