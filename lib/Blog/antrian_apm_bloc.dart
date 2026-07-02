@@ -1034,9 +1034,9 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     return pw.Table(
       border: pw.TableBorder.all(width: 1),
       columnWidths: const {
-        0: pw.FixedColumnWidth(25),
-        1: pw.FixedColumnWidth(25),
-        2: pw.FlexColumnWidth(),
+        0: pw.FixedColumnWidth(20),
+        1: pw.FixedColumnWidth(20),
+        2: pw.FlexColumnWidth(0.6),
       },
       children: [
         pw.TableRow(
