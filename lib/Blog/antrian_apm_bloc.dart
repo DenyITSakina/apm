@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:apm/api/api_config.dart';
 import 'package:colorful_print/colorful_print.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
@@ -858,6 +860,9 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     final pdf = pw.Document();
     final now = DateTime.now();
     final qrData = apmPoliModel.rm;
+    final logoBytes = (await rootBundle.load(
+      'assets/images/logo.webp',
+    )).buffer.asUint8List();
 
     pdf.addPage(
       pw.Page(
@@ -871,6 +876,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
           qrData,
           _formatDate(now),
           _formatTime(now),
+          logoBytes,
         ),
       ),
     );
@@ -963,7 +969,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     ],
   );
 
-  pw.Widget _buildCardHeader() {
+  pw.Widget _buildCardHeader(Uint8List logoBytes) {
     return pw.Container(
       decoration: pw.BoxDecoration(
         border: pw.Border(bottom: pw.BorderSide(width: 2)),
@@ -978,12 +984,11 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
               color: PdfColors.grey200,
             ),
             child: pw.Center(
-              child: pw.Text(
-                'RS',
-                style: pw.TextStyle(
-                  fontSize: 8,
-                  fontWeight: pw.FontWeight.bold,
-                ),
+              child: pw.Image(
+                pw.MemoryImage(logoBytes),
+                width: 15,
+                height: 15,
+                fit: pw.BoxFit.contain,
               ),
             ),
           ),
@@ -1196,6 +1201,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     String qrData,
     String date,
     String time,
+    Uint8List logoBytes,
   ) {
     return pw.Container(
       width: 200 * PdfPageFormat.mm,
@@ -1203,7 +1209,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          _buildCardHeader(),
+          _buildCardHeader(logoBytes),
           pw.SizedBox(height: 3),
           pw.Row(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
