@@ -342,26 +342,6 @@ class _DashboardApmState extends State<DashboardApm>
                                     _showBookingTypeDialog(context);
                                   },
                                 ),
-
-                                _buildServiceCard(
-                                  title: "Test Tiket",
-                                  image: "assets/images/booking.png",
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFFBF360C),
-                                      Color(0xFFE65100),
-                                      Color(0xFFF57C00),
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  icon: Icons.calendar_month,
-                                  description: "Booking untuk pasien",
-                                  onTap: () => _navigateTo(
-                                    context,
-                                    const AntrianCard(pasien: {}),
-                                  ),
-                                ),
                                 // _buildServiceCard(
                                 //   title: "BPJS DAFTAR",
                                 //   image: "assets/images/bpjs.png",
