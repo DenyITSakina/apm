@@ -1281,8 +1281,8 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                             ),
                             pw.SizedBox(width: 3),
                             pw.SizedBox(
-                              width: 70,
-                              height: 70,
+                              width: 80,
+                              height: 80,
                               child: pw.BarcodeWidget(
                                 barcode: pw.Barcode.qrCode(),
                                 data: qrData,
