@@ -862,8 +862,8 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     pdf.addPage(
       pw.Page(
         pageFormat: const PdfPageFormat(
-          72 * PdfPageFormat.mm,
-          100 * PdfPageFormat.mm,
+          210 * PdfPageFormat.mm,
+          250 * PdfPageFormat.mm,
         ),
         margin: const pw.EdgeInsets.all(12),
         build: (context) => _buildPoliTicket(
@@ -1057,6 +1057,16 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
               textAlign: pw.TextAlign.center,
               fontWeight: pw.FontWeight.bold,
             ),
+            _buildCardTableCell(
+              'Paraf',
+              textAlign: pw.TextAlign.center,
+              fontWeight: pw.FontWeight.bold,
+            ),
+            _buildCardTableCell(
+              'Paraf',
+              textAlign: pw.TextAlign.center,
+              fontWeight: pw.FontWeight.bold,
+            ),
           ],
         ),
         pw.TableRow(
@@ -1188,7 +1198,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     String time,
   ) {
     return pw.Container(
-      width: 150 * PdfPageFormat.mm,
+      width: 200 * PdfPageFormat.mm,
       padding: const pw.EdgeInsets.all(2),
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
@@ -1199,7 +1209,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Expanded(
-                flex: 45,
+                flex: 40,
                 child: pw.Container(
                   decoration: pw.BoxDecoration(
                     border: pw.Border.all(width: 1.5),
@@ -1236,6 +1246,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                           children: [
                             pw.Expanded(
                               child: pw.Column(
+                                mainAxisAlignment: pw.MainAxisAlignment.start,
                                 crossAxisAlignment:
                                     pw.CrossAxisAlignment.center,
                                 children: [
@@ -1342,28 +1353,31 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     String date,
     String time,
   ) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.center,
-      children: [
-        _buildHeader(),
-        pw.Text(
-          'ANTRIAN LOKET',
-          style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
-        ),
-        pw.Divider(),
-        pw.Text(
-          no,
-          style: pw.TextStyle(fontSize: 42, fontWeight: pw.FontWeight.bold),
-          textAlign: pw.TextAlign.center,
-        ),
-        pw.Text('$date  $time', style: const pw.TextStyle(fontSize: 8)),
-        pw.Divider(),
-        pw.Text(
-          'Silahkan menunggu panggilan',
-          style: const pw.TextStyle(fontSize: 8),
-          textAlign: pw.TextAlign.center,
-        ),
-      ],
+    return pw.Container(
+      width: 210 * PdfPageFormat.mm,
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.center,
+        children: [
+          _buildHeader(),
+          pw.Text(
+            'ANTRIAN LOKET',
+            style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.Divider(),
+          pw.Text(
+            no,
+            style: pw.TextStyle(fontSize: 42, fontWeight: pw.FontWeight.bold),
+            textAlign: pw.TextAlign.center,
+          ),
+          pw.Text('$date  $time', style: const pw.TextStyle(fontSize: 8)),
+          pw.Divider(),
+          pw.Text(
+            'Silahkan menunggu panggilan',
+            style: const pw.TextStyle(fontSize: 8),
+            textAlign: pw.TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 
@@ -1377,64 +1391,67 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
   ) {
     final namaPoli = getNamaPoliByIdUnit(m.idUnit, listPoli);
 
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.center,
-      children: [
-        _buildHeader(),
-        pw.Row(
-          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-          children: [
-            pw.Expanded(
-              child: pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(
-                    formatNama(m.grupJaminan),
-                    style: pw.TextStyle(
-                      fontSize: 6,
-                      fontWeight: pw.FontWeight.bold,
+    return pw.Container(
+      width: 210 * PdfPageFormat.mm,
+      child: pw.Column(
+        crossAxisAlignment: pw.CrossAxisAlignment.center,
+        children: [
+          _buildHeader(),
+          pw.Row(
+            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Expanded(
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text(
+                      formatNama(m.grupJaminan),
+                      style: pw.TextStyle(
+                        fontSize: 6,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  pw.Text(
-                    formatNama(m.nama),
-                    style: pw.TextStyle(
-                      fontSize: 10,
-                      fontWeight: pw.FontWeight.bold,
+                    pw.Text(
+                      formatNama(m.nama),
+                      style: pw.TextStyle(
+                        fontSize: 10,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  pw.Text(
-                    'RM: ${m.rm}',
-                    style: const pw.TextStyle(fontSize: 9),
-                  ),
-                ],
+                    pw.Text(
+                      'RM: ${m.rm}',
+                      style: const pw.TextStyle(fontSize: 9),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            pw.SizedBox(
-              width: 50,
-              height: 50,
-              child: pw.BarcodeWidget(
-                barcode: pw.Barcode.qrCode(),
-                data: qrData,
+              pw.SizedBox(
+                width: 50,
+                height: 50,
+                child: pw.BarcodeWidget(
+                  barcode: pw.Barcode.qrCode(),
+                  data: qrData,
+                ),
               ),
-            ),
-          ],
-        ),
-        pw.Divider(thickness: 1),
-        pw.Text('No. Antrian Poli', style: const pw.TextStyle(fontSize: 9)),
-        pw.Text(
-          formatNama(namaPoli),
-          style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
-        ),
-        pw.Text(
-          m.noChekin,
-          style: pw.TextStyle(fontSize: 35, fontWeight: pw.FontWeight.bold),
-        ),
-        pw.SizedBox(height: 8),
-        pw.Text(
-          '$date / $time / pendaftaran',
-          style: const pw.TextStyle(fontSize: 8),
-        ),
-      ],
+            ],
+          ),
+          pw.Divider(thickness: 1),
+          pw.Text('No. Antrian Poli', style: const pw.TextStyle(fontSize: 9)),
+          pw.Text(
+            formatNama(namaPoli),
+            style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.Text(
+            m.noChekin,
+            style: pw.TextStyle(fontSize: 35, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.SizedBox(height: 8),
+          pw.Text(
+            '$date / $time / pendaftaran',
+            style: const pw.TextStyle(fontSize: 8),
+          ),
+        ],
+      ),
     );
   }
 }
