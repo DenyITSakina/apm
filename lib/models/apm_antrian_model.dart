@@ -18,8 +18,10 @@ class ApmAntrianModel {
   final String namaPoli;
   final String jamPraktik;
   final int statusBooking;
+  final int pasienBaru;
 
   // Constructor dengan default values
+
   const ApmAntrianModel({
     this.id = '',
     this.rm = '',
@@ -40,6 +42,7 @@ class ApmAntrianModel {
     this.namaPoli = '',
     this.jamPraktik = '',
     this.statusBooking = 0,
+    this.pasienBaru = 0,
   });
 
   factory ApmAntrianModel.fromJson(Map<String, dynamic> json) {
@@ -67,6 +70,7 @@ class ApmAntrianModel {
       namaPoli: _toString(data, 'nama_poli') ?? '',
       jamPraktik: _toString(data, 'jam_praktik') ?? '',
       statusBooking: _toInt(data, 'status_booking') ?? 0,
+      pasienBaru: _toInt(data, 'pasien_baru') ?? 0,
     );
   }
 

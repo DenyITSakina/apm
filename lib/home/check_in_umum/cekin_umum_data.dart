@@ -314,13 +314,21 @@ class CekinUmumDataPage extends StatelessWidget {
         final isLoadingPoli = state is AntrianApmLoading;
         final isLoadingLoket = state is AntrianApmPrinting;
 
+        final isPasienBaru = data.pasienBaru == 0;
+
         return Column(
           children: [
             Row(
               children: [
-                Expanded(child: _buildPoliButton(context, isLoadingPoli)),
-                const SizedBox(width: 12),
-                Expanded(child: _buildLoketButton(context, isLoadingLoket)),
+                if (isPasienBaru)
+                  Expanded(child: _buildPoliButton(context, isLoadingPoli))
+                else
+                  const SizedBox.shrink(),
+
+                if (!isPasienBaru)
+                  Expanded(child: _buildLoketButton(context, isLoadingLoket))
+                else
+                  const SizedBox.shrink(),
               ],
             ),
             const SizedBox(height: 20),
@@ -374,7 +382,7 @@ class CekinUmumDataPage extends StatelessWidget {
                       size: 15,
                     )
                   : Text(
-                      "LANJUT PILIH KE POLI",
+                      "SILAHKAN KE POLI",
                       style: GoogleFonts.oswald(
                         fontSize: 20,
                         fontWeight: FontWeight.w700,
