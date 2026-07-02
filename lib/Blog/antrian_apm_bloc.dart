@@ -1270,7 +1270,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                                   pw.Text(
                                     m.noAntrianPoli,
                                     style: pw.TextStyle(
-                                      fontSize: 24,
+                                      fontSize: 29,
                                       fontWeight: pw.FontWeight.bold,
                                       height: 1,
                                     ),
@@ -1281,8 +1281,8 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                             ),
                             pw.SizedBox(width: 3),
                             pw.SizedBox(
-                              width: 80,
-                              height: 80,
+                              width: 75,
+                              height: 75,
                               child: pw.BarcodeWidget(
                                 barcode: pw.Barcode.qrCode(),
                                 data: qrData,
