@@ -857,7 +857,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
   ) async {
     final pdf = pw.Document();
     final now = DateTime.now();
-    final qrData = json.encode(apmPoliModel.rm);
+    final qrData = apmPoliModel.rm;
 
     pdf.addPage(
       pw.Page(
