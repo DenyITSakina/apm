@@ -68,6 +68,7 @@ class BookingData {
   final String nik;
   final String unit;
   final String dokter;
+  final String jamPraktek;
   final String? poliRujukan;
   final String? kodePoliRujukan;
   final String? noBpjs;
@@ -84,6 +85,7 @@ class BookingData {
     required this.nik,
     required this.unit,
     required this.dokter,
+    required this.jamPraktek,
     this.poliRujukan,
     this.kodePoliRujukan,
     this.noBpjs,
@@ -118,6 +120,7 @@ class BookingData {
       nik: json['nik']?.toString() ?? '',
       unit: json['unit']?.toString() ?? '',
       dokter: json['dokter']?.toString() ?? '',
+      jamPraktek: json['jam_praktik']?.toString() ?? '',
       poliRujukan: poliRujukanNama,
       kodePoliRujukan: poliRujukanKode,
       noBpjs: json['no_bpjs']?.toString(),

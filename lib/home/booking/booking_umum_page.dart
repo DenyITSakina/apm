@@ -928,6 +928,11 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
                   _buildInfoRow(Icons.local_hospital, 'Unit', unitName),
                   _buildDivider(),
                   _buildInfoRow(Icons.medical_services, 'Dokter', dokterName),
+                  _buildInfoRow(
+                    Icons.access_time_filled_outlined,
+                    'Jam Praktek',
+                    data.jamPraktek,
+                  ),
                   _buildDivider(),
                 ],
               ),
@@ -946,7 +951,7 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
                       namaPoli: unitName,
                       tanggalPeriksa: data.tanggalPeriksa,
                       namaDokter: dokterName,
-                      jamPraktek: data.jamBooking,
+                      jamPraktek: data.jamPraktek,
                       qrData: data.kodeBooking,
                     );
 
