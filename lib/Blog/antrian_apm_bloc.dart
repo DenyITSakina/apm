@@ -857,23 +857,15 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
   Future<void> _runPrintSetupAutomation() async {
     try {
       printColor(
-        '🖨️ Menjalankan Print Setup automation...',
+        'Menjalankan Print Setup automation...',
         textColor: TextColor.cyan,
       );
-
-      // Delay 500ms untuk memastikan dialog sudah terbuka
       await Future.delayed(const Duration(milliseconds: 200));
-
-      // Jalankan script Python
       await PrintSetupRunner.runScript('print_setup.py');
-
-      printColor(
-        '✅ Print Setup automation selesai!',
-        textColor: TextColor.green,
-      );
+      printColor('Print Setup automation selesai!', textColor: TextColor.green);
     } catch (e) {
       printColor(
-        '❌ Gagal menjalankan Print Setup automation: $e',
+        'Gagal menjalankan Print Setup automation: $e',
         textColor: TextColor.red,
       );
     }
@@ -906,28 +898,15 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
         ),
       ),
     );
+    printColor('Menampilkan Print Setup dialog...', textColor: TextColor.cyan);
 
-    // ============ URUTAN YANG DIPERBAIKI ============
-    // STEP 1: Tampilkan Print Setup dialog terlebih dahulu
-    printColor(
-      '🖨️ Menampilkan Print Setup dialog...',
-      textColor: TextColor.cyan,
-    );
-
-    // Mulai printing PDF (ini akan membuka dialog Print Setup)
     final printingTask = Printing.layoutPdf(
       onLayout: (format) async => pdf.save(),
     );
 
-    // Beri waktu untuk dialog muncul
     await Future.delayed(const Duration(milliseconds: 800));
-
-    // STEP 2: Jalankan script Python untuk mengatur Print Setup
     await _runPrintSetupAutomation();
-
-    // STEP 3: Tunggu printing selesai
     await printingTask;
-    // ================================================
   }
 
   Future<void> _printToThermalPrinterLoket(
