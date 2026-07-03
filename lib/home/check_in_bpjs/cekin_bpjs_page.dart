@@ -465,7 +465,10 @@ class _CekinBpjsState extends State<CekinBpjs> {
           final canCheck = _isTimeInRange(now, jamPraktikRaw);
 
           if (!canCheck) {
-            TopToast.warning(context, 'Jam periksa anda $jamPeriksaText');
+            TopToast.warning(
+              context,
+              'Jam periksa anda $jamPeriksaText dan tidak dapat melakukan check-in sekarang.',
+            );
             setState(() => _isProcessing = false);
             _refocusScanner();
             return;
