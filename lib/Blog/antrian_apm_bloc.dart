@@ -868,9 +868,9 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
       pw.Page(
         pageFormat: const PdfPageFormat(
           210 * PdfPageFormat.mm,
-          250 * PdfPageFormat.mm,
+          double.infinity,
+          marginAll: 2 * PdfPageFormat.mm,
         ),
-        margin: const pw.EdgeInsets.all(12),
         build: (context) => _buildPoliTicket(
           apmPoliModel,
           qrData,
@@ -1026,10 +1026,10 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
             width: 30,
             child: pw.Text(
               label,
-              style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
+              style: pw.TextStyle(fontSize: 7, fontWeight: pw.FontWeight.bold),
             ),
           ),
-          pw.Text(': $value', style: const pw.TextStyle(fontSize: 8)),
+          pw.Text(': $value', style: const pw.TextStyle(fontSize: 7)),
         ],
       ),
     );
@@ -1187,7 +1187,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     pw.FontWeight fontWeight = pw.FontWeight.normal,
   }) {
     return pw.Padding(
-      padding: const pw.EdgeInsets.all(3),
+      padding: const pw.EdgeInsets.all(2),
       child: pw.Text(
         text,
         textAlign: textAlign,
@@ -1287,8 +1287,8 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                             ),
                             pw.SizedBox(width: 3),
                             pw.SizedBox(
-                              width: 79,
-                              height: 79,
+                              width: 57,
+                              height: 57,
                               child: pw.BarcodeWidget(
                                 barcode: pw.Barcode.qrCode(),
                                 data: qrData,
@@ -1312,7 +1312,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                         border: pw.Border.all(width: 1.5),
                         color: PdfColors.grey300,
                       ),
-                      padding: const pw.EdgeInsets.all(3),
+                      padding: const pw.EdgeInsets.all(2),
                       child: pw.Center(
                         child: pw.Text(
                           'FORMULIR KENDALI TINDAKAN RAWAT JALAN',
