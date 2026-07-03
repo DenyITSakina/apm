@@ -404,7 +404,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
           if (!canCheck) {
             TopToast.warning(
               context,
-              'Jam periksa anda $jamPeriksaText dan tidak dapat melakukan check-in sekarang.',
+              'Jam periksa anda $jamPeriksaText, silahkan melakukan check-in sekarang.',
             );
             setState(() => _isProcessing = false);
             _refocusScanner();
