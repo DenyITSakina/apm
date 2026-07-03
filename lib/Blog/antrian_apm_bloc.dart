@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:apm/api/api_config.dart';
+import 'package:apm/utils/print_setup_runner.dart';
 import 'package:colorful_print/colorful_print.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -853,6 +854,31 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     return [];
   }
 
+  Future<void> _runPrintSetupAutomation() async {
+    try {
+      printColor(
+        '🖨️ Menjalankan Print Setup automation...',
+        textColor: TextColor.cyan,
+      );
+
+      // Delay 500ms untuk memastikan dialog sudah terbuka
+      await Future.delayed(const Duration(milliseconds: 200));
+
+      // Jalankan script Python
+      await PrintSetupRunner.runScript('print_setup.py');
+
+      printColor(
+        '✅ Print Setup automation selesai!',
+        textColor: TextColor.green,
+      );
+    } catch (e) {
+      printColor(
+        '❌ Gagal menjalankan Print Setup automation: $e',
+        textColor: TextColor.red,
+      );
+    }
+  }
+
   Future<void> _printToThermalPrinterPoli(
     ApmAntrianPoliModel apmPoliModel,
     String jenisAntrian,
@@ -881,7 +907,27 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
       ),
     );
 
-    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+    // ============ URUTAN YANG DIPERBAIKI ============
+    // STEP 1: Tampilkan Print Setup dialog terlebih dahulu
+    printColor(
+      '🖨️ Menampilkan Print Setup dialog...',
+      textColor: TextColor.cyan,
+    );
+
+    // Mulai printing PDF (ini akan membuka dialog Print Setup)
+    final printingTask = Printing.layoutPdf(
+      onLayout: (format) async => pdf.save(),
+    );
+
+    // Beri waktu untuk dialog muncul
+    await Future.delayed(const Duration(milliseconds: 800));
+
+    // STEP 2: Jalankan script Python untuk mengatur Print Setup
+    await _runPrintSetupAutomation();
+
+    // STEP 3: Tunggu printing selesai
+    await printingTask;
+    // ================================================
   }
 
   Future<void> _printToThermalPrinterLoket(
