@@ -1,73 +1,141 @@
 // ignore: file_names
-import 'dart:ffi';
 import 'dart:io';
 
 import 'package:apm/dialog/top_toast.dart';
-import 'package:ffi/ffi.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:apm/api/vclaim_api_service.dart';
 
-import 'package:win32/win32.dart';
+const int vkReturn = 0x0D;
+const int vkTab = 0x09;
 
 Future<bool> isSidikJariRunning() async {
+  if (kIsWeb) {
+    debugPrint('Fitur proses native tidak tersedia di web');
+    return false;
+  }
+
   final result = await Process.run('tasklist', [], runInShell: true);
   return result.stdout.toString().contains("After.exe");
 }
 
 Future<void> closeSidikJariExe() async {
+  if (kIsWeb) {
+    return;
+  }
+
   await Process.run('taskkill', ['/IM', 'After.exe', '/F'], runInShell: true);
 }
 
+String _escapePowerShell(String value) => value.replaceAll("'", "''");
+
 bool isWindowOpen(String windowTitle) {
-  final titlePtr = windowTitle.toNativeUtf16();
-  final hWnd = FindWindow(nullptr, titlePtr);
-  calloc.free(titlePtr);
-  return hWnd != 0;
+  if (kIsWeb) {
+    return false;
+  }
+
+  final script =
+      '''
+  Add-Type -AssemblyName System.Windows.Forms
+  \$title = '${_escapePowerShell(windowTitle)}'
+  \$process = Get-Process | Where-Object {
+    \$_.MainWindowTitle -like "*\$title*" -or \$_.ProcessName -like "*\$title*"
+  } | Select-Object -First 1
+  if (\$process) { exit 0 } else { exit 1 }
+  ''';
+
+  final result = Process.runSync('powershell.exe', [
+    '-NoProfile',
+    '-ExecutionPolicy',
+    'Bypass',
+    '-Command',
+    script,
+  ]);
+
+  return result.exitCode == 0;
 }
 
 void focusWindow(String windowTitle) {
-  final titlePtr = windowTitle.toNativeUtf16();
-  final hWnd = FindWindow(nullptr, titlePtr);
-
-  if (hWnd != 0) {
-    SetForegroundWindow(hWnd);
-    debugPrint("Window ditemukan & difokuskan");
-  } else {
-    debugPrint("Window tidak ditemukan: $windowTitle");
+  if (kIsWeb) {
+    debugPrint('Fokus window tidak tersedia di web');
+    return;
   }
 
-  calloc.free(titlePtr);
+  final script =
+      '''
+  \$source = @"
+  using System;
+  using System.Runtime.InteropServices;
+  public static class Win32 {
+    [DllImport("user32.dll")]
+    public static extern bool SetForegroundWindow(IntPtr hWnd);
+    [DllImport("user32.dll")]
+    public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+    [DllImport("user32.dll")]
+    public static extern bool IsIconic(IntPtr hWnd);
+  }
+  "@
+  Add-Type -TypeDefinition \$source
+  \$title = '${_escapePowerShell(windowTitle)}'
+  \$process = Get-Process | Where-Object {
+    \$_.MainWindowTitle -like "*\$title*" -or \$_.ProcessName -like "*\$title*"
+  } | Select-Object -First 1
+
+  if (\$process -and \$process.MainWindowHandle -ne 0) {
+    \$handle = \$process.MainWindowHandle
+    if ([Win32]::IsIconic(\$handle)) {
+      [Win32]::ShowWindow(\$handle, 9) | Out-Null
+    }
+    [Win32]::SetForegroundWindow(\$handle) | Out-Null
+  }
+  ''';
+
+  Process.runSync('powershell.exe', [
+    '-NoProfile',
+    '-ExecutionPolicy',
+    'Bypass',
+    '-Command',
+    script,
+  ]);
 }
 
 void sendVirtualKey(int keyCode) {
-  final input = calloc<INPUT>();
-  input.ref.type = INPUT_KEYBOARD;
-  input.ref.ki.wVk = keyCode;
-  SendInput(1, input, sizeOf<INPUT>());
+  final key = switch (keyCode) {
+    vkReturn => '{ENTER}',
+    vkTab => '{TAB}',
+    _ => null,
+  };
 
-  input.ref.ki.dwFlags = KEYEVENTF_KEYUP;
-  SendInput(1, input, sizeOf<INPUT>());
+  if (key == null) {
+    debugPrint('Key tidak didukung: $keyCode');
+    return;
+  }
 
-  calloc.free(input);
+  sendKeys(key);
 }
 
 void sendKeys(String text) {
-  for (final rune in text.runes) {
-    final input = calloc<INPUT>();
-    input.ref.type = INPUT_KEYBOARD;
-    input.ref.ki.wScan = rune;
-    input.ref.ki.dwFlags = KEYEVENTF_UNICODE;
-    SendInput(1, input, sizeOf<INPUT>());
-
-    input.ref.ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP;
-    SendInput(1, input, sizeOf<INPUT>());
-
-    calloc.free(input);
+  if (kIsWeb || text.isEmpty) {
+    return;
   }
+
+  final script =
+      '''
+  Add-Type -AssemblyName System.Windows.Forms
+  [System.Windows.Forms.SendKeys]::SendWait('${_escapePowerShell(text)}')
+  ''';
+
+  Process.runSync('powershell.exe', [
+    '-NoProfile',
+    '-ExecutionPolicy',
+    'Bypass',
+    '-Command',
+    script,
+  ]);
 }
 
-void pressEnter() => sendVirtualKey(VK_RETURN);
-void pressTab() => sendVirtualKey(VK_TAB);
+void pressEnter() => sendVirtualKey(vkReturn);
+void pressTab() => sendVirtualKey(vkTab);
 
 Future<void> sendAutoLogin({
   required String username,
@@ -108,6 +176,13 @@ Future<bool> openExeFromMap(
 }
 
 Future<void> openExe(BuildContext context, String noPeserta) async {
+  if (kIsWeb) {
+    if (context.mounted) {
+      TopToast.error(context, 'Fitur ini hanya tersedia di aplikasi desktop');
+    }
+    return;
+  }
+
   const exePath =
       r"C:\Program Files (x86)\BPJS Kesehatan\Aplikasi Sidik Jari BPJS Kesehatan\After.exe";
 
