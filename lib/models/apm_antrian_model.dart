@@ -17,6 +17,7 @@ class ApmAntrianModel {
   final String namaDokter;
   final String namaPoli;
   final String jamPraktik;
+  final String tglBooking;
   final int statusBooking;
   final int pasienBaru;
 
@@ -41,6 +42,7 @@ class ApmAntrianModel {
     this.namaDokter = '',
     this.namaPoli = '',
     this.jamPraktik = '',
+    this.tglBooking = '',
     this.statusBooking = 0,
     this.pasienBaru = 0,
   });
@@ -69,6 +71,7 @@ class ApmAntrianModel {
       namaDokter: _toString(data, 'nama_dokter') ?? '',
       namaPoli: _toString(data, 'nama_poli') ?? '',
       jamPraktik: _toString(data, 'jam_praktik') ?? '',
+      tglBooking: _toString(data, 'tgl_booking') ?? '',
       statusBooking: _toInt(data, 'status_booking') ?? 0,
       pasienBaru: _toInt(data, 'pasien_baru') ?? 0,
     );

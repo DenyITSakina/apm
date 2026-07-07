@@ -30,46 +30,31 @@ class ApmAntrianPoliModel {
     required this.idLayanan,
   });
 
-  //   factory ApmAntrianPoliModel.fromJson(
-  //     Map<String, dynamic> data, {
-  //     String namaPoliRoot = '',
-  //   }) {
-  //     return ApmAntrianPoliModel(
-  //       noBooking: data['id']?.toString() ?? '',
-  //       noAntrianPoli: data['no_antrian']?.toString() ?? '',
-  //       noChekinPoli: data['no_checkin']?.toString() ?? '',
-  //       nama: data['nama'] ?? '',
-  //       rm: data['rm']?.toString() ?? '',
-  //       namaPoli:
-  //           data['nama_unit']?.toString() ??
-  //           data['nama_poli']?.toString() ??
-  //           namaPoliRoot,
-  //       idDokter: int.tryParse(data['id_dokter']?.toString() ?? '0') ?? 0,
-  //       idJadwalDokter: data['id_jadwal_dokter']?.toString() ?? '',
-  //       idLayanan: int.tryParse(data['id_layanan']?.toString() ?? '0') ?? 0,
-  //     );
-  //   }
-  // }
-
   factory ApmAntrianPoliModel.fromJson(Map<String, dynamic> json) {
-    // API sekarang bentuknya:
-    // json['data']['data'] = payload utama
-    // json['data']['no_checkin'] = nilai root tambahan
     final rootData = (json['data'] as Map<String, dynamic>?) ?? {};
     final data = (rootData['data'] as Map<String, dynamic>?) ?? rootData;
+    final poliFromKey =
+        data['namapoli']?.toString() ?? data['nama_poli']?.toString();
+    final poliFromNested =
+        (data['polyclinic'] as Map<String, dynamic>?)?['nama']?.toString();
+    final namaPoliFinal = (poliFromKey ?? poliFromNested ?? '').toString();
+
+    final dokterFromKey =
+        data['namadokter']?.toString() ?? data['nama_dokter']?.toString();
+    final dokterFromNested =
+        (data['doctor'] as Map<String, dynamic>?)?['namadokter']?.toString();
+    final namadokterFinal = (dokterFromKey ?? dokterFromNested ?? '')
+        .toString();
 
     return ApmAntrianPoliModel(
       noBooking: data['id']?.toString() ?? '',
       noAntrianPoli: data['no_antrian']?.toString() ?? '',
       noChekinPoli: rootData['no_checkin']?.toString() ?? '',
-      nama: data['nama'] ?? '',
+      nama: data['nama']?.toString() ?? '',
       rm: data['rm']?.toString() ?? '',
-      namaPoli: data['nama'] ?? '',
+      namaPoli: namaPoliFinal.isNotEmpty ? namaPoliFinal : '-',
       idDokter: int.tryParse(data['id_dokter']?.toString() ?? '0') ?? 0,
-      namadokter:
-          data['namadokter']?.toString() ??
-          data['namadokter']?.toString() ??
-          '',
+      namadokter: namadokterFinal,
       idJadwalDokter: data['id_jadwal_dokter']?.toString() ?? '',
       idLayanan: int.tryParse(data['id_unit']?.toString() ?? '0') ?? 0,
       tanggalLahir: data['tgl_lahir']?.toString() ?? '',
