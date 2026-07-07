@@ -27,7 +27,6 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
   String _formatTanggalBooking(String tanggalBookingRaw) {
     final s = tanggalBookingRaw.trim();
     if (s.isEmpty) return '-';
-    // Normalisasi karakter dash yang kadang muncul dari backend.
     return s.replaceAll('–', '-').replaceAll('—', '-');
   }
 
@@ -355,12 +354,10 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
           if (tanggalBookingText != '-') {
             TopToast.warning(
               context,
-              'Tanggal booking anda $tanggalBookingText, silahkan melakukan check-in sekarang.',
+              'Tanggal booking anda $tanggalBookingText',
             );
-            // Tidak ada validasi jam, hanya konfirmasi booking.
           }
 
-          // Clear input setelah berhasil
           setState(() {
             controller.clear();
           });
