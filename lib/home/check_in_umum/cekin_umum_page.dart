@@ -24,57 +24,11 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
   final Color secondaryColor = const Color(0xFF0ABF68);
   final Color bgColor = const Color(0xFFF8FAFC);
 
-  String _formatJamPeriksa(String jamPraktikRaw) {
-    final s = jamPraktikRaw.trim();
+  String _formatTanggalBooking(String tanggalBookingRaw) {
+    final s = tanggalBookingRaw.trim();
     if (s.isEmpty) return '-';
-
-    final normalized = s.replaceAll('–', '-').replaceAll('—', '-');
-    return normalized;
-  }
-
-  bool _isTimeInRange(TimeOfDay now, String jamPraktikRaw) {
-    final s = jamPraktikRaw.trim();
-
-    if (s.isEmpty || s.toLowerCase() == 'null') return false;
-
-    final reg = RegExp(
-      r'(\d{1,2})(?:[\.:](\d{1,2}))?\s*[-–—]\s*(\d{1,2})(?:[\.:](\d{1,2}))?',
-    );
-    final match = reg.firstMatch(s);
-    if (match == null) {
-      final singleReg = RegExp(r'^(\d{1,2})(?:[\.:](\d{1,2}))?$');
-      final m2 = singleReg.firstMatch(s);
-      if (m2 == null) return true;
-
-      final startH = int.parse(m2.group(1)!);
-      final startM = m2.group(2) != null
-          ? int.parse(m2.group(2)!.padRight(2, '0'))
-          : 0;
-      final nowMinutes = now.hour * 60 + now.minute;
-      final startMinutes = startH * 60 + startM;
-      return nowMinutes >= startMinutes;
-    }
-
-    int toHourMinute(int h, String? mStr) {
-      final m = (mStr == null || mStr.isEmpty)
-          ? 0
-          : int.parse(mStr.padRight(2, '0'));
-      return h * 60 + m;
-    }
-
-    final startH = int.parse(match.group(1)!);
-    final startMStr = match.group(2);
-    final endH = int.parse(match.group(3)!);
-    final endMStr = match.group(4);
-
-    final nowMinutes = now.hour * 60 + now.minute;
-    final startMinutes = toHourMinute(startH, startMStr);
-    final endMinutes = toHourMinute(endH, endMStr);
-
-    if (endMinutes >= startMinutes) {
-      return nowMinutes >= startMinutes && nowMinutes <= endMinutes;
-    }
-    return nowMinutes >= startMinutes || nowMinutes <= endMinutes;
+    // Normalisasi karakter dash yang kadang muncul dari backend.
+    return s.replaceAll('–', '-').replaceAll('—', '-');
   }
 
   @override
@@ -395,20 +349,15 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
           TopToast.error(context, state.pesan);
           _refocusScanner();
         } else if (state is AntrianApmValidated) {
-          final jamPraktikRaw = state.apmData.jamPraktik.trim();
-          final jamPeriksaText = _formatJamPeriksa(jamPraktikRaw);
+          final tanggalBookingRaw = state.apmData.tglBooking.trim();
+          final tanggalBookingText = _formatTanggalBooking(tanggalBookingRaw);
 
-          final now = TimeOfDay.now();
-          final canCheck = _isTimeInRange(now, jamPraktikRaw);
-
-          if (!canCheck) {
+          if (tanggalBookingText != '-') {
             TopToast.warning(
               context,
-              'Jam periksa anda $jamPeriksaText, silahkan melakukan check-in sekarang.',
+              'Tanggal booking anda $tanggalBookingText, silahkan melakukan check-in sekarang.',
             );
-            setState(() => _isProcessing = false);
-            _refocusScanner();
-            return;
+            // Tidak ada validasi jam, hanya konfirmasi booking.
           }
 
           // Clear input setelah berhasil
