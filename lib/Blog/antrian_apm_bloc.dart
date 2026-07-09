@@ -14,6 +14,7 @@ import 'package:printing/printing.dart';
 
 import '../models/apm_antrian_model.dart';
 import '../models/apm_antrian_poli_model.dart';
+import '../models/apm_antrian_loket_model.dart';
 import '../models/dokter_model.dart';
 import '../models/pendaftaran_poli_model.dart';
 import '../models/poli_model.dart';
@@ -437,13 +438,18 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
       final resp = await _requestPost(url, {'no': event.noBooking});
 
       if (resp['code'] == 200) {
-        final noLoket = resp['data'].toString();
+        final loketDataJson = resp['data'];
+        final loketData = loketDataJson is Map<String, dynamic>
+            ? ApmAntrianLoketModel.fromJson(loketDataJson)
+            : ApmAntrianLoketModel.fromJson(
+                (loketDataJson as Map).cast<String, dynamic>(),
+              );
 
         try {
           await _printToThermalPrinterLoket(
             event.apmData,
             event.jenisAntrian,
-            noLoket,
+            loketData,
           );
         } catch (e) {
           printColor(
@@ -452,7 +458,12 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
           );
         }
 
-        emit(AntrianApmPrinted('Berhasil lanjut ke Loket', noAntrian: noLoket));
+        emit(
+          AntrianApmPrinted(
+            'Berhasil lanjut ke Loket',
+            noAntrian: loketData.noAntrian.toString(),
+          ),
+        );
       } else {
         emit(AntrianApmError(resp['message'] ?? 'Gagal lanjut ke Loket'));
       }
@@ -790,7 +801,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
       await _printToThermalPrinterLoket(
         _lastLoketApmData!,
         _lastLoketJenis ?? 'umum',
-        _lastLoketNo!,
+        _lastLoketNo as ApmAntrianLoketModel,
       );
       emit(
         AntrianApmPrinted(
@@ -929,7 +940,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
   Future<void> _printToThermalPrinterLoket(
     ApmAntrianModel apmData,
     String jenisAntrian,
-    String noAntrianLoket,
+    ApmAntrianLoketModel loketData,
   ) async {
     final pdf = pw.Document();
     final now = DateTime.now();
@@ -945,7 +956,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
         build: (context) => _buildLoketTicket(
           apmData,
           qrData,
-          noAntrianLoket,
+          loketData,
           _formatDate(now),
           _formatTime(now),
         ),
@@ -1424,7 +1435,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
   pw.Widget _buildLoketTicket(
     ApmAntrianModel m,
     String qrData,
-    String no,
+    ApmAntrianLoketModel loketData,
     String date,
     String time,
   ) {
@@ -1440,11 +1451,11 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
           ),
           pw.Divider(),
           pw.Text(
-            no,
+            loketData.noAntrian.toString(),
             style: pw.TextStyle(fontSize: 42, fontWeight: pw.FontWeight.bold),
             textAlign: pw.TextAlign.center,
           ),
-          pw.Text('$date  $time', style: const pw.TextStyle(fontSize: 8)),
+          pw.Text('${loketData.waktu}', style: const pw.TextStyle(fontSize: 8)),
           pw.Divider(),
           pw.Text(
             'Silahkan menunggu panggilan',
