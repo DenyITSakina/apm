@@ -478,56 +478,70 @@ class CekinBpjsDataPage extends StatelessWidget {
             // Info tambahan di bawah kedua tombol
             const SizedBox(height: 16),
             Container(
-              padding: const EdgeInsets.all(12),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
                   colors: [Colors.amber.shade50, Colors.orange.shade50],
                 ),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.amber.shade200),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.amber.shade200, width: 1.5),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.amber.withOpacity(0.1),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
+                    color: Colors.amber.withOpacity(0.15),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
                   ),
                 ],
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Icon Container
                   Container(
-                    padding: const EdgeInsets.all(6),
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
                       color: Colors.amber.shade100,
                       shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.amber.withOpacity(0.2),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Icon(
                       Icons.info_rounded,
-                      size: 16,
+                      size: 18,
                       color: Colors.amber.shade800,
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 14),
+
+                  // Content
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Informasi",
+                          "Informasi Penting",
                           style: GoogleFonts.poppins(
-                            fontSize: 14,
+                            fontSize: 15,
                             fontWeight: FontWeight.w600,
                             color: Colors.amber.shade900,
+                            letterSpacing: 0.3,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         Text(
-                          "Pilih Poli langsung menuju poli yang di pilih lalu tunggu no antrian di panggil.\nPilih Loket jika ingin memerlukan bantuan silahkan menuju fo (front office).",
+                          "Pilih Poli untuk langsung menuju poli pilihan dan tunggu nomor antrian dipanggil.\nPilih Loket jika memerlukan bantuan, silakan menuju FO (Front Office).",
                           style: GoogleFonts.poppins(
-                            fontSize: 13,
-                            color: Colors.amber.shade900,
-                            height: 1.4,
+                            fontSize: 13.5,
+                            color: Colors.amber.shade800,
+                            height: 1.6,
+                            letterSpacing: 0.2,
                           ),
                         ),
                       ],
@@ -536,42 +550,6 @@ class CekinBpjsDataPage extends StatelessWidget {
                 ],
               ),
             ),
-
-            // Tampilkan nomor BPJS jika ada
-            if (data.noPeserta != null && data.noPeserta!.isNotEmpty) ...[
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.purple.shade50,
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: Colors.purple.shade200),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.credit_card,
-                      size: 14,
-                      color: Colors.purple.shade600,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      "No. BPJS: ${data.noPeserta}",
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.purple.shade800,
-                        letterSpacing: 0.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
           ],
         );
       },

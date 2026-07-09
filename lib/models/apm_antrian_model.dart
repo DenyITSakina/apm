@@ -21,8 +21,6 @@ class ApmAntrianModel {
   final int statusBooking;
   final int pasienBaru;
 
-  // Constructor dengan default values
-
   const ApmAntrianModel({
     this.id = '',
     this.rm = '',
@@ -77,17 +75,13 @@ class ApmAntrianModel {
     );
   }
 
-  // Helper untuk extract data dari nested structure
   static Map<String, dynamic> _extractData(Map<String, dynamic> json) {
-    // Handle nested response: {code, message, data: {data: {...}, jenis: ...}}
     if (json['data'] != null && json['data']['data'] != null) {
       return json['data']['data'] as Map<String, dynamic>;
     }
-    // Handle standard response: {code, message, data: {...}}
     if (json['data'] != null) {
       return json['data'] as Map<String, dynamic>;
     }
-    // Handle direct response: {...}
     return json;
   }
 

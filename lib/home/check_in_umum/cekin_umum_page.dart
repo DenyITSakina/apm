@@ -354,7 +354,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
           if (tanggalBookingText != '-') {
             TopToast.warning(
               context,
-              'Tanggal booking anda $tanggalBookingText',
+              'Tanggal booking anda $tanggalBookingText, silahkan check in',
             );
           }
 

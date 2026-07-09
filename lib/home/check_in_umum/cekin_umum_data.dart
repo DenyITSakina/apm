@@ -477,28 +477,87 @@ class CekinUmumDataPage extends StatelessWidget {
   }
 
   Widget _buildInfoTips() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.amber.shade50,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.amber.shade200),
-      ),
-      child: Row(
-        children: [
-          Icon(Icons.tips_and_updates, size: 16, color: Colors.amber.shade800),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              "Pilih Poli langsung menuju poli yang di pilih lalu menunggu no antrian di panggil.\nPilih Loket jika ingin memerlukan bantuan silahkan menuju fo (front office)",
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                color: Colors.amber.shade900,
-                fontWeight: FontWeight.w500,
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Colors.amber.shade400, Colors.yellowAccent.shade400],
+                ),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.info_outline_rounded,
+                color: Colors.white,
+                size: 20,
               ),
             ),
-          ),
-        ],
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Informasi Pelayanan",
+                    style: GoogleFonts.poppins(
+                      fontSize: 14,
+                      color: Colors.grey.shade800,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // Pasien Lama
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("📍", style: GoogleFonts.poppins(fontSize: 14)),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          "Pasien Lama: Langsung menuju Poliklinik tujuan, tunggu panggilan sesuai nomor antrean.",
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            color: Colors.grey.shade700,
+                            fontWeight: FontWeight.w400,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  // Pasien Baru
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("🛎️", style: GoogleFonts.poppins(fontSize: 14)),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          "Pasien Baru: Menuju Loket FO (Front Office) untuk registrasi awal dengan bantuan petugas.",
+                          style: GoogleFonts.poppins(
+                            fontSize: 13,
+                            color: Colors.grey.shade700,
+                            fontWeight: FontWeight.w400,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
