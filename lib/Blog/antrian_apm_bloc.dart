@@ -934,8 +934,15 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
         ),
       ),
     );
+    printColor('Menampilkan Print Setup dialog...', textColor: TextColor.cyan);
 
-    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+    final printingTask = Printing.layoutPdf(
+      onLayout: (format) async => pdf.save(),
+    );
+
+    await Future.delayed(const Duration(milliseconds: 800));
+    await _runPrintSetupAutomation();
+    await printingTask;
   }
 
   Future<void> _printToThermalPrinterPendaftaran(
@@ -966,7 +973,16 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
       ),
     );
 
-    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+    // await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+    printColor('Menampilkan Print Setup dialog...', textColor: TextColor.cyan);
+
+    final printingTask = Printing.layoutPdf(
+      onLayout: (format) async => pdf.save(),
+    );
+
+    await Future.delayed(const Duration(milliseconds: 800));
+    await _runPrintSetupAutomation();
+    await printingTask;
   }
 
   String _formatDate(DateTime date) =>

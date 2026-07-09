@@ -2,7 +2,9 @@ import 'package:apm/blog/booking/booking_bloc.dart';
 import 'package:apm/blog/booking/booking_event.dart';
 import 'package:apm/blog/booking/booking_state.dart';
 import 'package:apm/widget/keypad_section.dart';
+import 'package:colorful_print/colorful_print.dart';
 import 'package:flutter/material.dart';
+import 'package:apm/utils/print_setup_runner.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
@@ -1450,6 +1452,23 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
     );
   }
 
+  Future<void> _runPrintSetupAutomation() async {
+    try {
+      printColor(
+        'Menjalankan Print Setup automation...',
+        textColor: TextColor.cyan,
+      );
+      await Future.delayed(const Duration(milliseconds: 200));
+      await PrintSetupRunner.runScript('print_setup2.py');
+      printColor('Print Setup automation selesai!', textColor: TextColor.green);
+    } catch (e) {
+      printColor(
+        'Gagal menjalankan Print Setup automation: $e',
+        textColor: TextColor.red,
+      );
+    }
+  }
+
   Widget _buildDivider() {
     return Divider(height: 1, thickness: 1, color: Colors.grey.shade200);
   }
@@ -1560,6 +1579,12 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
       ),
     );
 
-    await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+    // await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+    final printingTask = Printing.layoutPdf(
+      onLayout: (format) async => pdf.save(),
+    );
+    await Future.delayed(const Duration(milliseconds: 800));
+    await _runPrintSetupAutomation();
+    await printingTask;
   }
 }
