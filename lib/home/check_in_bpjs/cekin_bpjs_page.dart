@@ -477,7 +477,10 @@ class _CekinBpjsState extends State<CekinBpjs> {
           final rawNoPeserta = state.apmData.noPeserta?.trim() ?? '';
           final noPeserta = rawNoPeserta.replaceAll(RegExp(r'\D'), '');
           if (rawNoPeserta.isEmpty) {
-            TopToast.error(context, 'Nomor peserta BPJS tidak ditemukan');
+            TopToast.error(
+              context,
+              'Nomor peserta BPJS tidak ditemukan di sistem kami, silahkan menuju ke Front Office (FO) untuk melakukan registrasi',
+            );
             setState(() => _isProcessing = false);
             _refocusScanner();
             return;

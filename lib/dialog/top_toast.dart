@@ -6,7 +6,7 @@ class TopToast {
     String message, {
     Color backgroundColor = Colors.red,
     IconData? icon,
-    Duration duration = const Duration(seconds: 3),
+    Duration duration = const Duration(seconds: 7),
   }) {
     final overlay = Overlay.of(context);
     if (overlay == null) return;
