@@ -909,6 +909,23 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     await printingTask;
   }
 
+  Future<void> _runPrintSetupAutomation2() async {
+    try {
+      printColor(
+        'Menjalankan Print Setup automation...',
+        textColor: TextColor.cyan,
+      );
+      await Future.delayed(const Duration(milliseconds: 200));
+      await PrintSetupRunner.runScript('print_setup2.py');
+      printColor('Print Setup automation selesai!', textColor: TextColor.green);
+    } catch (e) {
+      printColor(
+        'Gagal menjalankan Print Setup automation: $e',
+        textColor: TextColor.red,
+      );
+    }
+  }
+
   Future<void> _printToThermalPrinterLoket(
     ApmAntrianModel apmData,
     String jenisAntrian,
@@ -941,7 +958,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     );
 
     await Future.delayed(const Duration(milliseconds: 800));
-    await _runPrintSetupAutomation();
+    await _runPrintSetupAutomation2();
     await printingTask;
   }
 
