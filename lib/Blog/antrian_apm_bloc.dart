@@ -954,14 +954,17 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     final pdf = pw.Document();
     final now = DateTime.now();
     final qrData = json.encode(data.rm);
+    final logoBytes = (await rootBundle.load(
+      'assets/images/logo.webp',
+    )).buffer.asUint8List();
 
     pdf.addPage(
       pw.Page(
         pageFormat: const PdfPageFormat(
-          72 * PdfPageFormat.mm,
-          100 * PdfPageFormat.mm,
+          210 * PdfPageFormat.mm,
+          double.infinity,
+          marginAll: 2 * PdfPageFormat.mm,
         ),
-        margin: const pw.EdgeInsets.all(12),
         build: (context) => _buildPendaftaranTicket(
           data,
           qrData,
@@ -969,11 +972,11 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
           _formatDate(now),
           _formatTime(now),
           listPoli,
+          logoBytes,
         ),
       ),
     );
 
-    // await Printing.layoutPdf(onLayout: (format) async => pdf.save());
     printColor('Menampilkan Print Setup dialog...', textColor: TextColor.cyan);
 
     final printingTask = Printing.layoutPdf(
@@ -1443,67 +1446,163 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     String date,
     String time,
     List<PoliModel> listPoli,
+    Uint8List logoBytes,
   ) {
     final namaPoli = m.namaPoli;
 
     return pw.Container(
       width: 200 * PdfPageFormat.mm,
+      padding: const pw.EdgeInsets.all(2),
       child: pw.Column(
-        crossAxisAlignment: pw.CrossAxisAlignment.center,
+        crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
-          _buildHeader(),
+          _buildCardHeader(logoBytes),
+          pw.SizedBox(height: 3),
           pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Expanded(
+                flex: 35,
+                child: pw.Container(
+                  decoration: pw.BoxDecoration(
+                    border: pw.Border.all(width: 1.5),
+                  ),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.start,
+                    children: [
+                      pw.Padding(
+                        padding: const pw.EdgeInsets.all(3),
+                        child: pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            _buildCardInfoRow('RM', m.rm),
+                            _buildCardInfoRow(
+                              'Nama',
+                              formatNama(m.nama.toUpperCase()),
+                            ),
+                            _buildCardInfoRow(
+                              'Tgl Lahir',
+                              m.tglLahir.isNotEmpty ? m.tglLahir : '-',
+                            ),
+                            _buildCardInfoRow(
+                              'Tgl Admisi',
+                              '${m.tglMasuk} ${m.jamMasuk}'.trim().isNotEmpty
+                                  ? '${m.tglMasuk} ${m.jamMasuk}'.trim()
+                                  : '-',
+                            ),
+                            _buildCardInfoRow('Poli', formatNama(namaPoli)),
+                            _buildCardInfoRow(
+                              'Dokter',
+                              m.namaDokter.isNotEmpty ? m.namaDokter : '-',
+                            ),
+                          ],
+                        ),
+                      ),
+                      pw.Container(
+                        decoration: pw.BoxDecoration(
+                          border: pw.Border(top: pw.BorderSide(width: 1.5)),
+                        ),
+                        padding: const pw.EdgeInsets.symmetric(
+                          vertical: 6,
+                          horizontal: 4,
+                        ),
+                        child: pw.Row(
+                          children: [
+                            pw.Expanded(
+                              child: pw.Column(
+                                mainAxisAlignment: pw.MainAxisAlignment.start,
+                                crossAxisAlignment:
+                                    pw.CrossAxisAlignment.center,
+                                children: [
+                                  pw.Text(
+                                    'NO ANTRIAN',
+                                    style: pw.TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: pw.FontWeight.bold,
+                                      letterSpacing: 0.5,
+                                    ),
+                                  ),
+                                  pw.Text(
+                                    m.noAntrian,
+                                    style: pw.TextStyle(
+                                      fontSize: 29,
+                                      fontWeight: pw.FontWeight.bold,
+                                      height: 1,
+                                    ),
+                                    textAlign: pw.TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            pw.SizedBox(width: 3),
+                            pw.SizedBox(
+                              width: 60,
+                              height: 60,
+                              child: pw.BarcodeWidget(
+                                barcode: pw.Barcode.qrCode(),
+                                data: qrData,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              pw.SizedBox(width: 4),
+              pw.Expanded(
+                flex: 80,
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    pw.Text(
-                      formatNama(m.grupJaminan),
-                      style: pw.TextStyle(
-                        fontSize: 6,
-                        fontWeight: pw.FontWeight.bold,
+                    pw.Container(
+                      decoration: pw.BoxDecoration(
+                        border: pw.Border.all(width: 1.5),
+                        color: PdfColors.grey300,
+                      ),
+                      padding: const pw.EdgeInsets.all(2),
+                      child: pw.Center(
+                        child: pw.Text(
+                          'FORMULIR KENDALI TINDAKAN RAWAT JALAN',
+                          style: pw.TextStyle(
+                            fontSize: 8,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                          textAlign: pw.TextAlign.center,
+                        ),
                       ),
                     ),
-                    pw.Text(
-                      formatNama(m.nama),
-                      style: pw.TextStyle(
-                        fontSize: 10,
-                        fontWeight: pw.FontWeight.bold,
+                    pw.Container(
+                      decoration: pw.BoxDecoration(
+                        border: pw.Border(
+                          left: pw.BorderSide(width: 1.5),
+                          right: pw.BorderSide(width: 1.5),
+                          bottom: pw.BorderSide(width: 1.5),
+                        ),
                       ),
-                    ),
-                    pw.Text(
-                      'RM: ${m.rm}', // Ini harusnya terisi
-                      style: const pw.TextStyle(fontSize: 9),
+                      child: _buildCardFormTable(),
                     ),
                   ],
                 ),
               ),
-              pw.SizedBox(
-                width: 50,
-                height: 50,
-                child: pw.BarcodeWidget(
-                  barcode: pw.Barcode.qrCode(),
-                  data: qrData,
-                ),
-              ),
             ],
           ),
-          pw.Divider(thickness: 1),
-          pw.Text('No. Antrian Poli', style: const pw.TextStyle(fontSize: 9)),
-          pw.Text(
-            formatNama(namaPoli), // Gunakan dari model
-            style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
-          ),
-          pw.Text(
-            m.noAntrian, // Ini harusnya terisi
-            style: pw.TextStyle(fontSize: 35, fontWeight: pw.FontWeight.bold),
-          ),
-          pw.SizedBox(height: 8),
-          pw.Text(
-            '$date / $time / pendaftaran',
-            style: const pw.TextStyle(fontSize: 8),
+          pw.SizedBox(height: 4),
+          pw.Container(
+            decoration: pw.BoxDecoration(
+              border: pw.Border(top: pw.BorderSide(width: 1)),
+            ),
+            padding: const pw.EdgeInsets.only(top: 3),
+            child: pw.Row(
+              mainAxisAlignment: pw.MainAxisAlignment.end,
+              children: [
+                pw.Text(
+                  'Generated: $date $time',
+                  style: const pw.TextStyle(fontSize: 7),
+                ),
+              ],
+            ),
           ),
         ],
       ),
