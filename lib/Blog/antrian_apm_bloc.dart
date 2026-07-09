@@ -1444,10 +1444,10 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     String time,
     List<PoliModel> listPoli,
   ) {
-    final namaPoli = getNamaPoliByIdUnit(m.idUnit, listPoli);
+    final namaPoli = m.namaPoli;
 
     return pw.Container(
-      width: 210 * PdfPageFormat.mm,
+      width: 200 * PdfPageFormat.mm,
       child: pw.Column(
         crossAxisAlignment: pw.CrossAxisAlignment.center,
         children: [
@@ -1474,7 +1474,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                       ),
                     ),
                     pw.Text(
-                      'RM: ${m.rm}',
+                      'RM: ${m.rm}', // Ini harusnya terisi
                       style: const pw.TextStyle(fontSize: 9),
                     ),
                   ],
@@ -1493,11 +1493,11 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
           pw.Divider(thickness: 1),
           pw.Text('No. Antrian Poli', style: const pw.TextStyle(fontSize: 9)),
           pw.Text(
-            formatNama(namaPoli),
+            formatNama(namaPoli), // Gunakan dari model
             style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
           ),
           pw.Text(
-            m.noChekin,
+            m.noAntrian, // Ini harusnya terisi
             style: pw.TextStyle(fontSize: 35, fontWeight: pw.FontWeight.bold),
           ),
           pw.SizedBox(height: 8),
