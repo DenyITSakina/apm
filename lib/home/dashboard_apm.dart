@@ -541,25 +541,23 @@ class _DashboardApmState extends State<DashboardApm>
                   ? constraints.maxWidth
                   : MediaQuery.of(context).size.width;
 
-              // Card dengan aspect ratio persegi panjang (lebih lebar dari tinggi)
               final cardWidth = maxW < 360
-                  ? maxW * 0.92
-                  : (maxW < 700 ? 280.0 : 320.0);
-              final cardHeight =
-                  cardWidth * 0.75; // Rasio 4:3 (persegi panjang)
+                  ? maxW * 0.95
+                  : (maxW < 700 ? 340.0 : 380.0);
+              final cardHeight = cardWidth * 0.7;
 
               final w = cardWidth;
               final h = cardHeight;
 
-              final circleSize = h * 0.28;
-              final pad = w * 0.06;
+              final circleSize = h * 0.30;
+              final pad = w * 0.055;
 
-              final titleSize = (w * 0.065).clamp(16.0, 22.0);
-              final descSize = (w * 0.04).clamp(11.0, 13.5);
-              final iconDecoSize = (h * 0.25).clamp(60.0, 90.0);
-              final arrowSize = (w * 0.05).clamp(14.0, 16.0);
+              final titleSize = (w * 0.07).clamp(18.0, 24.0);
+              final descSize = (w * 0.045).clamp(12.0, 15.0);
+              final iconDecoSize = (h * 0.28).clamp(70.0, 100.0);
+              final arrowSize = (w * 0.055).clamp(16.0, 18.0);
 
-              final radius = (w * 0.08).clamp(20.0, 32.0);
+              final radius = (w * 0.09).clamp(22.0, 34.0);
 
               return SizedBox(
                 width: cardWidth,
@@ -580,8 +578,8 @@ class _DashboardApmState extends State<DashboardApm>
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.2),
-                              blurRadius: (w * 0.05).clamp(10.0, 18.0),
-                              offset: const Offset(0, 6),
+                              blurRadius: (w * 0.05).clamp(12.0, 20.0),
+                              offset: const Offset(0, 8),
                               spreadRadius: 0,
                             ),
                           ],
@@ -623,7 +621,7 @@ class _DashboardApmState extends State<DashboardApm>
                                                 child: Icon(
                                                   icon,
                                                   size: (circleSize * 0.5)
-                                                      .clamp(30.0, 60.0),
+                                                      .clamp(35.0, 65.0),
                                                   color: Colors.white,
                                                 ),
                                               );
@@ -631,7 +629,7 @@ class _DashboardApmState extends State<DashboardApm>
                                       ),
                                     ),
                                   ),
-                                  SizedBox(height: h * 0.05),
+                                  SizedBox(height: h * 0.06),
                                   Text(
                                     title,
                                     textAlign: TextAlign.center,
@@ -642,7 +640,7 @@ class _DashboardApmState extends State<DashboardApm>
                                       color: Colors.white,
                                     ),
                                   ),
-                                  SizedBox(height: h * 0.02),
+                                  SizedBox(height: h * 0.025),
                                   Text(
                                     description,
                                     textAlign: TextAlign.center,
@@ -652,11 +650,11 @@ class _DashboardApmState extends State<DashboardApm>
                                       color: Colors.white.withOpacity(0.9),
                                     ),
                                   ),
-                                  SizedBox(height: h * 0.04),
+                                  SizedBox(height: h * 0.05),
                                   Container(
                                     padding: EdgeInsets.symmetric(
-                                      horizontal: w * 0.065,
-                                      vertical: h * 0.025,
+                                      horizontal: w * 0.060,
+                                      vertical: h * 0.02,
                                     ),
                                     decoration: BoxDecoration(
                                       color: Colors.white.withOpacity(0.25),

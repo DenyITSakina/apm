@@ -316,7 +316,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
-      height: screenHeight * 0.45,
+      height: screenHeight * 0.43,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -328,7 +328,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
               onClearPressed: _onClearPressed,
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 100),
           Expanded(flex: 1, child: _buildSubmitButton()),
         ],
       ),

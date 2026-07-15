@@ -384,8 +384,8 @@ class _CekinBpjsState extends State<CekinBpjs> {
           ),
           Text(
             widget.selectType == "bpjs"
-                ? "NOMOR KARTU BPJS / NIK"
-                : "NOMOR REKAM MEDIS / KTP",
+                ? "NOMOR KARTU BPJS / NIK / NO REKAM MEDIS"
+                : "NOMOR REKAM MEDIS / KTP / NO REKAM MEDIS",
             style: GoogleFonts.oswald(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -426,7 +426,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
     final screenHeight = MediaQuery.of(context).size.height;
 
     return Container(
-      height: screenHeight * 0.48,
+      height: screenHeight * 0.44,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -438,7 +438,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
               onClearPressed: _onClearPressed,
             ),
           ),
-          const SizedBox(width: 20),
+          SizedBox(width: 100),
           Expanded(flex: 1, child: _buildSubmitButton()),
         ],
       ),
