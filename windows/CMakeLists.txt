@@ -23,6 +23,7 @@ else()
       "Debug" "Profile" "Release")
   endif()
 endif()
+
 # Define settings for the Profile build mode.
 set(CMAKE_EXE_LINKER_FLAGS_PROFILE "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
 set(CMAKE_SHARED_LINKER_FLAGS_PROFILE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE}")
@@ -52,19 +53,19 @@ add_subdirectory(${FLUTTER_MANAGED_DIR})
 # Application build; see runner/CMakeLists.txt.
 add_subdirectory("runner")
 
-
 # Generated plugin build rules, which manage building the plugins and adding
 # them to the application.
 include(flutter/generated_plugins.cmake)
-
 
 # === Installation ===
 # Support files are copied into place next to the executable, so that it can
 # run in place. This is done instead of making a separate bundle (as on Linux)
 # so that building and running from within Visual Studio will work.
 set(BUILD_BUNDLE_DIR "$<TARGET_FILE_DIR:${BINARY_NAME}>")
+
 # Make the "install" step default, as it's required to run.
 set(CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD 1)
+
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(CMAKE_INSTALL_PREFIX "${BUILD_BUNDLE_DIR}" CACHE PATH "..." FORCE)
 endif()
@@ -99,36 +100,73 @@ set(FLUTTER_ASSET_DIR_NAME "flutter_assets")
 install(CODE "
   file(REMOVE_RECURSE \"${INSTALL_BUNDLE_DATA_DIR}/${FLUTTER_ASSET_DIR_NAME}\")
   " COMPONENT Runtime)
+
 install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
   DESTINATION "${INSTALL_BUNDLE_DATA_DIR}" COMPONENT Runtime)
 
-# === Copy python scripts & runtime (dibutuhkan untuk PrintSetupRunner) ===
-# Gunakan path relatif terhadap folder `windows/` supaya tidak bergantung variabel
-# PROJECT_SOURCE_DIR (kadang berbeda tergantung integrasi Flutter/CMake).
-set(PYTHON_SCRIPTS_DIR "${CMAKE_CURRENT_LIST_DIR}/../python_scripts")
-set(PYTHON_RUNTIME_DIR "${CMAKE_CURRENT_LIST_DIR}/../python_runtime")
+# =====================================================
+# === COPY PYTHON RUNTIME & SCRIPTS ===
+# =====================================================
 
-if(EXISTS "${PYTHON_SCRIPTS_DIR}")
-  install(DIRECTORY "${PYTHON_SCRIPTS_DIR}"
-    DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/python_scripts" COMPONENT Runtime
-    USE_SOURCE_PERMISSIONS)
+# ✅ Path yang benar - gunakan CMAKE_SOURCE_DIR (root project)
+set(PYTHON_SCRIPTS_SOURCE "${CMAKE_SOURCE_DIR}/python_scripts")
+set(PYTHON_RUNTIME_SOURCE "${CMAKE_SOURCE_DIR}/python_runtime")
+
+# Copy Python Runtime (isi folder, BUKAN folder-nya)
+if(EXISTS "${PYTHON_RUNTIME_SOURCE}")
+  message(STATUS "========================================")
+  message(STATUS "✅ Copying Python runtime...")
+  message(STATUS "  Source: ${PYTHON_RUNTIME_SOURCE}")
+  message(STATUS "  Target: ${INSTALL_BUNDLE_DATA_DIR}/python")
+  message(STATUS "========================================")
+  
+  # Copy ISI folder python_runtime ke data/python
+  install(DIRECTORY "${PYTHON_RUNTIME_SOURCE}/"
+    DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/python"
+    COMPONENT Runtime
+    USE_SOURCE_PERMISSIONS
+    PATTERN ".git" EXCLUDE
+    PATTERN "__pycache__" EXCLUDE
+    PATTERN "*.pyc" EXCLUDE
+    PATTERN "get-pip.py" EXCLUDE
+    PATTERN "requirements.txt" EXCLUDE
+  )
+  message(STATUS "✅ Python runtime copied successfully!")
 else()
-  message(WARNING "python_scripts folder tidak ditemukan: ${PYTHON_SCRIPTS_DIR}")
+  message(FATAL_ERROR "❌ python_runtime folder not found: ${PYTHON_RUNTIME_SOURCE}")
 endif()
 
-if(EXISTS "${PYTHON_RUNTIME_DIR}")
-  # Anda minta runtime berada di: data/python/python_runtime/python.exe
-  install(DIRECTORY "${PYTHON_RUNTIME_DIR}"
-    DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/python/python_runtime" COMPONENT Runtime
-    USE_SOURCE_PERMISSIONS)
+# Copy Python Scripts
+if(EXISTS "${PYTHON_SCRIPTS_SOURCE}")
+  message(STATUS "========================================")
+  message(STATUS "✅ Copying Python scripts...")
+  message(STATUS "  Source: ${PYTHON_SCRIPTS_SOURCE}")
+  message(STATUS "  Target: ${INSTALL_BUNDLE_DATA_DIR}/python_scripts")
+  message(STATUS "========================================")
+  
+  install(DIRECTORY "${PYTHON_SCRIPTS_SOURCE}/"
+    DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/python_scripts"
+    COMPONENT Runtime
+    USE_SOURCE_PERMISSIONS
+    PATTERN ".git" EXCLUDE
+    PATTERN "__pycache__" EXCLUDE
+    PATTERN "*.pyc" EXCLUDE
+  )
+  message(STATUS "✅ Python scripts copied successfully!")
 else()
-  message(WARNING "python_runtime folder tidak ditemukan: ${PYTHON_RUNTIME_DIR}")
+  message(WARNING "⚠️  python_scripts folder not found: ${PYTHON_SCRIPTS_SOURCE}")
+  message(WARNING "⚠️  Create folder at: ${PYTHON_SCRIPTS_SOURCE}")
 endif()
 
-
+# Verifikasi final
+message(STATUS "========================================")
+message(STATUS "📊 Python Configuration Summary:")
+message(STATUS "  Runtime source: ${PYTHON_RUNTIME_SOURCE}")
+message(STATUS "  Scripts source: ${PYTHON_SCRIPTS_SOURCE}")
+message(STATUS "  Install prefix: ${INSTALL_BUNDLE_DATA_DIR}")
+message(STATUS "========================================")
 
 # Install the AOT library on non-Debug builds only.
 install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   CONFIGURATIONS Profile;Release
   COMPONENT Runtime)
-
