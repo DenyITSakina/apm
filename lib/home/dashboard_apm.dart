@@ -204,77 +204,62 @@ class _DashboardApmState extends State<DashboardApm>
                         horizontal: ResponsiveUtils.isMobile(context) ? 12 : 20,
                       ),
                       child: Center(
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            final maxW = constraints.maxWidth;
-                            final crossAxisCount = maxW < 420
-                                ? 2
-                                : (maxW < 700 ? 2 : 4);
-
-                            // Mobile/tablet responsif tanpa scroll horizontal.
-                            final childAspectRatio = maxW < 420
-                                ? 0.85
-                                : (maxW < 700 ? 0.9 : 0.95);
-
-                            return GridView.count(
-                              crossAxisCount: crossAxisCount,
-                              mainAxisSpacing: 16,
-                              crossAxisSpacing: 16,
-                              childAspectRatio: childAspectRatio,
-                              physics: const BouncingScrollPhysics(),
-                              padding: const EdgeInsets.symmetric(vertical: 6),
-                              children: [
-                                _buildServiceCard(
-                                  title: "CEK-IN BPJS",
-                                  image: "assets/images/bpjs_logo.png",
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFF1565C0),
-                                      Color(0xFF1E88E5),
-                                      Color(0xFF42A5F5),
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Flexible(
+                              child: _buildServiceCard(
+                                title: "CEK-IN BPJS",
+                                image: "assets/images/bpjs_logo.png",
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF1565C0),
+                                    Color(0xFF1E88E5),
+                                    Color(0xFF42A5F5),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                icon: Icons.health_and_safety,
+                                description: "Untuk pasien BPJS Kesehatan",
+                                onTap: () => _navigateTo(
+                                  context,
+                                  BlocProvider(
+                                    create: (_) => AntrianApmBloc(),
+                                    child: const CekinBpjs(selectType: "bpjs"),
                                   ),
-                                  icon: Icons.health_and_safety,
-                                  description: "Untuk pasien BPJS Kesehatan",
-                                  onTap: () => _navigateTo(
-                                    context,
-                                    BlocProvider(
-                                      create: (_) => AntrianApmBloc(),
-                                      child: const CekinBpjs(
-                                        selectType: "bpjs",
-                                      ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Flexible(
+                              child: _buildServiceCard(
+                                title: "CEK-IN UMUM",
+                                image: "assets/images/umum.png",
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    Color(0xFF2E7D32),
+                                    Color(0xFF388E3C),
+                                    Color(0xFF4CAF50),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                icon: Icons.people,
+                                description: "Untuk pasien umum",
+                                onTap: () => _navigateTo(
+                                  context,
+                                  BlocProvider(
+                                    create: (_) => AntrianApmBloc(),
+                                    child: const CekinUmumPage(
+                                      selectType: "umum",
                                     ),
                                   ),
                                 ),
-                                _buildServiceCard(
-                                  title: "CEK-IN UMUM",
-                                  image: "assets/images/umum.png",
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFF2E7D32),
-                                      Color(0xFF388E3C),
-                                      Color(0xFF4CAF50),
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  icon: Icons.people,
-                                  description: "Untuk pasien umum",
-                                  onTap: () => _navigateTo(
-                                    context,
-                                    BlocProvider(
-                                      create: (_) => AntrianApmBloc(),
-                                      child: const CekinUmumPage(
-                                        selectType: "umum",
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            );
-                          },
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -304,7 +289,6 @@ class _DashboardApmState extends State<DashboardApm>
                     ),
                     child: Column(
                       children: [
-                        // Header dengan icon peringatan
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -325,14 +309,11 @@ class _DashboardApmState extends State<DashboardApm>
                             ),
                           ],
                         ),
-
                         const Divider(
                           color: Colors.red,
                           thickness: 1,
                           height: 20,
                         ),
-
-                        // Informasi 1 - CEK-IN BPJS
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
@@ -360,8 +341,6 @@ class _DashboardApmState extends State<DashboardApm>
                             ],
                           ),
                         ),
-
-                        // Informasi 2 - CEK-IN UMUM
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
@@ -389,7 +368,6 @@ class _DashboardApmState extends State<DashboardApm>
                             ],
                           ),
                         ),
-
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
@@ -434,7 +412,6 @@ class _DashboardApmState extends State<DashboardApm>
                     ),
                     child: Column(
                       children: [
-                        // Baris pertama: Jam operasional dan bantuan
                         Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
@@ -476,7 +453,6 @@ class _DashboardApmState extends State<DashboardApm>
                             ),
                           ],
                         ),
-
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 20,
@@ -564,25 +540,32 @@ class _DashboardApmState extends State<DashboardApm>
               final maxW = constraints.maxWidth.isFinite
                   ? constraints.maxWidth
                   : MediaQuery.of(context).size.width;
+
+              // Card dengan aspect ratio persegi panjang (lebih lebar dari tinggi)
               final cardWidth = maxW < 360
                   ? maxW * 0.92
-                  : (maxW < 700 ? 300.0 : 320.0);
+                  : (maxW < 700 ? 280.0 : 320.0);
+              final cardHeight =
+                  cardWidth * 0.75; // Rasio 4:3 (persegi panjang)
 
               final w = cardWidth;
-              final circleSize = w * 0.41;
-              final pad = w * 0.085;
+              final h = cardHeight;
 
-              final titleSize = (w * 0.075).clamp(18.0, 24.0);
-              final descSize = (w * 0.045).clamp(12.0, 14.5);
-              final iconDecoSize = (w * 0.33).clamp(72.0, 110.0);
-              final arrowSize = (w * 0.055).clamp(14.0, 16.0);
+              final circleSize = h * 0.28;
+              final pad = w * 0.06;
 
-              final radius = (w * 0.11).clamp(26.0, 40.0);
+              final titleSize = (w * 0.065).clamp(16.0, 22.0);
+              final descSize = (w * 0.04).clamp(11.0, 13.5);
+              final iconDecoSize = (h * 0.25).clamp(60.0, 90.0);
+              final arrowSize = (w * 0.05).clamp(14.0, 16.0);
+
+              final radius = (w * 0.08).clamp(20.0, 32.0);
 
               return SizedBox(
                 width: cardWidth,
+                height: cardHeight,
                 child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  margin: const EdgeInsets.symmetric(vertical: 5),
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
@@ -598,7 +581,7 @@ class _DashboardApmState extends State<DashboardApm>
                             BoxShadow(
                               color: Colors.black.withOpacity(0.2),
                               blurRadius: (w * 0.05).clamp(10.0, 18.0),
-                              offset: const Offset(0, 8),
+                              offset: const Offset(0, 6),
                               spreadRadius: 0,
                             ),
                           ],
@@ -606,8 +589,8 @@ class _DashboardApmState extends State<DashboardApm>
                         child: Stack(
                           children: [
                             Positioned(
-                              top: -15,
-                              right: -15,
+                              top: -10,
+                              right: -10,
                               child: Icon(
                                 icon,
                                 size: iconDecoSize,
@@ -618,6 +601,7 @@ class _DashboardApmState extends State<DashboardApm>
                               padding: EdgeInsets.all(pad),
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Container(
                                     height: circleSize,
@@ -639,7 +623,7 @@ class _DashboardApmState extends State<DashboardApm>
                                                 child: Icon(
                                                   icon,
                                                   size: (circleSize * 0.5)
-                                                      .clamp(40.0, 70.0),
+                                                      .clamp(30.0, 60.0),
                                                   color: Colors.white,
                                                 ),
                                               );
@@ -647,7 +631,7 @@ class _DashboardApmState extends State<DashboardApm>
                                       ),
                                     ),
                                   ),
-                                  SizedBox(height: w * 0.07),
+                                  SizedBox(height: h * 0.05),
                                   Text(
                                     title,
                                     textAlign: TextAlign.center,
@@ -658,7 +642,7 @@ class _DashboardApmState extends State<DashboardApm>
                                       color: Colors.white,
                                     ),
                                   ),
-                                  SizedBox(height: w * 0.028),
+                                  SizedBox(height: h * 0.02),
                                   Text(
                                     description,
                                     textAlign: TextAlign.center,
@@ -668,11 +652,11 @@ class _DashboardApmState extends State<DashboardApm>
                                       color: Colors.white.withOpacity(0.9),
                                     ),
                                   ),
-                                  SizedBox(height: w * 0.055),
+                                  SizedBox(height: h * 0.04),
                                   Container(
                                     padding: EdgeInsets.symmetric(
-                                      horizontal: w * 0.075,
-                                      vertical: w * 0.03,
+                                      horizontal: w * 0.065,
+                                      vertical: h * 0.025,
                                     ),
                                     decoration: BoxDecoration(
                                       color: Colors.white.withOpacity(0.25),
@@ -691,7 +675,7 @@ class _DashboardApmState extends State<DashboardApm>
                                             color: Colors.white,
                                           ),
                                         ),
-                                        SizedBox(width: w * 0.028),
+                                        SizedBox(width: w * 0.025),
                                         Icon(
                                           Icons.arrow_forward,
                                           color: Colors.white,
@@ -758,15 +742,12 @@ void _showBookingTypeDialog(BuildContext context) {
     builder: (_) => Dialog(
       backgroundColor: Colors.transparent,
       insetPadding: const EdgeInsets.symmetric(horizontal: 20),
-
       child: Container(
         padding: const EdgeInsets.all(24),
-
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
         ),
-
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -774,17 +755,12 @@ void _showBookingTypeDialog(BuildContext context) {
               "Pilih Jenis Booking",
               style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
             ),
-
             const SizedBox(height: 8),
-
             Text(
               "Pilih metode pendaftaran",
               style: TextStyle(color: Colors.grey[600]),
             ),
-
             const SizedBox(height: 28),
-
-            /// KANAN KIRI
             Row(
               children: [
                 Expanded(
@@ -797,9 +773,7 @@ void _showBookingTypeDialog(BuildContext context) {
                     jenis: '1',
                   ),
                 ),
-
                 const SizedBox(width: 18),
-
                 Expanded(
                   child: _bookingCard(
                     context,
@@ -829,10 +803,8 @@ Widget _bookingCard(
 }) {
   return InkWell(
     borderRadius: BorderRadius.circular(12),
-
     onTap: () {
       Navigator.pop(context);
-
       Navigator.of(context).push(
         BackSwipePageRoute(
           builder: (_) => BlocProvider(
@@ -842,23 +814,17 @@ Widget _bookingCard(
         ),
       );
     },
-
     child: Container(
       height: 290,
-
       padding: const EdgeInsets.all(20),
-
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [color.withOpacity(.15), color.withOpacity(.04)],
         ),
-
         borderRadius: BorderRadius.circular(28),
-
         border: Border.all(color: color.withOpacity(.20)),
-
         boxShadow: [
           BoxShadow(
             color: color.withOpacity(.08),
@@ -867,48 +833,36 @@ Widget _bookingCard(
           ),
         ],
       ),
-
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-
         children: [
           Container(
             width: 90,
             height: 90,
-
             decoration: BoxDecoration(
               color: color,
               borderRadius: BorderRadius.circular(12),
             ),
-
             child: Icon(icon, size: 46, color: Colors.white),
           ),
-
           const SizedBox(height: 20),
-
           Text(
             title,
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ),
-
           const SizedBox(height: 10),
-
           Text(
             subtitle,
             textAlign: TextAlign.center,
             style: TextStyle(color: Colors.grey[700], height: 1.4),
           ),
-
           const Spacer(),
-
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-
             decoration: BoxDecoration(
               color: color,
               borderRadius: BorderRadius.circular(12),
             ),
-
             child: const Text(
               "Pilih",
               style: TextStyle(
