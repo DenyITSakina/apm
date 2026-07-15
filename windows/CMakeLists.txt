@@ -102,20 +102,28 @@ install(CODE "
 install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
   DESTINATION "${INSTALL_BUNDLE_DATA_DIR}" COMPONENT Runtime)
 
-# === Copy python scripts (optional tapi dibutuhkan untuk PrintSetupRunner) ===
-# Harapkan folder di root proyek: python_scripts/
-set(PYTHON_SCRIPTS_DIR "${PROJECT_SOURCE_DIR}/python_scripts")
-install(DIRECTORY "${PYTHON_SCRIPTS_DIR}"
-  DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/python_scripts" COMPONENT Runtime
-  USE_SOURCE_PERMISSIONS)
+# === Copy python scripts & runtime (dibutuhkan untuk PrintSetupRunner) ===
+# Gunakan path relatif terhadap folder `windows/` supaya tidak bergantung variabel
+# PROJECT_SOURCE_DIR (kadang berbeda tergantung integrasi Flutter/CMake).
+set(PYTHON_SCRIPTS_DIR "${CMAKE_CURRENT_LIST_DIR}/../python_scripts")
+set(PYTHON_RUNTIME_DIR "${CMAKE_CURRENT_LIST_DIR}/../python_runtime")
 
-# === Copy python runtime (HARUS disediakan) ===
-# Harapkan folder di root proyek: python_runtime/
-# isinya python.exe + library pendukung.
-set(PYTHON_RUNTIME_DIR "${PROJECT_SOURCE_DIR}/python_runtime")
-install(DIRECTORY "${PYTHON_RUNTIME_DIR}"
-  DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/python" COMPONENT Runtime
-  USE_SOURCE_PERMISSIONS)
+if(EXISTS "${PYTHON_SCRIPTS_DIR}")
+  install(DIRECTORY "${PYTHON_SCRIPTS_DIR}"
+    DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/python_scripts" COMPONENT Runtime
+    USE_SOURCE_PERMISSIONS)
+else()
+  message(WARNING "python_scripts folder tidak ditemukan: ${PYTHON_SCRIPTS_DIR}")
+endif()
+
+if(EXISTS "${PYTHON_RUNTIME_DIR}")
+  install(DIRECTORY "${PYTHON_RUNTIME_DIR}"
+    DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/python" COMPONENT Runtime
+    USE_SOURCE_PERMISSIONS)
+else()
+  message(WARNING "python_runtime folder tidak ditemukan: ${PYTHON_RUNTIME_DIR}")
+endif()
+
 
 # Install the AOT library on non-Debug builds only.
 install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"

@@ -12,7 +12,7 @@ class PrintSetupRunner {
     final dataDir = Directory('${appDir.path}${Platform.pathSeparator}data');
 
     final pythonExe = File(
-      '${dataDir.path}${Platform.pathSeparator}python${Platform.pathSeparator}python.exe',
+      '${dataDir.path}${Platform.pathSeparator}python${Platform.pathSeparator}python_runtime${Platform.pathSeparator}python.exe',
     );
     final scriptPath =
         '${dataDir.path}${Platform.pathSeparator}python_scripts${Platform.pathSeparator}$scriptName';
@@ -21,7 +21,7 @@ class PrintSetupRunner {
       throw ProcessException(
         pythonExe.path,
         [scriptPath],
-        'Python runtime tidak ditemukan. Harap pastikan data/python/python.exe tersedia. '
+        'Python runtime tidak ditemukan. Pastikan file tersedia di data/python/python_runtime/python.exe. '
         'Lokasi yang dicek: ${pythonExe.path}',
         -1,
       );
