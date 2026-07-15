@@ -46,6 +46,7 @@ dependencies:
   equatable: ^2.0.8
   loading_animation_widget: ^1.3.0
   full_swipe_back_gesture: ^0.1.1
+  path: ^1.9.1
 
 dev_dependencies:
   flutter_test:

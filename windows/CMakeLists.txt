@@ -117,12 +117,14 @@ else()
 endif()
 
 if(EXISTS "${PYTHON_RUNTIME_DIR}")
+  # Anda minta runtime berada di: data/python/python_runtime/python.exe
   install(DIRECTORY "${PYTHON_RUNTIME_DIR}"
-    DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/python" COMPONENT Runtime
+    DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/python/python_runtime" COMPONENT Runtime
     USE_SOURCE_PERMISSIONS)
 else()
   message(WARNING "python_runtime folder tidak ditemukan: ${PYTHON_RUNTIME_DIR}")
 endif()
+
 
 
 # Install the AOT library on non-Debug builds only.

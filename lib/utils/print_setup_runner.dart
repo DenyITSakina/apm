@@ -1,54 +1,70 @@
 import 'dart:io';
+import 'package:path/path.dart' as p;
 
 class PrintSetupRunner {
-  static Future<void> runScript(String scriptName) async {
-    // Struktur yang diharapkan saat Windows build:
-    // - data/python/python.exe
-    // - data/python_scripts/<scriptName>
-    //
-    // Base folder aplikasi untuk windows "in-place" diasumsikan sama dengan
-    // folder tempat exe berada.
+  static Future<String> runScript(String scriptName) async {
     final appDir = Directory.current;
-    final dataDir = Directory('${appDir.path}${Platform.pathSeparator}data');
 
-    final pythonExe = File(
-      '${dataDir.path}${Platform.pathSeparator}python${Platform.pathSeparator}python_runtime${Platform.pathSeparator}python.exe',
+    final pythonExeData = File(
+      p.join(appDir.path, 'data', 'python', 'python.exe'),
     );
-    final scriptPath =
-        '${dataDir.path}${Platform.pathSeparator}python_scripts${Platform.pathSeparator}python_scripts${Platform.pathSeparator}$scriptName';
+    final scriptFileData = File(
+      p.join(appDir.path, 'data', 'python_scripts', scriptName),
+    );
 
-    if (!pythonExe.existsSync()) {
-      throw ProcessException(
-        pythonExe.path,
-        [scriptPath],
-        'Python runtime tidak ditemukan. Pastikan file tersedia di data/python/python_runtime/python.exe. '
-        'Lokasi yang dicek: ${pythonExe.path}',
-        -1,
+    final pythonExeRuntime = File(
+      p.join(appDir.path, 'python_runtime', 'python.exe'),
+    );
+    final scriptFileScripts = File(
+      p.join(appDir.path, 'python_scripts', scriptName),
+    );
+
+    final pythonExe = await pythonExeData.exists()
+        ? pythonExeData
+        : pythonExeRuntime;
+    final scriptFile = await scriptFileData.exists()
+        ? scriptFileData
+        : scriptFileScripts;
+
+    print('App directory: ${appDir.path}');
+    print('Python path: ${pythonExe.path}');
+    print('Script path: ${scriptFile.path}');
+
+    if (!await pythonExe.exists()) {
+      throw Exception(
+        'Python runtime tidak ditemukan.\n'
+        'Coba cek salah satu lokasi berikut:\n'
+        '- ${pythonExeData.path}\n'
+        '- ${pythonExeRuntime.path}',
       );
     }
 
-    if (!File(scriptPath).existsSync()) {
-      throw ProcessException(
-        pythonExe.path,
-        [scriptPath],
-        'Script python tidak ditemukan: $scriptPath',
-        -1,
+    if (!await scriptFile.exists()) {
+      throw Exception(
+        'Script tidak ditemukan: $scriptName\n'
+        'Coba cek salah satu lokasi berikut:\n'
+        '- ${scriptFileData.path}\n'
+        '- ${scriptFileScripts.path}',
       );
     }
 
-    final result = await Process.run(pythonExe.path, [
-      scriptPath,
-    ], runInShell: false);
+    final result = await Process.run(
+      pythonExe.path,
+      [scriptFile.path],
+      workingDirectory: p.dirname(scriptFile.path),
+      runInShell: Platform.isWindows,
+    );
 
     if (result.exitCode != 0) {
-      throw ProcessException(
-        pythonExe.path,
-        [scriptPath],
-        'Script failed. exitCode=${result.exitCode}\n'
-        'stdout=${result.stdout}\n'
-        'stderr=${result.stderr}',
-        result.exitCode,
+      throw Exception(
+        'Script gagal dijalankan\n'
+        'Exit Code: ${result.exitCode}\n'
+        'Stdout: ${result.stdout}\n'
+        'Stderr: ${result.stderr}',
       );
     }
+
+    print('Output: ${result.stdout}');
+    return result.stdout.toString();
   }
 }
