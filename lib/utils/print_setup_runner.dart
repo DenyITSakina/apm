@@ -15,7 +15,7 @@ class PrintSetupRunner {
       '${dataDir.path}${Platform.pathSeparator}python${Platform.pathSeparator}python_runtime${Platform.pathSeparator}python.exe',
     );
     final scriptPath =
-        '${dataDir.path}${Platform.pathSeparator}python_scripts${Platform.pathSeparator}$scriptName';
+        '${dataDir.path}${Platform.pathSeparator}python_scripts${Platform.pathSeparator}python_scripts${Platform.pathSeparator}$scriptName';
 
     if (!pythonExe.existsSync()) {
       throw ProcessException(
