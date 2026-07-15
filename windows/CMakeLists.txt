@@ -102,7 +102,23 @@ install(CODE "
 install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
   DESTINATION "${INSTALL_BUNDLE_DATA_DIR}" COMPONENT Runtime)
 
+# === Copy python scripts (optional tapi dibutuhkan untuk PrintSetupRunner) ===
+# Harapkan folder di root proyek: python_scripts/
+set(PYTHON_SCRIPTS_DIR "${PROJECT_SOURCE_DIR}/python_scripts")
+install(DIRECTORY "${PYTHON_SCRIPTS_DIR}"
+  DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/python_scripts" COMPONENT Runtime
+  USE_SOURCE_PERMISSIONS)
+
+# === Copy python runtime (HARUS disediakan) ===
+# Harapkan folder di root proyek: python_runtime/
+# isinya python.exe + library pendukung.
+set(PYTHON_RUNTIME_DIR "${PROJECT_SOURCE_DIR}/python_runtime")
+install(DIRECTORY "${PYTHON_RUNTIME_DIR}"
+  DESTINATION "${INSTALL_BUNDLE_DATA_DIR}/python" COMPONENT Runtime
+  USE_SOURCE_PERMISSIONS)
+
 # Install the AOT library on non-Debug builds only.
 install(FILES "${AOT_LIBRARY}" DESTINATION "${INSTALL_BUNDLE_DATA_DIR}"
   CONFIGURATIONS Profile;Release
   COMPONENT Runtime)
+

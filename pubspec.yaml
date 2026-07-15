@@ -75,6 +75,7 @@ flutter:
     - assets/sounds/ding-47489.mp3
     - assets/sounds/nomer.mp3
     - assets/sounds/silahkan_menuju.mp3
+    - python_scripts/
 
   fonts:
     - family: League Spartan
