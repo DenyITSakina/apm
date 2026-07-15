@@ -204,20 +204,32 @@ class _DashboardApmState extends State<DashboardApm>
                   Expanded(
                     child: Padding(
                       padding: EdgeInsets.symmetric(
-                        horizontal: ResponsiveUtils.isMobile(context) ? 12 : 20,
+                        horizontal: ResponsiveUtils.isMobile(context)
+                            ? 150
+                            : 190,
                       ),
                       child: Center(
                         child: LayoutBuilder(
                           builder: (context, constraints) {
                             final maxW = constraints.maxWidth;
+
+                            // Landscape: lebih rapat dan tetap di tengah.
+                            final isLandscape =
+                                MediaQuery.of(context).orientation ==
+                                Orientation.landscape;
+
                             final crossAxisCount = maxW < 420
                                 ? 2
-                                : (maxW < 700 ? 2 : 4);
+                                : (maxW < 700
+                                      ? (isLandscape ? 4 : 4)
+                                      : (isLandscape ? 4 : 4));
 
                             // Mobile/tablet responsif tanpa scroll horizontal.
                             final childAspectRatio = maxW < 420
                                 ? 0.85
-                                : (maxW < 700 ? 0.9 : 0.95);
+                                : (maxW < 700
+                                      ? (isLandscape ? 0.88 : 0.9)
+                                      : (isLandscape ? 0.9 : 0.95));
 
                             return GridView.count(
                               crossAxisCount: crossAxisCount,
@@ -225,7 +237,7 @@ class _DashboardApmState extends State<DashboardApm>
                               crossAxisSpacing: 16,
                               childAspectRatio: childAspectRatio,
                               physics: const BouncingScrollPhysics(),
-                              padding: const EdgeInsets.symmetric(vertical: 6),
+                              padding: const EdgeInsets.symmetric(vertical: 2),
                               children: [
                                 _buildServiceCard(
                                   title: "CEK-IN BPJS",
@@ -730,7 +742,13 @@ class _DashboardApmState extends State<DashboardApm>
               return SizedBox(
                 width: cardWidth,
                 child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  margin: EdgeInsets.symmetric(
+                    vertical:
+                        MediaQuery.of(context).orientation ==
+                            Orientation.landscape
+                        ? 6
+                        : 10,
+                  ),
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
