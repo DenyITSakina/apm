@@ -510,62 +510,62 @@ class _DashboardApmState extends State<DashboardApm>
                         ),
 
                         // Informasi 3 - DAFTAR POLI HARI INI
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                margin: const EdgeInsets.only(top: 2),
-                                child: Icon(
-                                  Icons.assignment,
-                                  color: Colors.teal,
-                                  size: 18,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  "DAFTAR POLI HARI INI: Khusus untuk pasien yang ingin melakukan pemeriksaan langsung pada hari ini, baik pasien lama maupun pasien baru.",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        // Padding(
+                        //   padding: const EdgeInsets.symmetric(vertical: 4),
+                        //   child: Row(
+                        //     crossAxisAlignment: CrossAxisAlignment.start,
+                        //     children: [
+                        //       Container(
+                        //         margin: const EdgeInsets.only(top: 2),
+                        //         child: Icon(
+                        //           Icons.assignment,
+                        //           color: Colors.teal,
+                        //           size: 18,
+                        //         ),
+                        //       ),
+                        //       const SizedBox(width: 10),
+                        //       Expanded(
+                        //         child: Text(
+                        //           "DAFTAR POLI HARI INI: Khusus untuk pasien yang ingin melakukan pemeriksaan langsung pada hari ini, baik pasien lama maupun pasien baru.",
+                        //           style: GoogleFonts.poppins(
+                        //             fontSize: 14,
+                        //             fontWeight: FontWeight.w500,
+                        //             color: Colors.black,
+                        //           ),
+                        //         ),
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
 
-                        // Informasi 4 - BOOKING
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                margin: const EdgeInsets.only(top: 2),
-                                child: Icon(
-                                  Icons.calendar_today,
-                                  color: Colors.teal,
-                                  size: 18,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  "BOOKING: Untuk pemeriksaan di hari lain, dapat digunakan oleh pasien lama maupun baru. Pasien BPJS wajib membawa surat rujukan.",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                        // // Informasi 4 - BOOKING
+                        // Padding(
+                        //   padding: const EdgeInsets.symmetric(vertical: 4),
+                        //   child: Row(
+                        //     crossAxisAlignment: CrossAxisAlignment.start,
+                        //     children: [
+                        //       Container(
+                        //         margin: const EdgeInsets.only(top: 2),
+                        //         child: Icon(
+                        //           Icons.calendar_today,
+                        //           color: Colors.teal,
+                        //           size: 18,
+                        //         ),
+                        //       ),
+                        //       const SizedBox(width: 10),
+                        //       Expanded(
+                        //         child: Text(
+                        //           "BOOKING: Untuk pemeriksaan di hari lain, dapat digunakan oleh pasien lama maupun baru. Pasien BPJS wajib membawa surat rujukan.",
+                        //           style: GoogleFonts.poppins(
+                        //             fontSize: 14,
+                        //             fontWeight: FontWeight.w500,
+                        //             color: Colors.black,
+                        //           ),
+                        //         ),
+                        //       ),
+                        //     ],
+                        //   ),
+                        // ),
 
                         // Informasi 5 - Hubungi Petugas
                         Padding(
