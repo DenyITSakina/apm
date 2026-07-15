@@ -1,8 +1,6 @@
 import 'package:apm/blog/booking/booking_bloc.dart';
-import 'package:apm/func/open_aplikasi_bpjsDaftar.dart';
 import 'package:apm/home/booking/booking_page.dart';
 import 'package:apm/home/daftar_poli/daftar_umum_bpjs_page.dart';
-import 'package:apm/home/test/cetak_tiket.dart';
 
 import '../Blog/antrian_apm_bloc.dart';
 import 'package:apm/home/check_in_bpjs/cekin_bpjs_page.dart';
@@ -120,28 +118,6 @@ class _DashboardApmState extends State<DashboardApm>
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            // Container(
-                            //   decoration: BoxDecoration(
-                            //     shape: BoxShape.rectangle,
-                            //     boxShadow: [
-                            //       BoxShadow(
-                            //         color: Colors.white.withOpacity(0.5),
-                            //         blurRadius: 10,
-                            //         spreadRadius: 10,
-                            //       ),
-                            //     ],
-                            //   ),
-                            //   child: Container(
-                            //     padding: const EdgeInsets.all(15),
-                            //     color: Colors.white,
-                            //     child: Image.asset(
-                            //       "assets/images/logo_sakina.png",
-                            //       height: size.height * 0.15,
-                            //       fit: BoxFit.contain,
-                            //     ),
-                            //   ),
-                            // ),
-                            // const SizedBox(height: 20),
                             ShaderMask(
                               shaderCallback: (bounds) => const LinearGradient(
                                 colors: [Colors.white, Color(0xFFE0F7FA)],
@@ -303,45 +279,45 @@ class _DashboardApmState extends State<DashboardApm>
                                     ),
                                   ),
                                 ),
-                                _buildServiceCard(
-                                  title: "DAFTAR POLI HARI INI",
-                                  image: "assets/images/daftar.png",
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFFB71C1C),
-                                      Color(0xFFC62828),
-                                      Color(0xFFD32F2F),
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  icon: Icons.local_hospital,
-                                  description: "Pendaftaran tujuan poli",
-                                  onTap: () => _navigateTo(
-                                    context,
-                                    const PendaftaranPoliPage(
-                                      selectType: "pendaftaran",
-                                    ),
-                                  ),
-                                ),
-                                _buildServiceCard(
-                                  title: "BOOKING",
-                                  image: "assets/images/booking.png",
-                                  gradient: const LinearGradient(
-                                    colors: [
-                                      Color(0xFFBF360C),
-                                      Color(0xFFE65100),
-                                      Color(0xFFF57C00),
-                                    ],
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                  ),
-                                  icon: Icons.calendar_month,
-                                  description: "Booking untuk pasien",
-                                  onTap: () {
-                                    _showBookingTypeDialog(context);
-                                  },
-                                ),
+                                // _buildServiceCard(
+                                //   title: "DAFTAR POLI HARI INI",
+                                //   image: "assets/images/daftar.png",
+                                //   gradient: const LinearGradient(
+                                //     colors: [
+                                //       Color(0xFFB71C1C),
+                                //       Color(0xFFC62828),
+                                //       Color(0xFFD32F2F),
+                                //     ],
+                                //     begin: Alignment.topLeft,
+                                //     end: Alignment.bottomRight,
+                                //   ),
+                                //   icon: Icons.local_hospital,
+                                //   description: "Pendaftaran tujuan poli",
+                                //   onTap: () => _navigateTo(
+                                //     context,
+                                //     const PendaftaranPoliPage(
+                                //       selectType: "pendaftaran",
+                                //     ),
+                                //   ),
+                                // ),
+                                // _buildServiceCard(
+                                //   title: "BOOKING",
+                                //   image: "assets/images/booking.png",
+                                //   gradient: const LinearGradient(
+                                //     colors: [
+                                //       Color(0xFFBF360C),
+                                //       Color(0xFFE65100),
+                                //       Color(0xFFF57C00),
+                                //     ],
+                                //     begin: Alignment.topLeft,
+                                //     end: Alignment.bottomRight,
+                                //   ),
+                                //   icon: Icons.calendar_month,
+                                //   description: "Booking untuk pasien",
+                                //   onTap: () {
+                                //     _showBookingTypeDialog(context);
+                                //   },
+                                // ),
                                 // _buildServiceCard(
                                 //   title: "BPJS DAFTAR",
                                 //   image: "assets/images/bpjs.png",
@@ -566,8 +542,6 @@ class _DashboardApmState extends State<DashboardApm>
                         //     ],
                         //   ),
                         // ),
-
-                        // Informasi 5 - Hubungi Petugas
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
