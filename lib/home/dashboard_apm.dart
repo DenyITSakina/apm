@@ -76,10 +76,7 @@ class _DashboardApmState extends State<DashboardApm>
                 children: [
                   Container(
                     width: double.infinity,
-                    padding: EdgeInsets.symmetric(
-                      vertical: isTablet ? 32 : 24,
-                      horizontal: isTablet ? 40 : 24,
-                    ),
+                    padding: EdgeInsets.symmetric(vertical: isTablet ? 5 : 12),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
                         colors: [
@@ -133,7 +130,7 @@ class _DashboardApmState extends State<DashboardApm>
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 5),
+                            const SizedBox(height: 2),
                             Text(
                               "Peduli Sesama, Sakina Pilihanku",
                               textAlign: TextAlign.center,
@@ -145,7 +142,7 @@ class _DashboardApmState extends State<DashboardApm>
                                 letterSpacing: 0.5,
                               ),
                             ),
-                            const SizedBox(height: 5),
+                            const SizedBox(height: 2),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -167,7 +164,7 @@ class _DashboardApmState extends State<DashboardApm>
                     ),
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 4),
 
                   AnimatedBuilder(
                     animation: _pulseController,
@@ -187,7 +184,6 @@ class _DashboardApmState extends State<DashboardApm>
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 5),
                             Text(
                               "Silahkan pilih layanan yang Anda butuhkan",
                               textAlign: TextAlign.center,
@@ -203,7 +199,7 @@ class _DashboardApmState extends State<DashboardApm>
                     },
                   ),
 
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 2),
 
                   Expanded(
                     child: Padding(
