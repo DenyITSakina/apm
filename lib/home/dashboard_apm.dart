@@ -1,10 +1,7 @@
 import 'package:apm/blog/booking/booking_bloc.dart';
 import 'package:apm/home/booking/booking_page.dart';
-import 'package:apm/home/daftar_poli/daftar_umum_bpjs_page.dart';
-
 import '../Blog/antrian_apm_bloc.dart';
 import 'package:apm/home/check_in_bpjs/cekin_bpjs_page.dart';
-
 import 'package:apm/home/check_in_umum/cekin_umum_page.dart';
 import 'package:flutter/material.dart';
 import 'package:full_swipe_back_gesture/full_swipe_back_gesture.dart';
@@ -204,32 +201,20 @@ class _DashboardApmState extends State<DashboardApm>
                   Expanded(
                     child: Padding(
                       padding: EdgeInsets.symmetric(
-                        horizontal: ResponsiveUtils.isMobile(context)
-                            ? 150
-                            : 190,
+                        horizontal: ResponsiveUtils.isMobile(context) ? 12 : 20,
                       ),
                       child: Center(
                         child: LayoutBuilder(
                           builder: (context, constraints) {
                             final maxW = constraints.maxWidth;
-
-                            // Landscape: lebih rapat dan tetap di tengah.
-                            final isLandscape =
-                                MediaQuery.of(context).orientation ==
-                                Orientation.landscape;
-
                             final crossAxisCount = maxW < 420
                                 ? 2
-                                : (maxW < 700
-                                      ? (isLandscape ? 4 : 4)
-                                      : (isLandscape ? 4 : 4));
+                                : (maxW < 700 ? 2 : 4);
 
                             // Mobile/tablet responsif tanpa scroll horizontal.
                             final childAspectRatio = maxW < 420
                                 ? 0.85
-                                : (maxW < 700
-                                      ? (isLandscape ? 0.88 : 0.9)
-                                      : (isLandscape ? 0.9 : 0.95));
+                                : (maxW < 700 ? 0.9 : 0.95);
 
                             return GridView.count(
                               crossAxisCount: crossAxisCount,
@@ -237,7 +222,7 @@ class _DashboardApmState extends State<DashboardApm>
                               crossAxisSpacing: 16,
                               childAspectRatio: childAspectRatio,
                               physics: const BouncingScrollPhysics(),
-                              padding: const EdgeInsets.symmetric(vertical: 2),
+                              padding: const EdgeInsets.symmetric(vertical: 6),
                               children: [
                                 _buildServiceCard(
                                   title: "CEK-IN BPJS",
@@ -287,94 +272,6 @@ class _DashboardApmState extends State<DashboardApm>
                                     ),
                                   ),
                                 ),
-                                // _buildServiceCard(
-                                //   title: "DAFTAR POLI HARI INI",
-                                //   image: "assets/images/daftar.png",
-                                //   gradient: const LinearGradient(
-                                //     colors: [
-                                //       Color(0xFFB71C1C),
-                                //       Color(0xFFC62828),
-                                //       Color(0xFFD32F2F),
-                                //     ],
-                                //     begin: Alignment.topLeft,
-                                //     end: Alignment.bottomRight,
-                                //   ),
-                                //   icon: Icons.local_hospital,
-                                //   description: "Pendaftaran tujuan poli",
-                                //   onTap: () => _navigateTo(
-                                //     context,
-                                //     const PendaftaranPoliPage(
-                                //       selectType: "pendaftaran",
-                                //     ),
-                                //   ),
-                                // ),
-                                // _buildServiceCard(
-                                //   title: "BOOKING",
-                                //   image: "assets/images/booking.png",
-                                //   gradient: const LinearGradient(
-                                //     colors: [
-                                //       Color(0xFFBF360C),
-                                //       Color(0xFFE65100),
-                                //       Color(0xFFF57C00),
-                                //     ],
-                                //     begin: Alignment.topLeft,
-                                //     end: Alignment.bottomRight,
-                                //   ),
-                                //   icon: Icons.calendar_month,
-                                //   description: "Booking untuk pasien",
-                                //   onTap: () {
-                                //     _showBookingTypeDialog(context);
-                                //   },
-                                // ),
-                                // _buildServiceCard(
-                                //   title: "BPJS DAFTAR",
-                                //   image: "assets/images/bpjs.png",
-                                //   gradient: const LinearGradient(
-                                //     colors: [
-                                //       Color(0xFF1565C0),
-                                //       Color(0xFF1E88E5),
-                                //       Color(0xFF42A5F5),
-                                //     ],
-                                //     begin: Alignment.topLeft,
-                                //     end: Alignment.bottomRight,
-                                //   ),
-                                //   icon: Icons.fingerprint,
-                                //   description: "Panggil After.exe otomatis",
-                                //   onTap: () async {
-                                //     const String nomorBpjs = '0005658974521';
-
-                                //     if (nomorBpjs.isEmpty) {
-                                //       if (!context.mounted) return;
-                                //       ScaffoldMessenger.of(
-                                //         context,
-                                //       ).showSnackBar(
-                                //         const SnackBar(
-                                //           content: Text(
-                                //             'Nomor BPJS kosong. Isi nomor BPJS dulu di halaman pendaftaran.',
-                                //           ),
-                                //         ),
-                                //       );
-                                //       return;
-                                //     }
-
-                                //     final sukses = await openExeFromMap(
-                                //       context,
-                                //       {"nomor": nomorBpjs},
-                                //     );
-
-                                //     if (!sukses && context.mounted) {
-                                //       ScaffoldMessenger.of(
-                                //         context,
-                                //       ).showSnackBar(
-                                //         const SnackBar(
-                                //           content: Text(
-                                //             'Gagal membuka aplikasi BPJS.',
-                                //           ),
-                                //         ),
-                                //       );
-                                //     }
-                                //   },
-                                // ),
                               ],
                             );
                           },
@@ -493,63 +390,6 @@ class _DashboardApmState extends State<DashboardApm>
                           ),
                         ),
 
-                        // Informasi 3 - DAFTAR POLI HARI INI
-                        // Padding(
-                        //   padding: const EdgeInsets.symmetric(vertical: 4),
-                        //   child: Row(
-                        //     crossAxisAlignment: CrossAxisAlignment.start,
-                        //     children: [
-                        //       Container(
-                        //         margin: const EdgeInsets.only(top: 2),
-                        //         child: Icon(
-                        //           Icons.assignment,
-                        //           color: Colors.teal,
-                        //           size: 18,
-                        //         ),
-                        //       ),
-                        //       const SizedBox(width: 10),
-                        //       Expanded(
-                        //         child: Text(
-                        //           "DAFTAR POLI HARI INI: Khusus untuk pasien yang ingin melakukan pemeriksaan langsung pada hari ini, baik pasien lama maupun pasien baru.",
-                        //           style: GoogleFonts.poppins(
-                        //             fontSize: 14,
-                        //             fontWeight: FontWeight.w500,
-                        //             color: Colors.black,
-                        //           ),
-                        //         ),
-                        //       ),
-                        //     ],
-                        //   ),
-                        // ),
-
-                        // // Informasi 4 - BOOKING
-                        // Padding(
-                        //   padding: const EdgeInsets.symmetric(vertical: 4),
-                        //   child: Row(
-                        //     crossAxisAlignment: CrossAxisAlignment.start,
-                        //     children: [
-                        //       Container(
-                        //         margin: const EdgeInsets.only(top: 2),
-                        //         child: Icon(
-                        //           Icons.calendar_today,
-                        //           color: Colors.teal,
-                        //           size: 18,
-                        //         ),
-                        //       ),
-                        //       const SizedBox(width: 10),
-                        //       Expanded(
-                        //         child: Text(
-                        //           "BOOKING: Untuk pemeriksaan di hari lain, dapat digunakan oleh pasien lama maupun baru. Pasien BPJS wajib membawa surat rujukan.",
-                        //           style: GoogleFonts.poppins(
-                        //             fontSize: 14,
-                        //             fontWeight: FontWeight.w500,
-                        //             color: Colors.black,
-                        //           ),
-                        //         ),
-                        //       ),
-                        //     ],
-                        //   ),
-                        // ),
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 4),
                           child: Row(
@@ -742,13 +582,7 @@ class _DashboardApmState extends State<DashboardApm>
               return SizedBox(
                 width: cardWidth,
                 child: Container(
-                  margin: EdgeInsets.symmetric(
-                    vertical:
-                        MediaQuery.of(context).orientation ==
-                            Orientation.landscape
-                        ? 6
-                        : 10,
-                  ),
+                  margin: const EdgeInsets.symmetric(vertical: 10),
                   child: Material(
                     color: Colors.transparent,
                     child: InkWell(
@@ -978,16 +812,6 @@ void _showBookingTypeDialog(BuildContext context) {
                 ),
               ],
             ),
-
-            // const SizedBox(height: 24),
-
-            // SizedBox(
-            //   width: double.infinity,
-            //   child: TextButton(
-            //     onPressed: () => Navigator.pop(context),
-            //     child: const Text("Batal", style: TextStyle(fontSize: 16)),
-            //   ),
-            // ),
           ],
         ),
       ),
