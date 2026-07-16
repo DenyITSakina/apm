@@ -28,12 +28,18 @@ class _CekinBpjsState extends State<CekinBpjs> {
   final Color secondaryColor = const Color(0xFF0ABF68);
   final Color bgColor = const Color(0xFFF8FAFC);
 
-  String _formatJamPeriksa(String jamPraktikRaw) {
-    final s = jamPraktikRaw.trim();
-    if (s.isEmpty) return '-';
+  // String _formatJamPeriksa(String jamPraktikRaw) {
+  //   final s = jamPraktikRaw.trim();
+  //   if (s.isEmpty) return '-';
 
-    final normalized = s.replaceAll('–', '-').replaceAll('—', '-');
-    return normalized;
+  //   final normalized = s.replaceAll('–', '-').replaceAll('—', '-');
+  //   return normalized;
+  // }
+
+  String _formatTanggalBooking(String tanggalBookingRaw) {
+    final s = tanggalBookingRaw.trim();
+    if (s.isEmpty) return '-';
+    return s.replaceAll('–', '-').replaceAll('—', '-');
   }
 
   bool _isTimeInRange(TimeOfDay now, String jamPraktikRaw) {
@@ -458,20 +464,14 @@ class _CekinBpjsState extends State<CekinBpjs> {
           TopToast.error(context, state.pesan);
           _refocusScanner();
         } else if (state is AntrianApmValidated) {
-          final jamPraktikRaw = state.apmData.tglBooking.trim();
-          final jamPeriksaText = _formatJamPeriksa(jamPraktikRaw);
+          final tanggalBookingRaw = state.apmData.tglBooking.trim();
+          final tanggalBookingText = _formatTanggalBooking(tanggalBookingRaw);
 
-          final now = TimeOfDay.now();
-          final canCheck = _isTimeInRange(now, jamPraktikRaw);
-
-          if (!canCheck) {
+          if (tanggalBookingText != '-') {
             TopToast.warning(
               context,
-              'Jam periksa anda $jamPeriksaText dan tidak dapat melakukan check-in sekarang.',
+              'Tanggal booking anda $tanggalBookingText',
             );
-            setState(() => _isProcessing = false);
-            _refocusScanner();
-            return;
           }
 
           final rawNoPeserta = state.apmData.noPeserta?.trim() ?? '';
@@ -479,7 +479,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
           if (rawNoPeserta.isEmpty) {
             TopToast.error(
               context,
-              'Nomor peserta BPJS tidak ditemukan di sistem kami, silahkan menuju ke Front Office (FO) untuk melakukan registrasi',
+              'Nomor peserta BPJS anda tidak ditemukan disistem kami, silahkan menuju Front Office (FO) untuk melakukan registrasi/check in',
             );
             setState(() => _isProcessing = false);
             _refocusScanner();
