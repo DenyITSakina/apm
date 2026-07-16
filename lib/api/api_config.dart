@@ -1,8 +1,9 @@
 class ApiConfig {
   ApiConfig._();
 
-  static const String baseUrl =
-      'http://10.30.0.16/api_dev/public/index.php/api';
+  static const String baseUrl = 'http://10.30.0.9/res/public/index.php/api';
+
+  //http://10.30.0.16/api_dev/public/index.php/api
 
   static const String antrianApm = '$baseUrl/apm-antrian';
   static const String antrianApmLoket = '$baseUrl/apm-antrian-loket';
