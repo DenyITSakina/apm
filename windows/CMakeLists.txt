@@ -108,16 +108,16 @@ install(DIRECTORY "${PROJECT_BUILD_DIR}/${FLUTTER_ASSET_DIR_NAME}"
 # === COPY PYTHON RUNTIME & SCRIPTS ===
 # =====================================================
 
-# ✅ Path yang benar - gunakan CMAKE_SOURCE_DIR (root project)
-set(PYTHON_SCRIPTS_SOURCE "${CMAKE_SOURCE_DIR}/python_scripts")
-set(PYTHON_RUNTIME_SOURCE "${CMAKE_SOURCE_DIR}/python_runtime")
+# Path yang benar - gunakan CMAKE_SOURCE_DIR (root project)
+set(PYTHON_SCRIPTS_SOURCE "${CMAKE_CURRENT_LIST_DIR}/../python_scripts")
+set(PYTHON_RUNTIME_SOURCE "${CMAKE_CURRENT_LIST_DIR}/../python_runtime")
 
 # Copy Python Runtime (isi folder, BUKAN folder-nya)
 if(EXISTS "${PYTHON_RUNTIME_SOURCE}")
   message(STATUS "========================================")
-  message(STATUS "✅ Copying Python runtime...")
-  message(STATUS "  Source: ${PYTHON_RUNTIME_SOURCE}")
-  message(STATUS "  Target: ${INSTALL_BUNDLE_DATA_DIR}/python")
+  message(STATUS "Copying Python runtime...")
+  message(STATUS "Source: ${PYTHON_RUNTIME_SOURCE}")
+  message(STATUS "Target: ${INSTALL_BUNDLE_DATA_DIR}/python")
   message(STATUS "========================================")
   
   # Copy ISI folder python_runtime ke data/python
@@ -131,17 +131,17 @@ if(EXISTS "${PYTHON_RUNTIME_SOURCE}")
     PATTERN "get-pip.py" EXCLUDE
     PATTERN "requirements.txt" EXCLUDE
   )
-  message(STATUS "✅ Python runtime copied successfully!")
+  message(STATUS "Python runtime copied successfully!")
 else()
-  message(FATAL_ERROR "❌ python_runtime folder not found: ${PYTHON_RUNTIME_SOURCE}")
+  message(FATAL_ERROR "python_runtime folder not found: ${PYTHON_RUNTIME_SOURCE}")
 endif()
 
 # Copy Python Scripts
 if(EXISTS "${PYTHON_SCRIPTS_SOURCE}")
   message(STATUS "========================================")
-  message(STATUS "✅ Copying Python scripts...")
-  message(STATUS "  Source: ${PYTHON_SCRIPTS_SOURCE}")
-  message(STATUS "  Target: ${INSTALL_BUNDLE_DATA_DIR}/python_scripts")
+  message(STATUS "Copying Python scripts...")
+  message(STATUS "Source: ${PYTHON_SCRIPTS_SOURCE}")
+  message(STATUS "Target: ${INSTALL_BUNDLE_DATA_DIR}/python_scripts")
   message(STATUS "========================================")
   
   install(DIRECTORY "${PYTHON_SCRIPTS_SOURCE}/"
@@ -152,18 +152,18 @@ if(EXISTS "${PYTHON_SCRIPTS_SOURCE}")
     PATTERN "__pycache__" EXCLUDE
     PATTERN "*.pyc" EXCLUDE
   )
-  message(STATUS "✅ Python scripts copied successfully!")
+  message(STATUS "Python scripts copied successfully!")
 else()
-  message(WARNING "⚠️  python_scripts folder not found: ${PYTHON_SCRIPTS_SOURCE}")
-  message(WARNING "⚠️  Create folder at: ${PYTHON_SCRIPTS_SOURCE}")
+  message(WARNING "python_scripts folder not found: ${PYTHON_SCRIPTS_SOURCE}")
+  message(WARNING "Create folder at: ${PYTHON_SCRIPTS_SOURCE}")
 endif()
 
 # Verifikasi final
 message(STATUS "========================================")
-message(STATUS "📊 Python Configuration Summary:")
-message(STATUS "  Runtime source: ${PYTHON_RUNTIME_SOURCE}")
-message(STATUS "  Scripts source: ${PYTHON_SCRIPTS_SOURCE}")
-message(STATUS "  Install prefix: ${INSTALL_BUNDLE_DATA_DIR}")
+message(STATUS "Python Configuration Summary:")
+message(STATUS "Runtime source: ${PYTHON_RUNTIME_SOURCE}")
+message(STATUS "Scripts source: ${PYTHON_SCRIPTS_SOURCE}")
+message(STATUS "Install prefix: ${INSTALL_BUNDLE_DATA_DIR}")
 message(STATUS "========================================")
 
 # Install the AOT library on non-Debug builds only.

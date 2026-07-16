@@ -458,7 +458,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
           TopToast.error(context, state.pesan);
           _refocusScanner();
         } else if (state is AntrianApmValidated) {
-          final jamPraktikRaw = state.apmData.jamPraktik.trim();
+          final jamPraktikRaw = state.apmData.tglBooking.trim();
           final jamPeriksaText = _formatJamPeriksa(jamPraktikRaw);
 
           final now = TimeOfDay.now();
