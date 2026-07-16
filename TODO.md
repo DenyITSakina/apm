@@ -1,3 +1,0 @@
-- [x] Update PrintSetupRunner path resolution (fallback dari data/python & data/python_scripts ke python_runtime & python_scripts)
-- [x] Update error message & debug expectations
-- [ ] Run Flutter/Windows build and test print setup automation
