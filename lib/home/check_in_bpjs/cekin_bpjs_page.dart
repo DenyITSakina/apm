@@ -7,7 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import '../../Blog/antrian_apm_bloc.dart';
 import '../../widget/keypad_section.dart';
-import '../../api/booking_api_service.dart';
+
 import '../../models/apm_antrian_model.dart';
 
 class CekinBpjs extends StatefulWidget {
@@ -504,52 +504,52 @@ class _CekinBpjsState extends State<CekinBpjs> {
           });
 
           WidgetsBinding.instance.addPostFrameCallback((_) async {
-            try {
-              final resp = await BookingApiService.cekPasienBpjs(noPeserta);
-              if (!mounted) return;
+            //  try {
+            //   final resp = await BookingApiService.cekPasienBpjs(noPeserta);
+            //   if (!mounted) return;
 
-              if (resp.status != true) {
-                TopToast.error(
-                  context,
-                  resp.message.isNotEmpty
-                      ? resp.message
-                      : 'Data BPJS tidak valid',
-                );
-                setState(() => _isProcessing = false);
-                _refocusScanner();
-                return;
-              }
+            //   if (resp.status != true) {
+            //     TopToast.error(
+            //       context,
+            //       resp.message.isNotEmpty
+            //           ? resp.message
+            //           : 'Data BPJS tidak valid',
+            //     );
+            //     setState(() => _isProcessing = false);
+            //     _refocusScanner();
+            //     return;
+            //   }
 
-              final peserta = resp.peserta;
-              final apmDataFromBpjs = ApmAntrianModel(
-                rm: state.apmData.rm,
-                pasien: peserta?.nama ?? '',
-                alamatDomisili: peserta?.alamat ?? '',
-                tglLahir: peserta?.tglLahir ?? '',
-                noPeserta: peserta?.noPeserta ?? noPeserta,
-                noIdentitas: peserta?.nik ?? '',
-                namaPoli: state.apmData.namaPoli,
-                noBooking: state.apmData.noBooking,
-                namaDokter: state.apmData.namaDokter,
-              );
+            //   final peserta = resp.peserta;
+            final apmDataFromBpjs = ApmAntrianModel(
+              rm: state.apmData.rm,
+              pasien: state.apmData.pasien,
+              alamatDomisili: state.apmData.alamatDomisili,
+              tglLahir: state.apmData.tglLahir,
+              noPeserta: noPeserta,
+              noIdentitas: state.apmData.noIdentitas,
+              namaPoli: state.apmData.namaPoli,
+              noBooking: state.apmData.noBooking,
+              namaDokter: state.apmData.namaDokter,
+            );
 
-              pushBackSwipePage(
-                context: context,
-                page: BlocProvider.value(
-                  value: context.read<AntrianApmBloc>(),
-                  child: CekinBpjsDataPage(
-                    noBpjs: noPeserta,
-                    data: apmDataFromBpjs,
-                    jenisPasien: widget.selectType,
-                  ),
+            pushBackSwipePage(
+              context: context,
+              page: BlocProvider.value(
+                value: context.read<AntrianApmBloc>(),
+                child: CekinBpjsDataPage(
+                  noBpjs: noPeserta,
+                  data: apmDataFromBpjs,
+                  jenisPasien: widget.selectType,
                 ),
-              );
-            } catch (e) {
-              if (!mounted) return;
-              TopToast.error(context, 'Gagal validasi data BPJS: $e');
-              setState(() => _isProcessing = false);
-              _refocusScanner();
-            }
+              ),
+            );
+            //  } catch (e) {
+            //   if (!mounted) return;
+            //   TopToast.error(context, 'Gagal validasi data BPJS: $e');
+            //   setState(() => _isProcessing = false);
+            //   _refocusScanner();
+            // }
           });
         } else if (state is AntrianApmBlocked) {
           TopToast.warning(context, state.message);

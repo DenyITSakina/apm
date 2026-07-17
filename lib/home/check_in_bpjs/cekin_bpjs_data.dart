@@ -231,6 +231,8 @@ class CekinBpjsDataPage extends StatelessWidget {
         final isLoadingPoli = state is AntrianApmLoading;
         final isLoadingLoket = state is AntrianApmPrinting;
 
+        final isPasienBaru = data.pasienBaru == 0;
+
         return Column(
           children: [
             Row(
