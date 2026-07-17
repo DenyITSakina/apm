@@ -231,249 +231,255 @@ class CekinBpjsDataPage extends StatelessWidget {
         final isLoadingPoli = state is AntrianApmLoading;
         final isLoadingLoket = state is AntrianApmPrinting;
 
-        final isPasienBaru = data.pasienBaru == 0;
+        // pasien_baru: 1 = Ya (tampil ke Loket), 0 = Tidak (tampil ke Poli)
+        final pasienBaruFlag = data.pasienBaru;
+        final isPasienBaru = pasienBaruFlag == 1;
 
         return Column(
           children: [
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: Column(
-                    children: [
-                      GestureDetector(
-                        onTap: isLoadingPoli
-                            ? null
-                            : () async {
-                                final nomor = data.noPeserta?.trim() ?? '';
-                                if (nomor.isEmpty) {
-                                  TopToast.error(
-                                    context,
-                                    "Nomor tidak ditemukan!",
-                                  );
-                                  return;
-                                }
-                                if (nomor.length != 13) {
-                                  TopToast.error(
-                                    context,
-                                    "Nomor harus 13 digit!",
-                                  );
-                                  return;
-                                }
-
-                                final sukses = await openExeFromMap(context, {
-                                  "nomor": nomor,
-                                });
-
-                                // Validasi sukses/gagal: jika gagal, tombol tidak lanjut ke poli.
-                                if (sukses != true) {
-                                  TopToast.error(
-                                    context,
-                                    "Gagal membuka aplikasi BPJS/menyiapkan input. Silakan coba lagi.",
-                                  );
-                                  return;
-                                }
-
-                                ConfirmationDialog.show(
-                                  context,
-                                  title: "Menuju Poli",
-                                  message:
-                                      "Anda yakin ingin melanjutkan ke pelayanan POLI?",
-                                  onConfirm: () {
-                                    context.read<AntrianApmBloc>().add(
-                                      LanjutKePoliEvent(
-                                        noRm: data.rm,
-                                        jenisAntrian: jenisPasien.toLowerCase(),
-                                      ),
+                if (!isPasienBaru)
+                  Expanded(
+                    child: Column(
+                      children: [
+                        GestureDetector(
+                          onTap: isLoadingPoli
+                              ? null
+                              : () async {
+                                  final nomor = data.noPeserta?.trim() ?? '';
+                                  if (nomor.isEmpty) {
+                                    TopToast.error(
+                                      context,
+                                      "Nomor tidak ditemukan!",
                                     );
-                                  },
-                                );
-                              },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 24),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF0ABF68), Color(0xFF089E59)],
-                            ),
-                            borderRadius: BorderRadius.circular(14),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
+                                    return;
+                                  }
+                                  if (nomor.length != 13) {
+                                    TopToast.error(
+                                      context,
+                                      "Nomor harus 13 digit!",
+                                    );
+                                    return;
+                                  }
+
+                                  final sukses = await openExeFromMap(context, {
+                                    "nomor": nomor,
+                                  });
+
+                                  // Validasi sukses/gagal: jika gagal, tombol tidak lanjut ke poli.
+                                  if (sukses != true) {
+                                    TopToast.error(
+                                      context,
+                                      "Gagal membuka aplikasi BPJS/menyiapkan input. Silakan coba lagi.",
+                                    );
+                                    return;
+                                  }
+
+                                  ConfirmationDialog.show(
+                                    context,
+                                    title: "Menuju Poli",
+                                    message:
+                                        "Anda yakin ingin melanjutkan ke pelayanan POLI?",
+                                    onConfirm: () {
+                                      context.read<AntrianApmBloc>().add(
+                                        LanjutKePoliEvent(
+                                          noRm: data.rm,
+                                          jenisAntrian: jenisPasien
+                                              .toLowerCase(),
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 24),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF0ABF68), Color(0xFF089E59)],
                               ),
-                            ],
-                          ),
-                          child: Center(
-                            child: isLoadingPoli
-                                ? LoadingAnimationWidget.fourRotatingDots(
-                                    color: Colors.white,
-                                    size: 15,
-                                  )
-                                : Text(
-                                    "LANJUT PILIH KE POLI",
-                                    style: GoogleFonts.oswald(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                      letterSpacing: 1,
-                                    ),
-                                  ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      // Keterangan untuk tombol POLI
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.green.shade50,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.green.shade200),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.verified_user,
-                              size: 12,
-                              color: Colors.green.shade700,
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                "Nomor BPJS: ${data.noPeserta?.substring(0, 4)}...${data.noPeserta?.substring(data.noPeserta!.length - 4)}",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.green.shade800,
+                              borderRadius: BorderRadius.circular(14),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
                                 ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
+                              ],
                             ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "Konsultasi dengan dokter / Langsung tunggu di Poli",
-                        style: GoogleFonts.poppins(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey.shade600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const SizedBox(width: 16),
-
-                // Tombol LOKET
-                Expanded(
-                  child: Column(
-                    children: [
-                      GestureDetector(
-                        onTap: isLoadingLoket
-                            ? null
-                            : () {
-                                ConfirmationDialog.show(
-                                  context,
-                                  title: "Menuju Loket",
-                                  message:
-                                      "Anda yakin ingin melanjutkan ke pelayanan LOKET?",
-                                  onConfirm: () {
-                                    context.read<AntrianApmBloc>().add(
-                                      LanjutKeLoketEvent(
-                                        apmData: data,
-                                        jenisAntrian: jenisPasien.toLowerCase(),
-                                        noBooking: data.noBooking ?? '',
+                            child: Center(
+                              child: isLoadingPoli
+                                  ? LoadingAnimationWidget.fourRotatingDots(
+                                      color: Colors.white,
+                                      size: 15,
+                                    )
+                                  : Text(
+                                      "LANJUT PILIH KE POLI",
+                                      style: GoogleFonts.oswald(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                        letterSpacing: 1,
                                       ),
-                                    );
-                                  },
-                                );
-                              },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 24),
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF0D8AAE), Color(0xFF0ABF68)],
+                                    ),
                             ),
-                            borderRadius: BorderRadius.circular(14),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.08),
-                                blurRadius: 8,
-                                offset: const Offset(0, 4),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        // Keterangan untuk tombol POLI
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green.shade50,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.green.shade200),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.verified_user,
+                                size: 12,
+                                color: Colors.green.shade700,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  "Nomor BPJS: ${data.noPeserta?.substring(0, 4)}...${data.noPeserta?.substring(data.noPeserta!.length - 4)}",
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.green.shade800,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ],
                           ),
-                          child: Center(
-                            child: isLoadingLoket
-                                ? LoadingAnimationWidget.fourRotatingDots(
-                                    color: Colors.white,
-                                    size: 15,
-                                  )
-                                : Text(
-                                    "PILIH KE LOKET",
-                                    style: GoogleFonts.oswald(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                      letterSpacing: 1,
-                                    ),
-                                  ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Konsultasi dengan dokter / Langsung tunggu di Poli",
+                          style: GoogleFonts.poppins(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey.shade600,
                           ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      // Keterangan untuk tombol LOKET
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.blue.shade50,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: Colors.blue.shade200),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.receipt,
-                              size: 12,
-                              color: Colors.blue.shade700,
+                      ],
+                    ),
+                  ),
+
+                if (!isPasienBaru) const SizedBox(width: 16),
+
+                // Tombol LOKET (ditampilkan hanya jika pasien_baru = 1)
+                if (isPasienBaru)
+                  Expanded(
+                    child: Column(
+                      children: [
+                        GestureDetector(
+                          onTap: isLoadingLoket
+                              ? null
+                              : () {
+                                  ConfirmationDialog.show(
+                                    context,
+                                    title: "Menuju Loket",
+                                    message:
+                                        "Anda yakin ingin melanjutkan ke pelayanan LOKET?",
+                                    onConfirm: () {
+                                      context.read<AntrianApmBloc>().add(
+                                        LanjutKeLoketEvent(
+                                          apmData: data,
+                                          jenisAntrian: jenisPasien
+                                              .toLowerCase(),
+                                          noBooking: data.noBooking ?? '',
+                                        ),
+                                      );
+                                    },
+                                  );
+                                },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(vertical: 24),
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF0D8AAE), Color(0xFF0ABF68)],
+                              ),
+                              borderRadius: BorderRadius.circular(14),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.08),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              "Administrasi & pendaftaran",
-                              style: GoogleFonts.poppins(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
+                            child: Center(
+                              child: isLoadingLoket
+                                  ? LoadingAnimationWidget.fourRotatingDots(
+                                      color: Colors.white,
+                                      size: 15,
+                                    )
+                                  : Text(
+                                      "PILIH KE LOKET",
+                                      style: GoogleFonts.oswald(
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w700,
+                                        color: Colors.white,
+                                        letterSpacing: 1,
+                                      ),
+                                    ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        // Keterangan untuk tombol LOKET
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade50,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: Colors.blue.shade200),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.receipt,
+                                size: 12,
                                 color: Colors.blue.shade700,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 4),
+                              Text(
+                                "Administrasi & pendaftaran",
+                                style: GoogleFonts.poppins(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.blue.shade700,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        "Administrasi & pendaftaran",
-                        style: GoogleFonts.poppins(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey.shade600,
+                        const SizedBox(height: 4),
+                        Text(
+                          "Administrasi & pendaftaran",
+                          style: GoogleFonts.poppins(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey.shade600,
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
               ],
             ),
 
