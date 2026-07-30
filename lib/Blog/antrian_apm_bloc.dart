@@ -1318,6 +1318,10 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                               'Dokter',
                               m.namadokter.isNotEmpty ? m.namadokter : '-',
                             ),
+                            _buildCardInfoRow(
+                              'APM',
+                              m.idRegistrasi.isNotEmpty ? m.idRegistrasi : '-',
+                            ),
                           ],
                         ),
                       ),
@@ -1359,8 +1363,8 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                             ),
                             pw.SizedBox(width: 3),
                             pw.SizedBox(
-                              width: 57,
-                              height: 57,
+                              width: 54,
+                              height: 54,
                               child: pw.BarcodeWidget(
                                 barcode: pw.Barcode.qrCode(),
                                 data: qrData,

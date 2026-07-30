@@ -12,6 +12,7 @@ class ApmAntrianPoliModel {
   String jamBooking;
   String idJadwalDokter;
   int idLayanan;
+  String idRegistrasi;
 
   ApmAntrianPoliModel({
     required this.noBooking,
@@ -28,6 +29,7 @@ class ApmAntrianPoliModel {
 
     required this.idJadwalDokter,
     required this.idLayanan,
+    required this.idRegistrasi,
   });
 
   factory ApmAntrianPoliModel.fromJson(Map<String, dynamic> json) {
@@ -60,6 +62,7 @@ class ApmAntrianPoliModel {
       tanggalLahir: data['tgl_lahir']?.toString() ?? '',
       tanggalBooking: data['tgl_booking']?.toString() ?? '',
       jamBooking: data['jam_booking']?.toString() ?? '',
+      idRegistrasi: rootData['id']?.toString() ?? '',
     );
   }
 }
