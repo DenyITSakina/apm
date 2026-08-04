@@ -288,32 +288,32 @@ Future<void> sendNoPeserta(BuildContext context, String nomor) async {
   }
 
   // Tunggu form registrasi benar-benar muncul
-  await Future.delayed(const Duration(milliseconds: 2000));
+  await Future.delayed(const Duration(milliseconds: 100));
 
   // Fokus ke window
   print('Memastikan fokus ke aplikasi...');
   focusWindow("After.exe");
-  await Future.delayed(const Duration(milliseconds: 800));
+  // await Future.delayed(const Duration(milliseconds: 200));
 
   // Kirim ESC beberapa kali untuk menutup dialog/modal
   print('Menutup dialog yang mungkin terbuka...');
   for (int i = 0; i < 5; i++) {
     sendKeys("{ESC}");
-    await Future.delayed(const Duration(milliseconds: 150));
+    // await Future.delayed(const Duration(milliseconds: 100));
   }
 
   // Gunakan ALT + D untuk fokus ke address bar (jika ada) atau reset fokus
   print('Reset fokus ke awal...');
   sendKeys("{TAB}");
-  await Future.delayed(const Duration(milliseconds: 200));
+  // await Future.delayed(const Duration(milliseconds: 50));
 
   // Kirim Shift+Tab untuk kembali ke awal (reverse tab)
   for (int i = 0; i < 10; i++) {
     sendKeys("+{TAB}"); // Shift+Tab
-    await Future.delayed(const Duration(milliseconds: 100));
+    // await Future.delayed(const Duration(milliseconds: 50));
   }
 
-  await Future.delayed(const Duration(milliseconds: 500));
+  // await Future.delayed(const Duration(milliseconds: 50));
 
   // Pilih radio button berdasarkan tipe
   print('Memilih radio button $tipe...');
@@ -321,58 +321,58 @@ Future<void> sendNoPeserta(BuildContext context, String nomor) async {
   if (tipe == "BPJS") {
     // Coba langsung ke radio BPJS dengan TAB beberapa kali
     // Dari awal form (setelah shift+tab berulang)
-    await Future.delayed(const Duration(milliseconds: 300));
+    // await Future.delayed(const Duration(milliseconds: 50));
 
     // TAB 2 kali untuk mencapai radio BPJS (biasanya radio pertama)
     sendKeys("{TAB}");
-    await Future.delayed(const Duration(milliseconds: 200));
+    // await Future.delayed(const Duration(milliseconds: 50));
     sendKeys("{TAB}");
-    await Future.delayed(const Duration(milliseconds: 200));
+    // await Future.delayed(const Duration(milliseconds: 50));
 
     // Pilih radio BPJS dengan spasi
     sendKeys(" ");
-    await Future.delayed(const Duration(milliseconds: 300));
+    // await Future.delayed(const Duration(milliseconds: 50));
     print('Radio BPJS dipilih');
   } else if (tipe == "NIK") {
-    // Untuk NIK, TAB lebih banyak
-    await Future.delayed(const Duration(milliseconds: 300));
+    // // Untuk NIK, TAB lebih banyak
+    // await Future.delayed(const Duration(milliseconds: 50));
 
     // TAB 3 kali untuk mencapai radio NIK
     sendKeys("{TAB}");
-    await Future.delayed(const Duration(milliseconds: 200));
+    // await Future.delayed(const Duration(milliseconds: 50));
     sendKeys("{TAB}");
-    await Future.delayed(const Duration(milliseconds: 200));
+    // await Future.delayed(const Duration(milliseconds: 50));
     sendKeys("{TAB}");
-    await Future.delayed(const Duration(milliseconds: 200));
+    // await Future.delayed(const Duration(milliseconds: 50));
 
     // Pilih radio NIK dengan spasi
     sendKeys(" ");
-    await Future.delayed(const Duration(milliseconds: 300));
+    // await Future.delayed(const Duration(milliseconds: 50));
     print('Radio NIK dipilih');
   }
 
-  await Future.delayed(const Duration(milliseconds: 500));
+  // await Future.delayed(const Duration(milliseconds: 50));
 
   // Pindah ke field input nomor (TAB 1 kali setelah radio)
   print('Pindah ke field input nomor...');
   sendKeys("{TAB}");
-  await Future.delayed(const Duration(milliseconds: 800));
+  // await Future.delayed(const Duration(milliseconds: 50));
 
   // Pastikan field kosong dengan triple click + delete
   print('Kosongkan field nomor...');
   sendKeys("{HOME}"); // Ke awal field
-  await Future.delayed(const Duration(milliseconds: 100));
+  // await Future.delayed(const Duration(milliseconds: 50));
   sendKeys("+{END}"); // Select all
-  await Future.delayed(const Duration(milliseconds: 100));
+  // await Future.delayed(const Duration(milliseconds: 50));
   sendKeys("{DELETE}");
-  await Future.delayed(const Duration(milliseconds: 300));
+  // await Future.delayed(const Duration(milliseconds: 50));
 
   // ISi nomor
   print('Mengisi nomor: $normalizedNomor');
 
   // Opsi 1: Kirim langsung (lebih cepat)
   sendKeys(normalizedNomor);
-  await Future.delayed(const Duration(milliseconds: 800));
+  // await Future.delayed(const Duration(milliseconds: 50));
 
   // Opsi 2: Jika opsi 1 tidak berhasil, gunakan clipboard
   // import 'package:flutter/services.dart';
@@ -385,6 +385,6 @@ Future<void> sendNoPeserta(BuildContext context, String nomor) async {
   print('Submit form...');
   sendKeys("{ENTER}");
 
-  await Future.delayed(const Duration(milliseconds: 500));
+  // await Future.delayed(const Duration(milliseconds: 50));
   print("Form $tipe selesai diisi");
 }
