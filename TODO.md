@@ -1,15 +1,13 @@
-# TODO - Fix auto-fill BPJS form (After.exe)
+# TODO - Auto-fill BPJS form using noPeserta from ApmAntrianModel
 
-## Problem
+## Goal
 
-Keystrokes are sent to the wrong window. Each `sendKeys` call spawns a new PowerShell console window that steals focus from the After.exe form, so `SendKeys.SendWait` types into the PowerShell window instead of the After.exe form.
+- In `lib/func/open_aplikasi_bpjsDaftar.dart`, take `noPeserta` from `ApmAntrianModel` and pass it to `sendNoPeserta` to auto-fill the BPJS form.
 
 ## Steps
 
-- [x] 1. Modify `sendKeys` in `lib/func/open_aplikasi_bpjsDaftar.dart`:
-  - Add `-WindowStyle Hidden` so the PowerShell window never appears/steals focus.
-  - Activate the After.exe window (`SetForegroundWindow`) inside the same script right before `SendKeys.SendWait`.
-- [x] 2. Verify all callers (`sendVirtualKey`, `sendAutoLogin`, `sendNoPeserta`) route through `sendKeys` and benefit automatically.
-- [x] 3. Rebuild and test the automation flow.
-  - `flutter analyze` passes (only pre-existing info lints, no errors).
-  - Verify PowerShell script syntax.
+- [x] 1. Add import for `ApmAntrianModel` in `lib/func/open_aplikasi_bpjsDaftar.dart`.
+- [ ] 2. Refactor `openExe` to accept `ApmAntrianModel` and extract `noPeserta`.
+- [ ] 3. Refactor `sendNoPeserta` to accept `ApmAntrianModel` and use its `noPeserta`.
+- [ ] 4. Update `openExeFromMap` to build an `ApmAntrianModel` from the map.
+- [ ] 5. Run `flutter analyze` to verify no errors.
