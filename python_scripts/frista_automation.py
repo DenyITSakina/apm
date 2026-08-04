@@ -14,32 +14,22 @@ DB_CONFIG = {
     'password': '12344321' 
 }
 
-def get_account_from_db(no_peserta=None):
+def get_account_from_db():
     """
-    Ambil account dari database.
-    Bisa berdasarkan no_peserta atau ambil yang aktif
+    Ambil account aktif dari database tanpa parameter no_peserta
     """
     connection = None
     try:
         connection = mysql.connector.connect(**DB_CONFIG)
         cursor = connection.cursor(dictionary=True)
         
-        if no_peserta:
-            query = """
-                SELECT va.username, va.password 
-                FROM vclaim_accounts va
-                JOIN peserta p ON va.id = p.account_id
-                WHERE p.no_peserta = %s
-            """
-            cursor.execute(query, (no_peserta,))
-        else:
-            query = """
-                SELECT username, password 
-                FROM vclaim_accounts 
-                WHERE is_active = 1 
-                LIMIT 1
-            """
-            cursor.execute(query)
+        query = """
+            SELECT username, password 
+            FROM vclaim_accounts 
+            WHERE is_active = 1 
+            LIMIT 1
+        """
+        cursor.execute(query)
         
         result = cursor.fetchone()
         
@@ -59,28 +49,21 @@ def get_account_from_db(no_peserta=None):
             cursor.close()
             connection.close()
 
-# Ambil argumen NIK / No Peserta
-if len(sys.argv) < 2:
-    print("Usage: python frista_auto.py <no_peserta>")
-    sys.exit(1)
-
-no_peserta = sys.argv[1]
-
-# Ambil username dan password dari database
-username, password = get_account_from_db(no_peserta)
+# Ambil username dan password dari database (TANPA no_peserta)
+username, password = get_account_from_db()
 print(f"Username: {username}, Password: {'*' * len(password)}")
 
 # Koordinat UI Frista
 username_coords = (641, 381)
 password_coords = (632, 446)
 login_coords = (605, 529)
-no_peserta_coords = (950, 274)
-ambil_foto_coords = (953, 394)
+# no_peserta_coords = (950, 274)  # TIDAK DIPAKAI
+# ambil_foto_coords = (953, 394)  # TIDAK DIPAKAI
 popup_ok_coords = (745, 439)
 
 EXPECTED_COLOR = (240, 240, 240)
-# FRISTA_PATH = r"C:\frista_v3.0.2\frista\Frista.exe"
-AFTER_PATH = r"C:\Program Files (x86)\BPJS Kesehatan\Aplikasi Sidik Jari BPJS Kesehatan\After.exe"
+FRISTA_PATH = r"C:\frista_v3.0.2\frista\Frista.exe"
+# AFTER_PATH = r"C:\Program Files (x86)\BPJS Kesehatan\Aplikasi Sidik Jari BPJS Kesehatan\After.exe"  # TIDAK DIPAKAI
 
 # Utility
 def is_process_running(name):
@@ -115,9 +98,8 @@ def detect_nik_popup():
         print(">>> Error deteksi popup:", e)
     return False
 
-# def run_after(no_peserta):
-def run_after(username, password, no_peserta):
-    """Jalankan After.exe dan input NIK / login otomatis"""
+def run_after(username, password):
+    """Jalankan After.exe dengan login otomatis (TANPA input no_peserta)"""
     print(">>> Menjalankan After.exe...")
     try:
         # Cegah dobel: jika After.exe sudah berjalan, jangan buka instance baru
@@ -128,27 +110,26 @@ def run_after(username, password, no_peserta):
             proc = None
             time.sleep(2)
 
-        # Fokus window After.exe
+        # Fokus window After.exe dan login
         pyautogui.click(username_coords)
         pyautogui.typewrite(username, interval=0.05)
         pyautogui.click(password_coords)
         pyautogui.typewrite(password, interval=0.05)
         pyautogui.click(login_coords)
+        print(">>> Login After.exe selesai (tanpa input no_peserta)")
         time.sleep(2)
 
-        # Input NIK peserta
-        pyautogui.click(no_peserta_coords)
-        pyautogui.typewrite(no_peserta, interval=0.05)
-        print(f"Nomor peserta {no_peserta} berhasil diinput di After.exe")
-
-        proc.wait()
-        print("After.exe selesai")
+        if proc:
+            proc.wait()
+            print("After.exe selesai")
     except Exception as e:
         print(">>> Gagal menjalankan After.exe:", e)
 
-# Proses utama Frista
-# def start_frista_and_login():
-def start_frista_and_login(username, password, no_peserta):
+def start_frista_and_login(username, password):
+    """
+    Jalankan Frista, login otomatis, dan handle popup
+    TANPA input no_peserta dan TANPA ambil foto
+    """
     print("Membuka Frista...")
     proc = subprocess.Popen(FRISTA_PATH)
     time.sleep(7)
@@ -174,40 +155,21 @@ def start_frista_and_login(username, password, no_peserta):
         kill_process("Frista.exe")
         return False
     
-    # Input nomor peserta
-    pyautogui.click(no_peserta_coords)
-    time.sleep(0.3)
-    pyautogui.typewrite(no_peserta, interval=0.05)
-    print(f"Nomor peserta {no_peserta} berhasil diinput")
-    time.sleep(2)
-
-    # Cek popup setelah input NIK
-    if detect_nik_popup():
-        kill_process("Frista.exe")
-        return False
-
-    # Ambil foto dengan pengecekan popup setiap 1 detik selama 8 detik
-    pyautogui.click(ambil_foto_coords)
-    print("Tombol Ambil Foto diklik! Proses pengambilan foto dimulai...")
-
-    for i in range(8):
-        time.sleep(1)
-        if detect_nik_popup():
-            kill_process("Frista.exe")
-            return False
-
-    print(">>> SUCCESS: Foto diambil")
+    # ===== TIDAK ADA INPUT NO_PESERTA =====
+    # ===== TIDAK ADA AMBIL FOTO =====
+    
+    print(">>> SUCCESS: Frista berhasil login (tanpa input no_peserta)")
     return True
 
 # Eksekusi
-# success = start_frista_and_login()
-success = start_frista_and_login(username, password, no_peserta)
+success = start_frista_and_login(username, password)
+
 if success:
-    print("Frista berhasil login, nomor peserta dimasukkan, foto diambil!")
+    print("Frista berhasil login!")
     sys.exit(0)
 else:
-    print("Frista gagal login/verifikasi wajah atau NIK tidak ditemukan")
+    print("Frista gagal login/verifikasi wajah")
     kill_process("Frista.exe")
-    # run_after(username, password)
-    run_after(username, password, no_peserta)
+    # ===== RUN AFTER TANPA NO_PESERTA =====
+    # run_after(username, password)  # Hanya login, tanpa input no_peserta
     sys.exit(0)

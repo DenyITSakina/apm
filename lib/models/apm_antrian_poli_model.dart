@@ -62,7 +62,7 @@ class ApmAntrianPoliModel {
       tanggalLahir: data['tgl_lahir']?.toString() ?? '',
       tanggalBooking: data['tgl_booking']?.toString() ?? '',
       jamBooking: data['jam_booking']?.toString() ?? '',
-      idRegistrasi: rootData['id']?.toString() ?? '',
+      idRegistrasi: rootData['id_registrasi']?.toString() ?? '',
     );
   }
 }
