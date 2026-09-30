@@ -1,144 +1,143 @@
-import 'package:apm/home/dashboard_apm.dart';
+import 'package:apm/func/navigation_helpers.dart';
+import 'package:apm/theme/app_tokens.dart';
+import 'package:apm/theme/app_typography.dart';
+import 'package:apm/widget/app_button.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
-Future showSuccessDialog(BuildContext context, String message) async {
+/// Dialog sukses yang selalu mengembalikan pengguna ke halaman utama kiosk
+/// sehingga alur bisa diulang tanpa perlu restart aplikasi.
+Future<void> showSuccessDialog(
+  BuildContext context,
+  String message, {
+  String title = 'Berhasil',
+  String actionLabel = 'SELESAI',
+  VoidCallback? onClose,
+}) {
   return showGeneralDialog(
     context: context,
     barrierDismissible: false,
-    barrierLabel: "Berhasil",
-    barrierColor: Colors.black.withOpacity(0.5),
-    pageBuilder: (context, anim1, anim2) => const SizedBox.shrink(),
-    transitionBuilder: (context, anim1, anim2, child) {
-      final scaleAnim = 0.8 + 0.2 * anim1.value;
-      final fadeAnim = anim1.value;
+    barrierLabel: title,
+    barrierColor: AppColors.primaryDark.withValues(alpha: 0.55),
+    pageBuilder: (_, _, _) => const SizedBox.shrink(),
+    transitionBuilder: (context, animation, _, _) {
+      final curved = CurvedAnimation(
+        parent: animation,
+        curve: Curves.easeOutBack,
+      );
 
-      return Opacity(
-        opacity: fadeAnim,
-        child: Transform.scale(
-          scale: scaleAnim,
+      return FadeTransition(
+        opacity: animation,
+        child: ScaleTransition(
+          scale: Tween(begin: 0.88, end: 1.0).animate(curved),
           child: Center(
-            child: Container(
-              width: MediaQuery.of(context).size.width * 0.85,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.1),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
-                  ),
-                ],
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        colors: [Colors.blue.shade300, Colors.blue.shade700],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 460),
+                child: Container(
+                  padding: const EdgeInsets.all(AppSpacing.lg),
+                  decoration: BoxDecoration(
+                    color: AppColors.surface,
+                    borderRadius: BorderRadius.circular(AppRadius.xl),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primaryDark.withValues(alpha: 0.3),
+                        blurRadius: 40,
+                        offset: const Offset(0, 20),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.blue.shade200.withOpacity(0.3),
-                          blurRadius: 12,
-                          offset: const Offset(0, 6),
-                        ),
-                      ],
-                    ),
-                    child: const Icon(
-                      Icons.local_hospital_rounded,
-                      color: Colors.white,
-                      size: 50,
-                    ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "Berhasil",
-                    style: GoogleFonts.oswald(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.blue.shade800,
-                      decoration: TextDecoration.none,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    message,
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      fontSize: 16,
-                      color: Colors.blueGrey.shade700,
-                      decoration: TextDecoration.none,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        backgroundColor: Colors.transparent,
-                        shadowColor: Colors.transparent,
-                      ).copyWith(elevation: MaterialStateProperty.all(0)),
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const DashboardApm(),
-                          ),
-                        );
-                      },
-                      child: Ink(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [
-                              Colors.blue.shade400,
-                              Colors.blue.shade700,
-                            ],
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.blue.shade200.withOpacity(0.3),
-                              blurRadius: 10,
-                              offset: const Offset(0, 4),
+                          shape: BoxShape.circle,
+                          gradient: AppGradients.brand,
+                          boxShadow: AppShadow.glow(AppColors.primary),
+                        ),
+                        child: const Icon(
+                          Icons.check_rounded,
+                          color: Colors.white,
+                          size: 44,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(
+                        title,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: AppText.family,
+                          fontSize: 24,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        message,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontFamily: AppText.family,
+                          fontSize: 15,
+                          height: 1.55,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.lg),
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: AppColors.accentSoft,
+                          borderRadius: BorderRadius.circular(AppRadius.md),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.info_rounded,
+                              color: AppColors.accentDark,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 10),
+                            const Expanded(
+                              child: Text(
+                                'Silakan lanjutkan ke poli atau loket sesuai '
+                                'petunjuk petugas.',
+                                style: TextStyle(
+                                  fontFamily: AppText.family,
+                                  fontSize: 13,
+                                  height: 1.45,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                        child: Container(
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          child: Text(
-                            "OK",
-                            style: GoogleFonts.oswald(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                              letterSpacing: 1,
-                            ),
-                          ),
-                        ),
                       ),
-                    ),
+                      const SizedBox(height: AppSpacing.lg),
+                      AppGradientButton(
+                        label: actionLabel,
+                        icon: Icons.home_rounded,
+                        height: 56,
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          if (onClose != null) {
+                            onClose();
+                          } else {
+                            popToRoot(context);
+                          }
+                        },
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
         ),
       );
     },
-    transitionDuration: const Duration(milliseconds: 500),
+    transitionDuration: const Duration(milliseconds: 420),
   );
 }

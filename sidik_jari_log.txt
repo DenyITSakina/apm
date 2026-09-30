@@ -1,0 +1,80 @@
+[2026-09-30T11:33:09.259381] Mulai proses | nomor=0003****3656 | app=D:\Sakina\apm
+[2026-09-30T11:33:09.296374] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-09-30T11:33:09.600082] Ambil akun VClaim (239 ms)
+[2026-09-30T11:33:09.630087] Login otomatis memakai user=ci*******a
+[2026-09-30T11:33:09.793285] After.exe tidak berjalan
+[2026-09-30T11:33:09.829322] After.exe dijalankan (pid=13792), menunggu proses muncul
+[2026-09-30T11:33:09.935321] After.exe tidak berjalan
+[2026-09-30T11:33:14.494297] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=LOGIN_OK | STEP=MODE_OK | STEP=NOMOR_OK
+[2026-09-30T11:33:14.522314] Otomasi UI selesai (4174 ms)
+[2026-09-30T11:33:18.759508] Aplikasi menutup diri -> sidik jari selesai
+[2026-09-30T11:33:18.778523] Status setelah 4 detik: SidikJariStatus.selesai
+[2026-09-30T11:33:18.805538] Sidik jari terverifikasi dari UI aplikasi
+[2026-09-30T11:38:46.436353] Mulai proses | nomor=0003****3656 | app=D:\Sakina\apm
+[2026-09-30T11:38:46.469350] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-09-30T11:38:46.720618] Ambil akun VClaim (228 ms)
+[2026-09-30T11:38:46.753634] Login otomatis memakai user=ci*******a
+[2026-09-30T11:38:46.937017] After.exe tidak berjalan
+[2026-09-30T11:38:46.964018] After.exe dijalankan (pid=11332), menunggu proses muncul
+[2026-09-30T11:38:47.080019] After.exe tidak berjalan
+[2026-09-30T11:38:52.451873] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=LOGIN_OK | STEP=MODE_OK | STEP=NOMOR_OK
+[2026-09-30T11:38:52.487868] Otomasi UI selesai (4840 ms)
+[2026-09-30T11:38:54.877008] Aplikasi menutup diri -> sidik jari selesai
+[2026-09-30T11:38:54.912022] Status setelah 2 detik: SidikJariStatus.selesai
+[2026-09-30T11:38:54.935025] Sidik jari terverifikasi dari UI aplikasi
+[2026-09-30T13:29:40.749673] Mulai proses | nomor=0003****3656 | app=D:\Sakina\apm
+[2026-09-30T13:29:40.792672] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-09-30T13:29:41.097930] Ambil akun VClaim (274 ms)
+[2026-09-30T13:29:41.125923] Login otomatis memakai user=ci*******a
+[2026-09-30T13:29:41.344926] After.exe tidak berjalan
+[2026-09-30T13:29:41.386926] After.exe dijalankan (pid=18272), menunggu proses muncul
+[2026-09-30T13:29:41.516926] After.exe tidak berjalan
+[2026-09-30T13:29:47.348937] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=LOGIN_OK | STEP=MODE_OK | STEP=NOMOR_OK
+[2026-09-30T13:29:47.375945] Otomasi UI selesai (5451 ms)
+[2026-09-30T13:29:51.879987] Aplikasi menutup diri -> sidik jari selesai
+[2026-09-30T13:29:51.910990] Status setelah 4 detik: SidikJariStatus.selesai
+[2026-09-30T13:29:51.940988] Sidik jari terverifikasi dari UI aplikasi
+[2026-09-30T13:35:48.030350] Mulai proses | nomor=0003****3656 | app=D:\Sakina\apm
+[2026-09-30T13:35:48.059346] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-09-30T13:35:48.333347] Ambil akun VClaim (243 ms)
+[2026-09-30T13:35:48.359344] Login otomatis memakai user=ci*******a
+[2026-09-30T13:35:48.507873] After.exe tidak berjalan
+[2026-09-30T13:35:48.536873] After.exe dijalankan (pid=16604), menunggu proses muncul
+[2026-09-30T13:35:51.988716] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=LOGIN_OK | STEP=MODE_OK | STEP=NOMOR_OK
+[2026-09-30T13:35:52.007062] Otomasi UI selesai (3323 ms)
+[2026-09-30T13:35:58.120695] Aplikasi menutup diri -> sidik jari selesai
+[2026-09-30T13:35:58.150809] Status setelah 6 detik: SidikJariStatus.selesai
+[2026-09-30T13:35:58.182813] Sidik jari terverifikasi dari UI aplikasi
+[2026-09-30T13:40:39.771745] Mulai proses | nomor=0003****3656 | app=D:\Sakina\apm
+[2026-09-30T13:40:39.805546] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-09-30T13:40:40.053578] Ambil akun VClaim (216 ms)
+[2026-09-30T13:40:40.088622] Login otomatis memakai user=ci*******a
+[2026-09-30T13:40:40.207628] After.exe tidak berjalan
+[2026-09-30T13:40:40.245687] After.exe dijalankan (pid=22052), menunggu proses muncul
+[2026-09-30T13:40:43.067783] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=LOGIN_OK | STEP=MODE_OK | STEP=NOMOR_OK
+[2026-09-30T13:40:43.097784] Otomasi UI selesai (2736 ms)
+[2026-09-30T13:41:13.521552] Teks penolakan terdeteksi: No Kartu belum terdaftar menjadi peserta BPJS
+[2026-09-30T13:41:13.556553] Status setelah 30 detik: SidikJariStatus.popupError
+[2026-09-30T13:41:13.584552] GAGAL: ditolak aplikasi: No Kartu belum terdaftar menjadi peserta BPJS (Aplikasi sidik jari menolak proses.)
+[2026-09-30T13:42:09.072401] Mulai proses | nomor=0003****3656 | app=D:\Sakina\apm
+[2026-09-30T13:42:09.095400] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-09-30T13:42:09.361380] Ambil akun VClaim (235 ms)
+[2026-09-30T13:42:09.379381] Login otomatis memakai user=ci*******a
+[2026-09-30T13:42:09.540380] After.exe tidak berjalan
+[2026-09-30T13:42:09.560384] After.exe dijalankan (pid=3500), menunggu proses muncul
+[2026-09-30T13:42:13.543833] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=LOGIN_OK | STEP=MODE_OK | STEP=NOMOR_OK
+[2026-09-30T13:42:13.566800] Otomasi UI selesai (3898 ms)
+[2026-09-30T13:42:20.038282] Teks penolakan terdeteksi: No Kartu belum terdaftar menjadi peserta BPJS
+[2026-09-30T13:42:20.062763] Status setelah 6 detik: SidikJariStatus.popupError
+[2026-09-30T13:42:20.092867] GAGAL: ditolak aplikasi: No Kartu belum terdaftar menjadi peserta BPJS (Aplikasi sidik jari menolak proses.)
+[2026-09-30T13:44:33.474982] Mulai proses | nomor=0003****3656 | app=D:\Sakina\apm
+[2026-09-30T13:44:33.516991] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-09-30T13:44:33.758001] Ambil akun VClaim (214 ms)
+[2026-09-30T13:44:33.791110] Login otomatis memakai user=ci*******a
+[2026-09-30T13:44:33.934421] PERINGATAN: After.exe sudah berjalan dari sesi sebelumnya, nomor dikirim ke window yang ada
+[2026-09-30T13:44:39.684828] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=LOGIN_OK | STEP=MODE_OK | STEP=NOMOR_OK
+[2026-09-30T13:44:39.707790] Otomasi UI selesai (5756 ms)
+[2026-09-30T13:44:39.735039] Dipantau proses yang sudah berjalan sebelumnya
+[2026-09-30T13:44:42.086200] Aplikasi menutup diri -> sidik jari selesai
+[2026-09-30T13:44:42.110214] Status setelah 2 detik: SidikJariStatus.selesai
+[2026-09-30T13:44:42.132214] Sidik jari terverifikasi dari UI aplikasi

@@ -9,3 +9,12 @@ void pushBackSwipePage<T>({
 }) {
   Navigator.of(context).push(BackSwipePageRoute<T>(builder: (_) => page));
 }
+
+/// Kembali ke halaman paling atas (dashboard) dan membersihkan seluruh stack
+/// di bawahnya, sehingga kiosk siap digunakan pasien berikutnya.
+void popToRoot(BuildContext context) {
+  final navigator = Navigator.of(context);
+  if (navigator.canPop()) {
+    navigator.popUntil((route) => route.isFirst);
+  }
+}

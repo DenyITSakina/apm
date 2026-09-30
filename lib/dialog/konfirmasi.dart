@@ -1,20 +1,30 @@
-import 'package:apm/widget/responsive.dart';
+import 'package:apm/theme/app_tokens.dart';
+import 'package:apm/theme/app_typography.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class ConfirmationDialog extends StatefulWidget {
-  final String title;
-  final String message;
-  final VoidCallback onConfirm;
-  final VoidCallback? onCancel;
-
   const ConfirmationDialog({
     super.key,
     required this.title,
     required this.message,
     required this.onConfirm,
     this.onCancel,
+    this.icon,
+    this.color = AppColors.primary,
+    this.confirmLabel = 'LANJUT',
+    this.cancelLabel = 'BATAL',
+    this.points = const [],
   });
+
+  final String title;
+  final String message;
+  final VoidCallback onConfirm;
+  final VoidCallback? onCancel;
+  final IconData? icon;
+  final Color color;
+  final String confirmLabel;
+  final String cancelLabel;
+  final List<String> points;
 
   static void show(
     BuildContext context, {
@@ -22,16 +32,26 @@ class ConfirmationDialog extends StatefulWidget {
     required String message,
     required VoidCallback onConfirm,
     VoidCallback? onCancel,
+    IconData? icon,
+    Color color = AppColors.primary,
+    String confirmLabel = 'LANJUT',
+    String cancelLabel = 'BATAL',
+    List<String> points = const [],
   }) {
     showDialog(
       context: context,
       barrierDismissible: false,
-      barrierColor: Colors.black.withOpacity(0.35),
+      barrierColor: AppColors.textPrimary.withValues(alpha: 0.45),
       builder: (_) => ConfirmationDialog(
         title: title,
         message: message,
         onConfirm: onConfirm,
         onCancel: onCancel,
+        icon: icon,
+        color: color,
+        confirmLabel: confirmLabel,
+        cancelLabel: cancelLabel,
+        points: points,
       ),
     );
   }
@@ -42,29 +62,20 @@ class ConfirmationDialog extends StatefulWidget {
 
 class _ConfirmationDialogState extends State<ConfirmationDialog>
     with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _scale;
-  late Animation<double> _fade;
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 380),
+  )..forward();
 
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 450),
-    );
+  late final Animation<double> _scale = Tween(
+    begin: 0.92,
+    end: 1.0,
+  ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
 
-    _scale = Tween(
-      begin: .7,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
-    _fade = Tween(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
-
-    _controller.forward();
-  }
+  late final Animation<double> _fade = CurvedAnimation(
+    parent: _controller,
+    curve: Curves.easeOut,
+  );
 
   @override
   void dispose() {
@@ -74,144 +85,197 @@ class _ConfirmationDialogState extends State<ConfirmationDialog>
 
   @override
   Widget build(BuildContext context) {
-    final fontSize = ResponsiveUtils.getFontSize(context);
-    final isPoli = widget.title.toUpperCase().contains("POLI");
-    final Color primaryColor = isPoli
-        ? Colors.blue.shade700
-        : Colors.green.shade700;
-    final IconData icon = isPoli
-        ? Icons.local_hospital_rounded
-        : Icons.account_balance_wallet_rounded;
+    final color = widget.color;
+    final compact = MediaQuery.sizeOf(context).width < 480;
 
     return ScaleTransition(
       scale: _scale,
       child: FadeTransition(
         opacity: _fade,
         child: Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          backgroundColor: Colors.white,
-          child: Container(
-            padding: const EdgeInsets.all(26),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
-                  blurRadius: 20,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(18),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: primaryColor,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 24),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 460),
+            child: Container(
+              padding: EdgeInsets.all(compact ? 24 : 30),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.xl),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.textPrimary.withValues(alpha: 0.18),
+                    blurRadius: 40,
+                    offset: const Offset(0, 20),
                   ),
-                  child: Icon(icon, size: 50, color: Colors.white),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  widget.title,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.montserrat(
-                    fontSize: fontSize + 2,
-                    fontWeight: FontWeight.bold,
-                    color: primaryColor,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  widget.message,
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.montserrat(
-                    fontSize: fontSize * 0.9,
-                    color: Colors.grey.shade800,
-                    height: 1.35,
-                  ),
-                ),
-                const SizedBox(height: 28),
-                Row(
-                  children: [
-                    _dialogButton(
-                      label: "BATAL",
-                      color: Colors.white,
-                      fontColor: Colors.red.shade600,
-                      fontSize: fontSize,
-                      onTap: () {
-                        Navigator.pop(context);
-                        // Tunggu dialog selesai menutup dulu, baru jalankan
-                        // aksi lanjutan (mis. kembali ke home).
-                        Future<void>.delayed(
-                          const Duration(milliseconds: 250),
-                          () {
-                            final onCancel = widget.onCancel;
-                            if (onCancel != null) {
-                              onCancel();
-                            }
-                          },
-                        );
-                      },
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(
+                    child: Container(
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            color.withValues(alpha: 0.9),
+                            color,
+                          ],
+                        ),
+                        boxShadow: AppShadow.glow(color),
+                      ),
+                      child: Icon(
+                        widget.icon ?? Icons.help_outline_rounded,
+                        size: 44,
+                        color: Colors.white,
+                      ),
                     ),
-                    const SizedBox(width: 12),
-                    _dialogButton(
-                      label: "LANJUT",
-                      color: Colors.white,
-                      fontColor: primaryColor,
-                      fontSize: fontSize,
-                      onTap: () {
-                        Navigator.pop(context);
-                        widget.onConfirm();
-                      },
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    widget.title,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: AppText.family,
+                      fontSize: compact ? 20 : 23,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                      height: 1.25,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    widget.message,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontFamily: AppText.family,
+                      fontSize: 14.5,
+                      height: 1.55,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  for (final point in widget.points) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.check_circle_rounded, size: 16, color: color),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              point,
+                              style: const TextStyle(
+                                fontFamily: AppText.family,
+                                fontSize: 13,
+                                height: 1.45,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
-                ),
-              ],
+                  const SizedBox(height: AppSpacing.lg),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _DialogButton(
+                          label: widget.cancelLabel,
+                          background: AppColors.surfaceMuted,
+                          foreground: AppColors.textSecondary,
+                          onTap: () {
+                            Navigator.pop(context);
+                            final onCancel = widget.onCancel;
+                            if (onCancel != null) {
+                              Future.delayed(
+                                const Duration(milliseconds: 200),
+                                onCancel,
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: _DialogButton(
+                          label: widget.confirmLabel,
+                          background: color,
+                          foreground: Colors.white,
+                          elevated: true,
+                          onTap: () {
+                            Navigator.pop(context);
+                            widget.onConfirm();
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _dialogButton({
-    required String label,
-    required Color color,
-    required Color fontColor,
-    required double fontSize,
-    required VoidCallback onTap,
-  }) {
-    return Expanded(
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Ink(
-          padding: const EdgeInsets.symmetric(vertical: 16),
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(14),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.2),
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-            border: Border.all(color: Colors.grey.shade300, width: 1.0),
-          ),
-          child: Center(
+class _DialogButton extends StatelessWidget {
+  const _DialogButton({
+    required this.label,
+    required this.background,
+    required this.foreground,
+    required this.onTap,
+    this.elevated = false,
+  });
+
+  final String label;
+  final Color background;
+  final Color foreground;
+  final VoidCallback onTap;
+  final bool elevated;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      child: Material(
+        color: background,
+        borderRadius: BorderRadius.circular(AppRadius.md),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(AppRadius.md),
+          onTap: onTap,
+          child: Container(
+            height: 54,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(AppRadius.md),
+              border: elevated
+                  ? null
+                  : Border.all(color: AppColors.border),
+              boxShadow: elevated ? AppShadow.soft : null,
+            ),
             child: Text(
               label,
-              style: GoogleFonts.oswald(
-                fontSize: fontSize * 0.9,
-                color: fontColor,
-                fontWeight: FontWeight.bold,
+              style: TextStyle(
+                fontFamily: AppText.family,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.4,
+                color: foreground,
               ),
             ),
           ),

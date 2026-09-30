@@ -31,8 +31,24 @@ class MyApp extends StatelessWidget {
         debugShowCheckedModeBanner: false,
         title: 'RSU Sakina Idaman',
         theme: AppTheme.lightTheme,
+        scrollBehavior: const _KioskScrollBehavior(),
         home: DashboardApm(),
       ),
     );
+  }
+}
+
+/// Scroll behavior yang dipakai untuk kiosk: drag momentum halus tanpa
+/// efek "glow" pada halaman.
+class _KioskScrollBehavior extends MaterialScrollBehavior {
+  const _KioskScrollBehavior();
+
+  @override
+  Widget buildOverscrollIndicator(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
+    return child;
   }
 }

@@ -1,13 +1,17 @@
+import 'package:apm/blog/antrian_apm_bloc.dart';
 import 'package:apm/blog/booking/booking_bloc.dart';
+import 'package:apm/dialog/konfirmasi.dart';
+import 'package:apm/func/navigation_helpers.dart';
 import 'package:apm/home/booking/booking_page.dart';
-import '../Blog/antrian_apm_bloc.dart';
 import 'package:apm/home/check_in_bpjs/cekin_bpjs_page.dart';
 import 'package:apm/home/check_in_umum/cekin_umum_page.dart';
+import 'package:apm/theme/app_tokens.dart';
+import 'package:apm/theme/app_typography.dart';
+import 'package:apm/widget/app_card.dart';
+import 'package:apm/widget/app_page_chrome.dart';
 import 'package:flutter/material.dart';
-import 'package:full_swipe_back_gesture/full_swipe_back_gesture.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../widget/responsive.dart';
 
 class DashboardApm extends StatefulWidget {
   const DashboardApm({super.key});
@@ -18,768 +22,247 @@ class DashboardApm extends StatefulWidget {
 
 class _DashboardApmState extends State<DashboardApm>
     with TickerProviderStateMixin {
-  late AnimationController _animationController;
-  late AnimationController _pulseController;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _animationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 12),
-    )..repeat(reverse: true);
-
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 2),
-    )..repeat(reverse: true);
-  }
+  late final AnimationController _enterController = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 900),
+  )..forward();
 
   @override
   void dispose() {
-    _animationController.dispose();
-    _pulseController.dispose();
+    _enterController.dispose();
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isTablet = size.width > 600;
+  void _pilihBooking() {
+    HapticFeedback.mediumImpact();
+    ConfirmationDialog.show(
+      context,
+      title: 'Booking Online',
+      message: 'Pilih jenis pasien untuk melakukan booking.',
+      icon: Icons.event_available_rounded,
+      color: AppColors.primary,
+      confirmLabel: 'UMUM',
+      cancelLabel: 'BPJS',
+      points: const [
+        'UMUM: pasien umum / non-BPJS.',
+        'BPJS: peserta BPJS Kesehatan aktif.',
+      ],
+      onCancel: () => _bukaBooking('2'),
+      onConfirm: () => _bukaBooking('1'),
+    );
+  }
 
-    return AnimatedBuilder(
-      animation: _animationController,
-      builder: (context, child) {
-        return Scaffold(
-          body: Container(
-            decoration: BoxDecoration(
-              gradient: RadialGradient(
-                center: Alignment(
-                  _animationController.value * 0.5,
-                  _animationController.value * 0.3,
-                ),
-                radius: 1.2,
-                colors: const [
-                  Color(0xFFE3F2FD),
-                  Color(0xFFB3E5FC),
-                  Color(0xFFE0F2F1),
-                ],
-                stops: [0.2, 0.6, 1.0],
-              ),
-            ),
-            child: SafeArea(
-              child: Column(
-                children: [
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.symmetric(vertical: isTablet ? 5 : 12),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFF006064),
-                          Color(0xFF00838F),
-                          Color(0xFF0097A7),
-                          Color(0xFF00ACC1),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        stops: [0.1, 0.3, 0.7, 1.0],
-                      ),
-                      borderRadius: const BorderRadius.only(
-                        bottomLeft: Radius.circular(40),
-                        bottomRight: Radius.circular(40),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.blueGrey.shade800.withOpacity(0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                    child: Stack(
-                      children: [
-                        Positioned.fill(
-                          child: Opacity(
-                            opacity: 0.1,
-                            child: CustomPaint(
-                              painter: MedicalPatternPainter(),
-                            ),
-                          ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            ShaderMask(
-                              shaderCallback: (bounds) => const LinearGradient(
-                                colors: [Colors.white, Color(0xFFE0F7FA)],
-                              ).createShader(bounds),
-                              child: Text(
-                                "RSU SAKINA IDAMAN",
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.playfairDisplay(
-                                  fontSize: isTablet ? 36 : 28,
-                                  fontWeight: FontWeight.w900,
-                                  color: Colors.white,
-                                  letterSpacing: 2,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              "Peduli Sesama, Sakina Pilihanku",
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.lora(
-                                fontSize: isTablet ? 20 : 16,
-                                fontStyle: FontStyle.italic,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.white.withOpacity(0.95),
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "ANJUNGAN PENDAFTARAN MANDIRI",
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: isTablet ? 24 : 18,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white.withOpacity(0.9),
-                                    letterSpacing: 1.5,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
+  void _bukaBooking(String jenis) {
+    pushBackSwipePage(
+      context: context,
+      page: BlocProvider(
+        create: (_) => BookingBloc(),
+        child: BookingPage(jenis: jenis),
+      ),
+    );
+  }
 
-                  const SizedBox(height: 4),
+  void _pilihLayanan({required bool bpjs}) {
+    HapticFeedback.mediumImpact();
+    final title = bpjs ? 'Cek-in BPJS' : 'Cek-in Umum';
+    final message = bpjs
+        ? 'Gunakan layanan ini jika Anda sudah memiliki nomor booking dan terdaftar sebagai peserta BPJS Kesehatan.'
+        : 'Gunakan layanan ini jika Anda sudah memiliki nomor booking dan merupakan pasien umum (non-BPJS).';
 
-                  AnimatedBuilder(
-                    animation: _pulseController,
-                    builder: (context, child) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                        child: Column(
-                          children: [
-                            Text(
-                              "Selamat Datang",
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
-                                fontSize: isTablet ? 32 : 24,
-                                fontWeight: FontWeight.w300,
-                                color: const Color(0xFF006064).withOpacity(
-                                  0.6 + (_pulseController.value * 0.4),
-                                ),
-                              ),
-                            ),
-                            Text(
-                              "Silahkan pilih layanan yang Anda butuhkan",
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.poppins(
-                                fontSize: isTablet ? 20 : 16,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF00838F),
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
-
-                  const SizedBox(height: 2),
-
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: ResponsiveUtils.isMobile(context) ? 12 : 20,
-                      ),
-                      child: Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Flexible(
-                              child: _buildServiceCard(
-                                title: "CEK-IN BPJS",
-                                image: "assets/images/bpjs_logo.png",
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFF1565C0),
-                                    Color(0xFF1E88E5),
-                                    Color(0xFF42A5F5),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                icon: Icons.health_and_safety,
-                                description: "Untuk pasien BPJS Kesehatan",
-                                onTap: () => _navigateTo(
-                                  context,
-                                  BlocProvider(
-                                    create: (_) => AntrianApmBloc(),
-                                    child: const CekinBpjs(selectType: "bpjs"),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Flexible(
-                              child: _buildServiceCard(
-                                title: "CEK-IN UMUM",
-                                image: "assets/images/umum.png",
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    Color(0xFF2E7D32),
-                                    Color(0xFF388E3C),
-                                    Color(0xFF4CAF50),
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                icon: Icons.people,
-                                description: "Untuk pasien umum",
-                                onTap: () => _navigateTo(
-                                  context,
-                                  BlocProvider(
-                                    create: (_) => AntrianApmBloc(),
-                                    child: const CekinUmumPage(
-                                      selectType: "umum",
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 8,
-                    ),
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: Colors.white12.withOpacity(0.08),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: Colors.red.withOpacity(0.5),
-                        width: 2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.red.withOpacity(0.1),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.warning_amber_rounded,
-                              color: Colors.red.shade700,
-                              size: 24,
-                            ),
-                            const SizedBox(width: 10),
-                            Text(
-                              "PERHATIAN PENTING",
-                              style: GoogleFonts.poppins(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.red.shade700,
-                                letterSpacing: 1,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const Divider(
-                          color: Colors.red,
-                          thickness: 1,
-                          height: 20,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                margin: const EdgeInsets.only(top: 2),
-                                child: Icon(
-                                  Icons.verified_user,
-                                  color: Colors.teal,
-                                  size: 18,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  "CEK-IN BPJS: Gunakan layanan ini jika Anda sudah memiliki nomor booking dan terdaftar sebagai peserta BPJS Kesehatan.",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                margin: const EdgeInsets.only(top: 2),
-                                child: Icon(
-                                  Icons.access_time,
-                                  color: Colors.teal,
-                                  size: 18,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  "CEK-IN UMUM: Gunakan layanan ini jika Anda sudah memiliki nomor booking dan merupakan pasien umum (non-BPJS).",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                margin: const EdgeInsets.only(top: 2),
-                                child: Icon(
-                                  Icons.phone_in_talk,
-                                  color: Colors.teal,
-                                  size: 18,
-                                ),
-                              ),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  "Informasi lebih lanjut? Silakan hubungi petugas kami yang siap membantu Anda.",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.9),
-                      border: Border(
-                        top: BorderSide(
-                          color: const Color(0xFF00838F).withOpacity(0.3),
-                          width: 1,
-                        ),
-                      ),
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.access_time,
-                              color: const Color(0xFF006064),
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              "Jam Operasional: 24 Jam | UGD",
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF006064),
-                              ),
-                            ),
-                            Container(
-                              margin: const EdgeInsets.symmetric(
-                                horizontal: 20,
-                              ),
-                              width: 1,
-                              height: 20,
-                              color: const Color(0xFF00838F).withOpacity(0.3),
-                            ),
-                            Icon(
-                              Icons.info_outline,
-                              color: const Color(0xFF006064),
-                              size: 20,
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              "Butuh bantuan? Hubungi petugas",
-                              style: GoogleFonts.poppins(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF006064),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.9),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "#pedulisesama | #sakinapilihanku",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  color: const Color(0xFF006064),
-                                  fontWeight: FontWeight.w300,
-                                ),
-                              ),
-                              Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                ),
-                                width: 1,
-                                height: 14,
-                                color: const Color(0xFF006064),
-                              ),
-                              Text(
-                                "v1.1.1",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  color: const Color(0xFF006064),
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                              Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                ),
-                                width: 1,
-                                height: 14,
-                                color: const Color(0xFF006064),
-                              ),
-                              Text(
-                                "2026",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  color: const Color(0xFF006064),
-                                  fontWeight: FontWeight.w300,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+    ConfirmationDialog.show(
+      context,
+      title: title,
+      message: message,
+      icon: bpjs ? Icons.health_and_safety_rounded : Icons.people_alt_rounded,
+      color: bpjs ? AppColors.bpjs : AppColors.umum,
+      confirmLabel: 'LANJUT',
+      cancelLabel: 'BATAL',
+      onCancel: () {},
+      onConfirm: () {
+        pushBackSwipePage(
+          context: context,
+          page: BlocProvider(
+            create: (_) => AntrianApmBloc(),
+            child: bpjs
+                ? const CekinBpjs(selectType: 'bpjs')
+                : const CekinUmumPage(selectType: 'umum'),
           ),
         );
       },
     );
   }
 
-  Widget _buildServiceCard({
-    required String title,
-    required String image,
-    required LinearGradient gradient,
-    required IconData icon,
-    required String description,
-    required VoidCallback onTap,
-  }) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0.95, end: 1.0),
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeOutBack,
-      builder: (context, scale, child) {
-        return Transform.scale(
-          scale: scale,
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: AppBackground(
+        child: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final maxW = constraints.maxWidth.isFinite
-                  ? constraints.maxWidth
-                  : MediaQuery.of(context).size.width;
+              final isWide = constraints.maxWidth >= 900;
+              final pad = isWide ? AppSpacing.lg : AppSpacing.md;
 
-              final cardWidth = maxW < 360
-                  ? maxW * 0.95
-                  : (maxW < 700 ? 340.0 : 380.0);
-              final cardHeight = cardWidth * 0.7;
-
-              final w = cardWidth;
-              final h = cardHeight;
-
-              final circleSize = h * 0.30;
-              final pad = w * 0.055;
-
-              final titleSize = (w * 0.07).clamp(18.0, 24.0);
-              final descSize = (w * 0.045).clamp(12.0, 15.0);
-              final iconDecoSize = (h * 0.28).clamp(70.0, 100.0);
-              final arrowSize = (w * 0.055).clamp(16.0, 18.0);
-
-              final radius = (w * 0.09).clamp(22.0, 34.0);
-
-              return SizedBox(
-                width: cardWidth,
-                height: cardHeight,
-                child: Container(
-                  margin: const EdgeInsets.symmetric(vertical: 5),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: onTap,
-                      borderRadius: BorderRadius.circular(radius),
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                        decoration: BoxDecoration(
-                          gradient: gradient,
-                          borderRadius: BorderRadius.circular(radius),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: (w * 0.05).clamp(12.0, 20.0),
-                              offset: const Offset(0, 8),
-                              spreadRadius: 0,
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  pad,
+                  AppSpacing.md,
+                  pad,
+                  AppSpacing.md,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: isWide ? 1200 : 720),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildBrand(isWide: isWide),
+                        const SizedBox(height: AppSpacing.md),
+                        _buildGreeting(),
+                        const SizedBox(height: AppSpacing.md),
+                        Expanded(child: _buildServiceGrid(isWide: isWide)),
+                        const SizedBox(height: AppSpacing.md),
+                        if (isWide)
+                          IntrinsicHeight(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Expanded(flex: 3, child: _buildStepsCard()),
+                                const SizedBox(width: AppSpacing.md),
+                                Expanded(flex: 2, child: _buildHelpCard()),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: Stack(
-                          children: [
-                            Positioned(
-                              top: -10,
-                              right: -10,
-                              child: Icon(
-                                icon,
-                                size: iconDecoSize,
-                                color: Colors.white.withOpacity(0.1),
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.all(pad),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    height: circleSize,
-                                    width: circleSize,
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.2),
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: ClipOval(
-                                      child: Image.asset(
-                                        image,
-                                        fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                              return Container(
-                                                color: Colors.white.withOpacity(
-                                                  0.2,
-                                                ),
-                                                child: Icon(
-                                                  icon,
-                                                  size: (circleSize * 0.5)
-                                                      .clamp(35.0, 65.0),
-                                                  color: Colors.white,
-                                                ),
-                                              );
-                                            },
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(height: h * 0.06),
-                                  Text(
-                                    title,
-                                    textAlign: TextAlign.center,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: GoogleFonts.montserrat(
-                                      fontSize: titleSize,
-                                      fontWeight: FontWeight.w800,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  SizedBox(height: h * 0.025),
-                                  Text(
-                                    description,
-                                    textAlign: TextAlign.center,
-                                    style: GoogleFonts.poppins(
-                                      fontSize: descSize,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.white.withOpacity(0.9),
-                                    ),
-                                  ),
-                                  SizedBox(height: h * 0.05),
-                                  Container(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: w * 0.060,
-                                      vertical: h * 0.02,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white.withOpacity(0.25),
-                                      borderRadius: BorderRadius.circular(
-                                        radius,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        Text(
-                                          "Pilih",
-                                          style: GoogleFonts.poppins(
-                                            fontSize: descSize,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.white,
-                                          ),
-                                        ),
-                                        SizedBox(width: w * 0.025),
-                                        Icon(
-                                          Icons.arrow_forward,
-                                          color: Colors.white,
-                                          size: arrowSize,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                          )
+                        else
+                          _buildHelpChips(),
+                      ],
                     ),
                   ),
                 ),
               );
             },
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
-  void _navigateTo(BuildContext context, Widget page) {
-    Navigator.of(context).push(BackSwipePageRoute(builder: (_) => page));
-  }
-}
+  Widget _fadeIn(Widget child, int index) {
+    final animation = CurvedAnimation(
+      parent: _enterController,
+      curve: Interval(
+        (index * 0.12).clamp(0.0, 0.7),
+        ((index * 0.12) + 0.5).clamp(0.0, 1.0),
+        curve: Curves.easeOutCubic,
+      ),
+    );
 
-class MedicalPatternPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-
-    final crossSize = 30.0;
-    for (double i = 0; i < size.width; i += 60) {
-      for (double j = 0; j < size.height; j += 60) {
-        canvas.drawLine(
-          Offset(i + crossSize / 2, j),
-          Offset(i + crossSize / 2, j + crossSize),
-          paint,
-        );
-        canvas.drawLine(
-          Offset(i, j + crossSize / 2),
-          Offset(i + crossSize, j + crossSize / 2),
-          paint,
-        );
-      }
-    }
+    return FadeTransition(
+      opacity: animation,
+      child: SlideTransition(
+        position: Tween(
+          begin: const Offset(0, 0.06),
+          end: Offset.zero,
+        ).animate(animation),
+        child: child,
+      ),
+    );
   }
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-void _showBookingTypeDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    barrierDismissible: true,
-    builder: (_) => Dialog(
-      backgroundColor: Colors.transparent,
-      insetPadding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+  Widget _buildBrand({required bool isWide}) {
+    return _fadeIn(
+      Container(
+        width: double.infinity,
+        padding: EdgeInsets.symmetric(
+          horizontal: AppSpacing.lg,
+          vertical: isWide ? AppSpacing.lg : AppSpacing.md,
         ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        decoration: BoxDecoration(
+          gradient: AppGradients.brand,
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+          boxShadow: AppShadow.glow(AppColors.primary),
+        ),
+        child: Stack(
           children: [
-            const Text(
-              "Pilih Jenis Booking",
-              style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+            Positioned(
+              right: -40,
+              top: -40,
+              child: Container(
+                width: 160,
+                height: 160,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.08),
+                ),
+              ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              "Pilih metode pendaftaran",
-              style: TextStyle(color: Colors.grey[600]),
+            Positioned(
+              left: -30,
+              bottom: -50,
+              child: Container(
+                width: 120,
+                height: 120,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.06),
+                ),
+              ),
             ),
-            const SizedBox(height: 28),
-            Row(
+            Column(
               children: [
-                Expanded(
-                  child: _bookingCard(
+                Text(
+                  'RSU SAKINA IDAMAN',
+                  textAlign: TextAlign.center,
+                  style: AppText.headerTitle(
                     context,
-                    icon: Icons.person,
-                    title: "UMUM",
-                    subtitle: "Pasien Umum / Non Bpjs",
-                    color: Colors.orange,
-                    jenis: '1',
+                  ).copyWith(fontSize: isWide ? 30 : 24),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Peduli Sesama, Sakina Pilihanku',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontFamily: AppText.family,
+                    fontSize: isWide ? 16 : 13.5,
+                    fontStyle: FontStyle.italic,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withValues(alpha: 0.92),
                   ),
                 ),
-                const SizedBox(width: 18),
-                Expanded(
-                  child: _bookingCard(
-                    context,
-                    icon: Icons.health_and_safety,
-                    title: "BPJS",
-                    subtitle: "Peserta JKN aktif",
-                    color: Colors.blue,
-                    jenis: '2',
+                const SizedBox(height: AppSpacing.sm),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.touch_app_rounded,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          'ANJUNGAN PENDAFTARAN MANDIRI',
+                          style: const TextStyle(
+                            fontFamily: AppText.family,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 0.8,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -787,90 +270,590 @@ void _showBookingTypeDialog(BuildContext context) {
           ],
         ),
       ),
-    ),
-  );
-}
+      0,
+    );
+  }
 
-Widget _bookingCard(
-  BuildContext context, {
-  required IconData icon,
-  required String title,
-  required String subtitle,
-  required Color color,
-  required String jenis,
-}) {
-  return InkWell(
-    borderRadius: BorderRadius.circular(12),
-    onTap: () {
-      Navigator.pop(context);
-      Navigator.of(context).push(
-        BackSwipePageRoute(
-          builder: (_) => BlocProvider(
-            create: (_) => BookingBloc(),
-            child: BookingPage(jenis: jenis),
+  Widget _buildGreeting() {
+    return _fadeIn(
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(
+            Icons.touch_app_rounded,
+            size: 18,
+            color: AppColors.primary,
           ),
-        ),
-      );
-    },
-    child: Container(
-      height: 290,
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [color.withOpacity(.15), color.withOpacity(.04)],
-        ),
-        borderRadius: BorderRadius.circular(28),
-        border: Border.all(color: color.withOpacity(.20)),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(.08),
-            blurRadius: 20,
-            offset: const Offset(0, 12),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              'Silakan pilih layanan di bawah untuk memulai',
+              textAlign: TextAlign.center,
+              style: AppText.body(context),
+            ),
           ),
         ],
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      1,
+    );
+  }
+
+  Widget _buildServiceGrid({required bool isWide}) {
+    final cards = [
+      _ServiceConfig(
+        title: 'Cek-in BPJS',
+        subtitle: 'Peserta BPJS Kesehatan',
+        image: 'assets/images/bpjs_logo.png',
+        icon: Icons.health_and_safety_rounded,
+        gradient: AppGradients.bpjs,
+        color: AppColors.bpjs,
+        steps: 'Pindai kartu BPJS / NIK',
+        onTap: () => _pilihLayanan(bpjs: true),
+      ),
+      _ServiceConfig(
+        title: 'Cek-in Umum',
+        subtitle: 'Pasien umum / non-BPJS',
+        image: 'assets/images/umum.png',
+        icon: Icons.people_alt_rounded,
+        gradient: AppGradients.umum,
+        color: AppColors.umum,
+        steps: 'Pindai kartu / NIK / No RM',
+        onTap: () => _pilihLayanan(bpjs: false),
+      ),
+      // _ServiceConfig(
+      //   title: 'Booking Online',
+      //   subtitle: 'Daftarpoli tanpa datang',
+      //   image: 'assets/images/booking.png',
+      //   icon: Icons.event_available_rounded,
+      //   gradient: AppGradients.brand,
+      //   color: AppColors.primary,
+      //   steps: 'Pilih poli, dokter, dan tanggal',
+      //   onTap: _pilihBooking,
+      // ),
+    ];
+
+    return _fadeIn(
+      LayoutBuilder(
+        builder: (context, constraints) {
+          const gap = AppSpacing.md;
+          final columns = constraints.maxWidth >= 1000
+              ? 3
+              : constraints.maxWidth >= 620
+              ? 2
+              : 1;
+
+          final rows = <List<_ServiceConfig>>[];
+          for (var i = 0; i < cards.length; i += columns) {
+            rows.add(cards.sublist(i, (i + columns).clamp(0, cards.length)));
+          }
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              for (var r = 0; r < rows.length; r++) ...[
+                if (r > 0) const SizedBox(height: gap),
+                Expanded(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var c = 0; c < rows[r].length; c++) ...[
+                        if (c > 0) const SizedBox(width: gap),
+                        Expanded(
+                          child: _ServiceCard(config: rows[r][c], fill: true),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          );
+        },
+      ),
+      2,
+    );
+  }
+
+  Widget _buildStepsCard() {
+    return _fadeIn(
+      AppCard(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const AppSectionLabel(
+              text: 'Cara Penggunaan',
+              icon: Icons.help_outline_rounded,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            const _StepRow(
+              number: '1',
+              title: 'Pilih layanan',
+              description: 'Cek-in BPJS atau  cek-in umum,',
+            ),
+            const _StepRow(
+              number: '2',
+              title: 'Pindai / ketik nomor',
+              description: 'Pindai barcode kartu, NIK, atau No RM.',
+            ),
+            const _StepRow(
+              number: '3',
+              title: 'Verifikasi data',
+              description: 'Ikuti petunjuk poli atau loket dari petugas.',
+              isLast: true,
+            ),
+          ],
+        ),
+      ),
+      3,
+    );
+  }
+
+  Widget _buildHelpCard() {
+    return _fadeIn(
+      AppNotice(
+        title: 'Jam operasional 24 jam',
+        message:
+            'Layanan UGD tersedia 24 jam. Untuk informasi lain hubungi petugas front office.',
+        icon: Icons.support_agent_rounded,
+        color: AppColors.warning,
+        background: AppColors.warningSoft,
+        points: const [
+          'Booking dulu sebelum datang.',
+          'Simpan bukti booking / kode antrean.',
+        ],
+      ),
+      4,
+    );
+  }
+
+  Widget _buildHelpChips() {
+    const tips = [
+      (Icons.schedule_rounded, '24 jam'),
+      (Icons.event_available_rounded, 'Booking dulu'),
+      (Icons.support_agent_rounded, 'Bantuan front office'),
+    ];
+
+    return _fadeIn(
+      Wrap(
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.sm,
+        alignment: WrapAlignment.center,
         children: [
-          Container(
-            width: 90,
-            height: 90,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(12),
+          for (final tip in tips)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: AppColors.warningSoft,
+                borderRadius: BorderRadius.circular(AppRadius.pill),
+                border: Border.all(
+                  color: AppColors.warning.withValues(alpha: 0.25),
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(tip.$1, size: 13, color: AppColors.warning),
+                  const SizedBox(width: 6),
+                  Text(
+                    tip.$2,
+                    style: const TextStyle(
+                      fontFamily: AppText.family,
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
             ),
-            child: Icon(icon, size: 46, color: Colors.white),
-          ),
-          const SizedBox(height: 20),
-          Text(
-            title,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey[700], height: 1.4),
-          ),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: BorderRadius.circular(12),
+        ],
+      ),
+      4,
+    );
+  }
+}
+
+class _ServiceConfig {
+  const _ServiceConfig({
+    required this.title,
+    required this.subtitle,
+    required this.image,
+    required this.icon,
+    required this.gradient,
+    required this.color,
+    required this.steps,
+    required this.onTap,
+  });
+
+  final String title;
+  final String subtitle;
+  final String image;
+  final IconData icon;
+  final Gradient gradient;
+  final Color color;
+  final String steps;
+  final VoidCallback onTap;
+}
+
+class _ServiceCard extends StatefulWidget {
+  const _ServiceCard({required this.config, this.fill = false});
+
+  final _ServiceConfig config;
+  final bool fill;
+
+  @override
+  State<_ServiceCard> createState() => _ServiceCardState();
+}
+
+class _ServiceCardState extends State<_ServiceCard> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final config = widget.config;
+
+    return Semantics(
+      button: true,
+      label: '${config.title}. ${config.subtitle}',
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hovered = true),
+        onExit: (_) => setState(() => _hovered = false),
+        cursor: SystemMouseCursors.click,
+        child: AnimatedScale(
+          scale: _hovered ? 1.015 : 1,
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(AppRadius.xl),
+            child: InkWell(
+              onTap: config.onTap,
+              borderRadius: BorderRadius.circular(AppRadius.xl),
+              child: Ink(
+                decoration: BoxDecoration(
+                  gradient: config.gradient,
+                  borderRadius: BorderRadius.circular(AppRadius.xl),
+                  boxShadow: AppShadow.glow(config.color),
+                ),
+                child: Stack(
+                  children: [
+                    Positioned(
+                      right: -18,
+                      top: -18,
+                      child: Icon(
+                        config.icon,
+                        size: 150,
+                        color: Colors.white.withValues(alpha: 0.1),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final height = constraints.maxHeight;
+                          final tiny = height < 190;
+                          final horizontal = constraints.maxWidth >= 280;
+                          final logoSize = tiny
+                              ? 52.0
+                              : horizontal
+                              ? 72.0
+                              : 60.0;
+
+                          final info = Column(
+                            crossAxisAlignment: horizontal
+                                ? CrossAxisAlignment.start
+                                : CrossAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                config.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: horizontal
+                                    ? TextAlign.start
+                                    : TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: AppText.family,
+                                  fontSize: tiny
+                                      ? 19
+                                      : horizontal
+                                      ? 23
+                                      : 20,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.white,
+                                  height: 1.2,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                config.subtitle,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                textAlign: horizontal
+                                    ? TextAlign.start
+                                    : TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: AppText.family,
+                                  fontSize: tiny ? 12 : 13,
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.white.withValues(alpha: 0.92),
+                                ),
+                              ),
+                              SizedBox(height: tiny ? 6 : AppSpacing.sm),
+                              Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: tiny ? 5 : 7,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.2),
+                                  borderRadius: BorderRadius.circular(
+                                    AppRadius.pill,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.qr_code_scanner_rounded,
+                                      size: 15,
+                                      color: Colors.white,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Flexible(
+                                      child: Text(
+                                        config.steps,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontFamily: AppText.family,
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          );
+
+                          final action = Container(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: tiny ? 8 : 11,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.pill,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'MULAI',
+                                  style: TextStyle(
+                                    fontFamily: AppText.family,
+                                    fontSize: tiny ? 13 : 14,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 0.6,
+                                    color: config.color,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Icon(
+                                  Icons.arrow_forward_rounded,
+                                  size: tiny ? 16 : 18,
+                                  color: config.color,
+                                ),
+                              ],
+                            ),
+                          );
+
+                          if (horizontal) {
+                            return Row(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                _LogoBadge(
+                                  image: config.image,
+                                  icon: config.icon,
+                                  size: logoSize,
+                                ),
+                                const SizedBox(width: AppSpacing.md),
+                                Expanded(
+                                  child: Center(
+                                    child: widget.fill
+                                        ? SingleChildScrollView(
+                                            physics:
+                                                const NeverScrollableScrollPhysics(),
+                                            child: info,
+                                          )
+                                        : info,
+                                  ),
+                                ),
+                                const SizedBox(width: AppSpacing.md),
+                                action,
+                              ],
+                            );
+                          }
+
+                          return Column(
+                            mainAxisSize: widget.fill
+                                ? MainAxisSize.max
+                                : MainAxisSize.min,
+                            children: [
+                              _LogoBadge(
+                                image: config.image,
+                                icon: config.icon,
+                                size: logoSize,
+                              ),
+                              SizedBox(height: tiny ? 6 : AppSpacing.md),
+                              if (widget.fill)
+                                Expanded(child: Center(child: info))
+                              else
+                                info,
+                              SizedBox(height: tiny ? 6 : AppSpacing.md),
+                              action,
+                            ],
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            child: const Text(
-              "Pilih",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LogoBadge extends StatelessWidget {
+  const _LogoBadge({
+    required this.image,
+    required this.icon,
+    required this.size,
+  });
+
+  final String image;
+  final IconData icon;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(6),
+      child: ClipOval(
+        child: Image.asset(
+          image,
+          fit: BoxFit.contain,
+          errorBuilder: (_, _, _) => Icon(icon, size: size * 0.5),
+        ),
+      ),
+    );
+  }
+}
+
+class _StepRow extends StatelessWidget {
+  const _StepRow({
+    required this.number,
+    required this.title,
+    required this.description,
+    this.isLast = false,
+  });
+
+  final String number;
+  final String title;
+  final String description;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Column(
+            children: [
+              Container(
+                width: 30,
+                height: 30,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                  gradient: AppGradients.brand,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  number,
+                  style: const TextStyle(
+                    fontFamily: AppText.family,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              if (!isLast)
+                Expanded(
+                  child: Container(
+                    width: 2,
+                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    color: AppColors.border,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontFamily: AppText.family,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    description,
+                    style: const TextStyle(
+                      fontFamily: AppText.family,
+                      fontSize: 13.5,
+                      height: 1.45,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
         ],
       ),
-    ),
-  );
+    );
+  }
 }

@@ -2,6 +2,8 @@ import 'package:apm/api/booking_api_service.dart';
 import 'package:apm/dialog/sukses.dart';
 import 'package:apm/dialog/top_toast.dart';
 import 'package:apm/func/open_aplikasi_bpjsDaftar.dart';
+import 'package:apm/theme/app_tokens.dart';
+import 'package:apm/widget/app_page_chrome.dart';
 import 'package:apm/widget/custom_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -332,46 +334,21 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFFF1F5F9),
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF0D8AAE),
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.white,
-            ),
-            onPressed: () => Navigator.pop(context),
-          ),
-          centerTitle: true,
-          title: Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 20),
-                child: Image.asset(
-                  'assets/images/logo_sakina.png',
-                  height: 45,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                "PENDAFTARAN PASIEN",
-                style: GoogleFonts.oswald(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 25,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+        body: SafeArea(
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const AppPageHeader(
+                title: 'PENDAFTARAN PASIEN',
+                subtitle: 'Pilih poli, dokter, dan jenis pendaftaran',
+                badge: 'Step 2 dari 3',
+                badgeIcon: Icons.assignment_rounded,
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
               // Info Pasien Card
               Container(
                 padding: const EdgeInsets.all(12),
@@ -1301,6 +1278,11 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
                   ],
                 ],
               ),
+                    ],
+                  ),
+                ),
+              ),
+              const AppPageFooter(message: 'RSU Sakina Idaman - Pendaftaran Pasien'),
             ],
           ),
         ),

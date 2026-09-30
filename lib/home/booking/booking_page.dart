@@ -1,16 +1,22 @@
 import 'package:apm/blog/booking/booking_bloc.dart';
 import 'package:apm/blog/booking/booking_event.dart';
 import 'package:apm/blog/booking/booking_state.dart';
+import 'package:apm/dialog/top_toast.dart';
 import 'package:apm/home/booking/booking_bpjs_page.dart';
 import 'package:apm/home/booking/booking_umum_page.dart';
+import 'package:apm/theme/app_tokens.dart';
+import 'package:apm/widget/app_button.dart';
+import 'package:apm/widget/app_page_chrome.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 class BookingPage extends StatefulWidget {
-  final String jenis; // '1' for umum, '2' for bpjs
+  /// '1' untuk umum, '2' untuk BPJS.
+  final String jenis;
 
-  const BookingPage({Key? key, required this.jenis}) : super(key: key);
+  const BookingPage({super.key, required this.jenis});
+
+  bool get isUmum => jenis == '1';
 
   @override
   State<BookingPage> createState() => _BookingPageState();
@@ -21,107 +27,145 @@ class _BookingPageState extends State<BookingPage> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        context.read<BookingBloc>().add(LoadPoliEvent());
-      }
+      if (!mounted) return;
+      context.read<BookingBloc>().add(LoadPoliEvent());
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        elevation: 0,
-        centerTitle: true,
-
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-
-        title: Column(
+      body: SafeArea(
+        child: Column(
           children: [
-            const Text(
-              "Booking Pasien",
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w400),
+            AppPageHeader(
+              title: widget.isUmum ? 'BOOKING UMUM' : 'BOOKING BPJS',
+              subtitle: widget.isUmum
+                  ? 'Pilih poli, dokter, dan tanggal pemeriksaan'
+                  : 'Verifikasi data BPJS lalu pilih poli dan dokter',
+              badge: widget.isUmum ? 'Pasien Umum' : 'Peserta BPJS',
+              badgeIcon: widget.isUmum
+                  ? Icons.people_alt_rounded
+                  : Icons.health_and_safety_rounded,
             ),
+            Expanded(
+              child: BlocConsumer<BookingBloc, BookingState>(
+                listener: (context, state) {
+                  if (state.status == BookingStatus.error) {
+                    TopToast.error(
+                      context,
+                      state.errorMessage ?? 'Terjadi kesalahan',
+                    );
+                  }
+                },
+                builder: (context, state) {
+                  if (state.status == BookingStatus.loading &&
+                      state.poliList.isEmpty) {
+                    return const _BookingLoading();
+                  }
 
-            Text(
-              widget.jenis == '1' ? 'Booking Umum' : 'Booking BPJS',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  if (state.status == BookingStatus.error &&
+                      state.poliList.isEmpty) {
+                    return _BookingError(
+                      message: state.errorMessage ?? 'Terjadi kesalahan',
+                      onRetry: () =>
+                          context.read<BookingBloc>().add(LoadPoliEvent()),
+                    );
+                  }
+
+                  return widget.isUmum
+                      ? const BookingUmumPage()
+                      : const BookingBpjsPage();
+                },
+              ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
 
-        foregroundColor: Colors.white,
+class _BookingLoading extends StatelessWidget {
+  const _BookingLoading();
 
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: widget.jenis == '1'
-                  ? [const Color(0xFFFF9800), const Color(0xFFFF6F00)]
-                  : [const Color(0xFF2196F3), const Color(0xFF1565C0)],
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: 44,
+            height: 44,
+            child: CircularProgressIndicator(
+              strokeWidth: 3,
+              color: AppColors.primary,
             ),
           ),
-        ),
-
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(26),
-            bottomRight: Radius.circular(26),
+          SizedBox(height: AppSpacing.md),
+          Text(
+            'Memuat data poli...',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textSecondary,
+            ),
           ),
-        ),
-
-        toolbarHeight: 90,
+        ],
       ),
-      body: BlocConsumer<BookingBloc, BookingState>(
-        listener: (context, state) {
-          if (state.status == BookingStatus.error) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.errorMessage ?? 'Terjadi kesalahan'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-          // Dialog sukses sekarang ditangani di masing-masing halaman
-        },
-        builder: (context, state) {
-          if (state.status == BookingStatus.loading && state.poliList.isEmpty) {
-            return Center(
-              child: LoadingAnimationWidget.fourRotatingDots(
-                color: Colors.blue,
-                size: 45,
-              ),
-            );
-          }
+    );
+  }
+}
 
-          if (state.status == BookingStatus.error && state.poliList.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.error_outline, size: 64, color: Colors.red),
-                  const SizedBox(height: 16),
-                  Text(state.errorMessage ?? 'Terjadi kesalahan'),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<BookingBloc>().add(LoadPoliEvent());
-                    },
-                    child: const Text('Coba Lagi'),
-                  ),
-                ],
-              ),
-            );
-          }
+class _BookingError extends StatelessWidget {
+  const _BookingError({required this.message, required this.onRetry});
 
-          if (widget.jenis == '1') {
-            return const BookingUmumPage();
-          } else {
-            return const BookingBpjsPage();
-          }
-        },
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              decoration: const BoxDecoration(
+                color: AppColors.dangerSoft,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.cloud_off_rounded,
+                size: 40,
+                color: AppColors.danger,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            SizedBox(
+              width: 220,
+              child: AppGradientButton(
+                label: 'COBA LAGI',
+                icon: Icons.refresh_rounded,
+                onPressed: onRetry,
+                height: 52,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

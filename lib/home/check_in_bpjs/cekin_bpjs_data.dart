@@ -1,27 +1,31 @@
-import 'package:apm/Blog/antrian_apm_bloc.dart';
+import 'package:apm/blog/antrian_apm_bloc.dart';
+import 'package:apm/dialog/konfirmasi.dart';
+import 'package:apm/dialog/sukses.dart';
 import 'package:apm/dialog/top_toast.dart';
+import 'package:apm/func/navigation_helpers.dart';
 import 'package:apm/func/open_aplikasi_bpjsDaftar.dart';
+import 'package:apm/models/apm_antrian_model.dart';
 import 'package:apm/theme/Style/format_tgl.dart';
+import 'package:apm/theme/app_tokens.dart';
 import 'package:apm/theme/format_text.dart';
+import 'package:apm/widget/app_card.dart';
+import 'package:apm/widget/app_page_chrome.dart';
+import 'package:apm/widget/patient_choice.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
-import '../../dialog/konfirmasi.dart';
-import '../../dialog/sukses.dart';
-import '../../models/apm_antrian_model.dart';
 
-class CekinBpjsDataPage extends StatelessWidget {
-  final String noBpjs;
-  final ApmAntrianModel data;
-  final String jenisPasien;
-
+class CekinBpjsDataPage extends StatefulWidget {
   const CekinBpjsDataPage({
     super.key,
     required this.noBpjs,
     required this.data,
     required this.jenisPasien,
   });
+
+  final String noBpjs;
+  final ApmAntrianModel data;
+  final String jenisPasien;
 
   /// Samarkan nomor peserta tanpa pernah melempar RangeError.
   static String maskNomor(String? nomor) {
@@ -34,570 +38,331 @@ class CekinBpjsDataPage extends StatelessWidget {
 
   /// Kembali ke halaman utama (dashboard) dan membersihkan stack.
   static void kembaliKeHome(BuildContext context) {
-    if (!context.mounted) {
-      return;
-    }
-
-    final navigator = Navigator.of(context);
-    if (navigator.canPop()) {
-      navigator.popUntil((route) => route.isFirst);
-    }
+    popToRoot(context);
   }
 
   @override
+  State<CekinBpjsDataPage> createState() => _CekinBpjsDataPageState();
+}
+
+class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
+  bool sedangProses = false;
+
+  ApmAntrianModel get data => widget.data;
+
+  bool get isPasienBaru => data.pasienBaru == 1;
+
+  @override
   Widget build(BuildContext context) {
-    return BlocListener<AntrianApmBloc, AntrianApmState>(
-      listener: (context, state) {
-        if (state is AntrianApmPrinted) {
-          showSuccessDialog(context, "Sukses: ${state.message}");
-        } else if (state is AntrianApmPrinting) {
-          showSuccessDialog(context, "Sukses");
-        } else if (state is AntrianApmError) {
-          TopToast.error(context, state.pesan);
-        } else if (state is AntrianApmBlocked) {
-          TopToast.warning(context, state.message);
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.pop(context);
-          });
-        }
-      },
-      child: Scaffold(
-        backgroundColor: const Color(0xFFEFF7F9),
-        appBar: AppBar(
-          backgroundColor: const Color(0xFF0D8AAE),
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(
-              Icons.arrow_back_ios_new_rounded,
-              color: Colors.white,
-            ),
-            onPressed: () => Navigator.pop(context),
-          ),
-          centerTitle: true,
-          title: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset(
-                'assets/images/logo_sakina.png',
-                height: 45,
-                color: Colors.white,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                "DATA PASIEN BPJS",
-                style: GoogleFonts.oswald(
-                  fontSize: 25,
-                  fontWeight: FontWeight.w800,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              // _logoHeader(),
-              // const SizedBox(height: 20),
-              _buildCardData(),
-              const SizedBox(height: 30),
-              _buildButtons(context),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCardData() {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 12,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFF0D8AAE), Color(0xFF0ABF68)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(12),
-              ),
-            ),
-            child: Text(
-              "DATA PASIEN BPJS",
-              style: GoogleFonts.montserrat(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              children: [
-                _buildInfoRow("Nama Pasien", formatNama(data.pasien)),
-                _buildInfoRow(
-                  "Tanggal Lahir",
-                  formatTglBlnTahun(data.tglLahir),
-                ),
-                _buildInfoRow("Alamat", formatNama(data.alamatDomisili)),
-                _buildInfoRow("Nomor RM", data.rm ?? "-"),
-                _buildInfoRow("No. Booking", data.noBooking ?? "-"),
-                _buildInfoRow("No. BPJS", data.noPeserta),
-                _buildInfoRow("No. Nik", data.noIdentitas),
-                _buildInfoRow("Nama Poli", data.namaPoli),
-                _buildInfoRow("Nama Dokter", data.namaDokter),
-
-                _buildInfoRow("Jenis Pasien", "BPJS"),
-                const SizedBox(height: 20),
-                // Container(
-                //   padding: const EdgeInsets.all(12),
-                //   decoration: BoxDecoration(
-                //     color: Colors.teal.shade50,
-                //     borderRadius: BorderRadius.circular(12),
-                //   ),
-                //   child: Text(
-                //     "Silahkan pilih POLI atau Loket untuk melanjutkan check-in.",
-                //     textAlign: TextAlign.center,
-                //     style: GoogleFonts.poppins(
-                //       fontSize: 14,
-                //       fontWeight: FontWeight.w500,
-                //       color: Colors.teal.shade900,
-                //     ),
-                //   ),
-                // ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildInfoRow(String title, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 4,
-            child: Text(
-              "$title:",
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w600,
-                fontSize: 15,
-                color: Colors.teal.shade700,
-                height: 1.2,
-              ),
-            ),
-          ),
-          Expanded(
-            flex: 25,
-            child: Text(
-              value,
-              style: GoogleFonts.poppins(
-                fontWeight: FontWeight.w500,
-                fontSize: 15,
-                color: Colors.teal.shade900,
-                height: 1.2,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildButtons(BuildContext context) {
-    return BlocBuilder<AntrianApmBloc, AntrianApmState>(
+    return BlocConsumer<AntrianApmBloc, AntrianApmState>(
+      listenWhen: (previous, current) =>
+          current is AntrianApmPrinted ||
+          current is AntrianApmPrinting ||
+          current is AntrianApmError ||
+          current is AntrianApmBlocked,
+      listener: _handleState,
       builder: (context, state) {
-        final isLoadingPoli = state is AntrianApmLoading;
-        final isLoadingLoket = state is AntrianApmPrinting;
-
-        // Cegah tap ganda saat proses sidik jari berjalan.
-        var sedangProses = false;
-
-        // pasien_baru: 1 = Ya (tampil ke Loket), 0 = Tidak (tampil ke Poli)
-        final pasienBaruFlag = data.pasienBaru;
-        final isPasienBaru = pasienBaruFlag == 1;
-
-        return Column(
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (!isPasienBaru)
-                  Expanded(
-                    child: Column(
-                      children: [
-                        GestureDetector(
-                          onTap: isLoadingPoli
-                              ? null
-                              : () async {
-                                  if (sedangProses) {
-                                    return;
-                                  }
-                                  sedangProses = true;
-                                  final nomor = data.noPeserta?.trim() ?? '';
-                                  if (nomor.isEmpty) {
-                                    TopToast.error(
-                                      context,
-                                      "Nomor tidak ditemukan!",
-                                    );
-                                    return;
-                                  }
-                                  if (nomor.length != 13) {
-                                    TopToast.error(
-                                      context,
-                                      "Nomor harus 13 digit!",
-                                    );
-                                    return;
-                                  }
-
-                                  // Tunggu proses After.exe selesai.
-                                  final tutupDialog =
-                                      showSidikJariProgress(context);
-                                  bool sukses = false;
-                                  try {
-                                    sukses = await openExeFromMap(
-                                      context,
-                                      {"nomor": nomor},
-                                      tampilkanToast: false,
-                                    );
-                                  } catch (e) {
-                                    debugPrint("Gagal proses sidik jari: $e");
-                                  }
-                                  tutupDialog();
-
-                                  // Validasi sukses/gagal: jika gagal, tombol
-                                  // tidak lanjut ke poli dan tidak menampilkan
-                                  // konfirmasi.
-                                  if (sukses != true) {
-                                    if (context.mounted) {
-                                      debugPrint(
-                                        "Alasan gagal: $lastSidikJariReason",
-                                      );
-                                      TopToast.error(
-                                        context,
-                                        lastSidikJariReason.isEmpty
-                                            ? "Sidik jari gagal diproses. Silakan coba lagi."
-                                            : "Sidik jari gagal: ${lastSidikJariReason}",
-                                      );
-                                    }
-                                    return;
-                                  }
-
-                                  if (!context.mounted) {
-                                    return;
-                                  }
-
-                                  ConfirmationDialog.show(
-                                    context,
-                                    title: "Menuju Poli",
-                                    message:
-                                        "Anda yakin ingin melanjutkan ke pelayanan POLI?",
-                                    onConfirm: () {
-                                      if (!context.mounted) {
-                                        return;
-                                      }
-                                      context.read<AntrianApmBloc>().add(
-                                        LanjutKePoliEvent(
-                                          noRm: data.rm,
-                                          jenisAntrian: jenisPasien
-                                              .toLowerCase(),
-                                        ),
-                                      );
-                                    },
-                                    onCancel: () =>
-                                        CekinBpjsDataPage.kembaliKeHome(context),
-                                  );
-                                },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 24),
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF0ABF68), Color(0xFF089E59)],
-                              ),
-                              borderRadius: BorderRadius.circular(14),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.08),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Center(
-                              child: isLoadingPoli
-                                  ? LoadingAnimationWidget.fourRotatingDots(
-                                      color: Colors.white,
-                                      size: 15,
-                                    )
-                                  : Text(
-                                      "LANJUT PILIH KE POLI",
-                                      style: GoogleFonts.oswald(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
-                                        letterSpacing: 1,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        // Keterangan untuk tombol POLI
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.green.shade50,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.green.shade200),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.verified_user,
-                                size: 12,
-                                color: Colors.green.shade700,
-                              ),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  "Nomor BPJS: ${maskNomor(data.noPeserta)}",
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.green.shade800,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "Konsultasi dengan dokter / Langsung tunggu di Poli",
-                          style: GoogleFonts.poppins(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                if (!isPasienBaru) const SizedBox(width: 16),
-
-                // Tombol LOKET (ditampilkan hanya jika pasien_baru = 1)
-                if (isPasienBaru)
-                  Expanded(
-                    child: Column(
-                      children: [
-                        GestureDetector(
-                          onTap: isLoadingLoket
-                              ? null
-                              : () {
-                                  ConfirmationDialog.show(
-                                    context,
-                                    title: "Menuju Loket",
-                                    message:
-                                        "Anda yakin ingin melanjutkan ke pelayanan LOKET?",
-                                    onConfirm: () {
-                                      context.read<AntrianApmBloc>().add(
-                                        LanjutKeLoketEvent(
-                                          apmData: data,
-                                          jenisAntrian: jenisPasien
-                                              .toLowerCase(),
-                                          noBooking: data.noBooking ?? '',
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(vertical: 24),
-                            decoration: BoxDecoration(
-                              gradient: const LinearGradient(
-                                colors: [Color(0xFF0D8AAE), Color(0xFF0ABF68)],
-                              ),
-                              borderRadius: BorderRadius.circular(14),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.08),
-                                  blurRadius: 8,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Center(
-                              child: isLoadingLoket
-                                  ? LoadingAnimationWidget.fourRotatingDots(
-                                      color: Colors.white,
-                                      size: 15,
-                                    )
-                                  : Text(
-                                      "PILIH KE LOKET",
-                                      style: GoogleFonts.oswald(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.w700,
-                                        color: Colors.white,
-                                        letterSpacing: 1,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        // Keterangan untuk tombol LOKET
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.blue.shade50,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: Colors.blue.shade200),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.receipt,
-                                size: 12,
-                                color: Colors.blue.shade700,
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                "Administrasi & pendaftaran",
-                                style: GoogleFonts.poppins(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w500,
-                                  color: Colors.blue.shade700,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          "Administrasi & pendaftaran",
-                          style: GoogleFonts.poppins(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.grey.shade600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-              ],
-            ),
-
-            // Info tambahan di bawah kedua tombol
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Colors.amber.shade50, Colors.orange.shade50],
-                ),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.amber.shade200, width: 1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.amber.withOpacity(0.15),
-                    blurRadius: 12,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+        return Scaffold(
+          body: AppBackground(
+            child: SafeArea(
+              child: Column(
                 children: [
-                  // Icon Container
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.shade100,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.amber.withOpacity(0.2),
-                          blurRadius: 4,
-                          offset: const Offset(0, 2),
+                  const AppPageHeader(
+                    title: 'DATA PASIEN BPJS',
+                    subtitle: 'Periksa data berikut sebelum melanjutkan',
+                    badge: 'Verifikasi Pasien',
+                    badgeIcon: Icons.verified_user_rounded,
+                    dense: true,
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.md,
+                        AppSpacing.md,
+                        AppSpacing.md,
+                        AppSpacing.sm,
+                      ),
+                      child: Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1100),
+                          child: LayoutBuilder(
+                            builder: (context, constraints) {
+                              final isWide = constraints.maxWidth >= 880;
+                              final dense = constraints.maxHeight < 600;
+
+                              final card = _buildPatientCard(
+                                columns: isWide ? 2 : 1,
+                                dense: dense,
+                              );
+                              final actions = PatientChoiceActions(
+                                isPasienBaru: isPasienBaru,
+                                poliBusy: state is AntrianApmLoading,
+                                loketBusy: state is AntrianApmPrinting,
+                                onPoli: _handlePoli,
+                                onLoket: _handleLoket,
+                                dense: dense,
+                                showNotice: !dense,
+                              );
+
+                              if (isWide) {
+                                return Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Expanded(flex: 3, child: card),
+                                    const SizedBox(width: AppSpacing.md),
+                                    Expanded(flex: 2, child: actions),
+                                  ],
+                                );
+                              }
+
+                              return Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.stretch,
+                                children: [
+                                  Expanded(child: card),
+                                  const SizedBox(height: AppSpacing.sm),
+                                  actions,
+                                ],
+                              );
+                            },
+                          ),
                         ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.info_rounded,
-                      size: 18,
-                      color: Colors.amber.shade800,
+                      ),
                     ),
                   ),
-                  const SizedBox(width: 14),
-
-                  // Content
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Informasi Penting",
-                          style: GoogleFonts.poppins(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.amber.shade900,
-                            letterSpacing: 0.3,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          "Pilih Poli untuk langsung menuju poli pilihan dan tunggu nomor antrian dipanggil.\nPilih Loket jika memerlukan bantuan, silakan menuju FO (Front Office).",
-                          style: GoogleFonts.poppins(
-                            fontSize: 13.5,
-                            color: Colors.amber.shade800,
-                            height: 1.6,
-                            letterSpacing: 0.2,
-                          ),
-                        ),
-                      ],
-                    ),
+                  const AppPageFooter(
+                    message: 'RSU Sakina Idaman - Pelayanan BPJS',
+                    showClock: false,
                   ),
                 ],
               ),
             ),
-          ],
+          ),
         );
       },
+    );
+  }
+
+  Widget _buildPatientCard({int columns = 1, bool dense = false}) {
+    return PatientDataCard(
+      data: data,
+      title: 'DATA PASIEN BPJS',
+      gradient: AppGradients.bpjs,
+      columns: columns,
+      dense: dense,
+      status: AppChip(
+        label: isPasienBaru ? 'PASIEN BARU' : 'PASIEN LAMA',
+        icon: isPasienBaru
+            ? Icons.person_add_alt_1_rounded
+            : Icons.person_rounded,
+        color: Colors.white,
+        background: Colors.white24,
+      ),
+      sections: [
+        PatientDataSection(
+          title: 'Identitas',
+          icon: Icons.badge_outlined,
+          rows: [
+            AppDataRow(
+              icon: Icons.person_rounded,
+              label: 'Nama Pasien',
+              value: formatNama(data.pasien),
+              emphasized: true,
+              dense: dense,
+            ),
+            AppDataRow(
+              icon: Icons.cake_rounded,
+              label: 'Tanggal Lahir',
+              value: formatTglBlnTahun(data.tglLahir),
+              dense: dense,
+            ),
+            AppDataRow(
+              icon: Icons.fingerprint_rounded,
+              label: 'No. NIK',
+              value: data.noIdentitas,
+              dense: dense,
+            ),
+            AppDataRow(
+              icon: Icons.home_rounded,
+              label: 'Alamat',
+              value: formatNama(data.alamatDomisili),
+              dense: dense,
+            ),
+          ],
+        ),
+        PatientDataSection(
+          title: 'Pendaftaran',
+          icon: Icons.confirmation_number_outlined,
+          rows: [
+            AppDataRow(
+              icon: Icons.badge_rounded,
+              label: 'No. BPJS',
+              value: data.noPeserta,
+              emphasized: true,
+              dense: dense,
+            ),
+            AppDataRow(
+              icon: Icons.confirmation_number_rounded,
+              label: 'Nomor RM',
+              value: data.rm,
+              dense: dense,
+            ),
+            AppDataRow(
+              icon: Icons.book_online_rounded,
+              label: 'No. Booking',
+              value: data.noBooking,
+              dense: dense,
+            ),
+          ],
+        ),
+        PatientDataSection(
+          title: 'Kunjungan',
+          icon: Icons.local_hospital_outlined,
+          rows: [
+            AppDataRow(
+              icon: Icons.local_hospital_rounded,
+              label: 'Nama Poli',
+              value: data.namaPoli.isNotEmpty ? data.namaPoli : data.poli,
+              dense: dense,
+            ),
+            AppDataRow(
+              icon: Icons.medical_services_rounded,
+              label: 'Nama Dokter',
+              value: data.namaDokter,
+              dense: dense,
+            ),
+            AppDataRow(
+              icon: Icons.schedule_rounded,
+              label: 'Jam Praktik',
+              value: data.jamPraktik,
+              dense: dense,
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  void _handleState(BuildContext context, AntrianApmState state) {
+    if (!mounted) return;
+
+    if (state is AntrianApmPrinted || state is AntrianApmPrinting) {
+      sedangProses = false;
+      final message = state is AntrianApmPrinted
+          ? 'Sukses: ${state.message}'
+          : 'Check-in berhasil, silakan lanjutkan.';
+      showSuccessDialog(context, message);
+      return;
+    }
+
+    if (state is AntrianApmError) {
+      sedangProses = false;
+      TopToast.error(context, state.pesan);
+      return;
+    }
+
+    if (state is AntrianApmBlocked) {
+      sedangProses = false;
+      TopToast.warning(context, state.message);
+      Future.delayed(const Duration(milliseconds: 900), () {
+        if (mounted) Navigator.pop(context);
+      });
+    }
+  }
+
+  Future<void> _handlePoli() async {
+    if (sedangProses) return;
+    sedangProses = true;
+
+    final nomor = data.noPeserta.trim();
+    if (nomor.isEmpty) {
+      sedangProses = false;
+      TopToast.error(context, 'Nomor peserta BPJS tidak ditemukan.');
+      return;
+    }
+    if (nomor.length != 13) {
+      sedangProses = false;
+      TopToast.error(context, 'Nomor BPJS harus 13 digit.');
+      return;
+    }
+
+    final tutupDialog = showSidikJariProgress(context);
+    var sukses = false;
+    try {
+      sukses = await openExeFromMap(
+        context,
+        {'nomor': nomor},
+        tampilkanToast: false,
+      );
+    } catch (e) {
+      debugPrint('Gagal proses sidik jari: $e');
+    }
+    tutupDialog();
+
+    if (!mounted) return;
+
+    if (sukses != true) {
+      sedangProses = false;
+      debugPrint('Alasan gagal: $lastSidikJariReason');
+      TopToast.error(
+        context,
+        lastSidikJariReason.isEmpty
+            ? 'Sidik jari gagal diproses. Silakan coba lagi.'
+            : 'Sidik jari gagal: $lastSidikJariReason',
+      );
+      return;
+    }
+
+    ConfirmationDialog.show(
+      context,
+      title: 'Menuju Poli',
+      message: 'Anda yakin ingin melanjutkan ke pelayanan Poli?',
+      icon: Icons.local_hospital_rounded,
+      color: AppColors.accentDark,
+      onConfirm: () {
+        if (!mounted) return;
+        HapticFeedback.mediumImpact();
+        context.read<AntrianApmBloc>().add(
+          LanjutKePoliEvent(
+            noRm: data.rm,
+            jenisAntrian: widget.jenisPasien.toLowerCase(),
+          ),
+        );
+      },
+      onCancel: () {
+        sedangProses = false;
+        if (mounted) popToRoot(context);
+      },
+    );
+  }
+
+  void _handleLoket() {
+    if (sedangProses) return;
+    sedangProses = true;
+    HapticFeedback.mediumImpact();
+
+    ConfirmationDialog.show(
+      context,
+      title: 'Menuju Loket',
+      message: 'Anda yakin ingin melanjutkan ke pelayanan Loket?',
+      icon: Icons.account_balance_wallet_rounded,
+      color: AppColors.bpjs,
+      points: const [
+        'Simpan nomor antrean Anda.',
+        'Tunjukkan ke petugas Front Office.',
+      ],
+      onConfirm: () {
+        if (!mounted) return;
+        context.read<AntrianApmBloc>().add(
+          LanjutKeLoketEvent(
+            apmData: data,
+            jenisAntrian: widget.jenisPasien.toLowerCase(),
+            noBooking: data.noBooking,
+          ),
+        );
+      },
+      onCancel: () => sedangProses = false,
     );
   }
 }

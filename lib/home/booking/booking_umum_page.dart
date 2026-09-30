@@ -1,8 +1,13 @@
 import 'package:apm/blog/booking/booking_bloc.dart';
 import 'package:apm/blog/booking/booking_event.dart';
 import 'package:apm/blog/booking/booking_state.dart';
+import 'package:apm/theme/app_tokens.dart';
 import 'package:apm/utils/print_setup_runner.dart';
-import 'package:apm/widget/keypad_section.dart';
+import 'package:apm/widget/app_button.dart';
+import 'package:apm/widget/app_card.dart';
+import 'package:apm/widget/app_page_chrome.dart';
+import 'package:apm/widget/doctor_option_card.dart';
+import 'package:apm/widget/number_entry_board.dart';
 import 'package:colorful_print/colorful_print.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,8 +15,6 @@ import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../models/booking_model.dart';
 import '../../theme/format_text.dart';
@@ -132,29 +135,11 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
 
   Widget _buildDokterList(BookingState state) {
     if (state.dokterList.isEmpty) {
-      return Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Center(
-          child: Column(
-            children: [
-              Icon(Icons.person_off, size: 40, color: Colors.grey),
-              SizedBox(height: 8),
-              Text(
-                'Tidak ada dokter tersedia',
-                style: TextStyle(color: Colors.grey),
-              ),
-              SizedBox(height: 4),
-              Text(
-                'Silakan pilih tanggal dan poli terlebih dahulu',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
+      return const AppEmptyState(
+        title: 'Belum ada dokter tersedia',
+        message: 'Silakan pilih tanggal pemeriksaan dan poli terlebih dahulu.',
+        icon: Icons.medical_information_outlined,
+        color: AppColors.textMuted,
       );
     }
 
@@ -163,230 +148,27 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
         .length;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-          child: Text(
-            '$availableCount dari ${state.dokterList.length} dokter tersedia',
-            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-          ),
+        DoctorListHeader(
+          total: state.dokterList.length,
+          tersedia: availableCount,
         ),
-        // List dokter
-        ...state.dokterList.map((dokter) {
-          final isLibur = dokter.isLibur;
-          final kuota = dokter.sisaKoutaKapasitaspasien ?? 0;
-          final hasKuota = dokter.terpakaiKapasitaspasien != null;
-          final isAvailable = !isLibur && (!hasKuota || kuota > 0);
-          final isSelected = _selectedDokterId == dokter.idDokter.toString();
-
-          return Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            elevation: isSelected ? 4 : 1,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-              side: BorderSide(
-                color: isSelected ? Colors.blue : Colors.transparent,
-                width: isSelected ? 2 : 0,
-              ),
-            ),
-            child: InkWell(
-              onTap: isAvailable
-                  ? () {
-                      setState(() {
-                        _selectedDokterId = dokter.idDokter.toString();
-                        _selectedDokterNama = dokter.namaDokter;
-                        _selectedJadwalId = dokter.idJadwalDetail;
-                      });
-                    }
-                  : null,
-              borderRadius: BorderRadius.circular(12),
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                child: Row(
-                  children: [
-                    // Icon status
-                    Container(
-                      width: 44,
-                      height: 44,
-                      decoration: BoxDecoration(
-                        color: isLibur
-                            ? Colors.red.withOpacity(0.1)
-                            : isAvailable
-                            ? Colors.green.withOpacity(0.1)
-                            : Colors.orange.withOpacity(0.1),
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        isLibur
-                            ? Icons.event_busy
-                            : isAvailable
-                            ? Icons.check_circle
-                            : Icons.warning,
-                        size: 24,
-                        color: isLibur
-                            ? Colors.red
-                            : isAvailable
-                            ? Colors.green
-                            : Colors.orange,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    // Info dokter
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            dokter.namaDokter,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              color: isLibur ? Colors.grey : Colors.black,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Icon(
-                                Icons.access_time,
-                                size: 14,
-                                color: isLibur ? Colors.red : Colors.grey[600],
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                dokter.jadwalLengkap,
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: isLibur
-                                      ? Colors.red
-                                      : Colors.grey[600],
-                                ),
-                              ),
-                            ],
-                          ),
-                          if (hasKuota) ...[
-                            const SizedBox(height: 4),
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.people_outline,
-                                  size: 14,
-                                  color: kuota > 0
-                                      ? Colors.blue
-                                      : Colors.orange,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Sisa Kuota: $kuota',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: kuota > 0
-                                        ? Colors.blue
-                                        : Colors.orange,
-                                    fontWeight: kuota > 0
-                                        ? FontWeight.normal
-                                        : FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    // Status badge + selected indicator
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        if (isLibur)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Text(
-                              'LIBUR',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          )
-                        else if (!isAvailable)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.orange,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Text(
-                              'PENUH',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          )
-                        else if (isSelected)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.blue,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.check_circle,
-                                  size: 14,
-                                  color: Colors.white,
-                                ),
-                                SizedBox(width: 4),
-                                Text(
-                                  'DIPILIH',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        const SizedBox(height: 4),
-                        if (isSelected)
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: Colors.blue,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        }).toList(),
+        for (final dokter in state.dokterList) ...[
+          DoctorOptionCard(
+            dokter: dokter,
+            accent: AppColors.umum,
+            isSelected: _selectedDokterId == dokter.idDokter.toString(),
+            onTap: () {
+              setState(() {
+                _selectedDokterId = dokter.idDokter.toString();
+                _selectedDokterNama = dokter.namaDokter;
+                _selectedJadwalId = dokter.idJadwalDetail;
+              });
+            },
+          ),
+          const SizedBox(height: AppSpacing.sm),
+        ],
       ],
     );
   }
@@ -625,19 +407,30 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
                                   const SizedBox(height: 8),
 
                                   state.status == BookingStatus.loadingDokter
-                                      ? Center(
-                                          child: Padding(
-                                            padding: EdgeInsets.all(20),
-                                            child: Column(
-                                              children: [
-                                                LoadingAnimationWidget.fourRotatingDots(
-                                                  color: Colors.white,
-                                                  size: 15,
+                                      ? const Padding(
+                                          padding: EdgeInsets.all(AppSpacing.lg),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              SizedBox(
+                                                width: 20,
+                                                height: 20,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2.5,
+                                                  color: AppColors.primary,
                                                 ),
-                                                SizedBox(height: 12),
-                                                Text('Memuat data dokter...'),
-                                              ],
-                                            ),
+                                              ),
+                                              SizedBox(width: 12),
+                                              Text(
+                                                'Memuat data dokter...',
+                                                style: TextStyle(
+                                                  fontSize: 13.5,
+                                                  fontWeight: FontWeight.w600,
+                                                  color: AppColors.textSecondary,
+                                                ),
+                                              ),
+                                            ],
                                           ),
                                         )
                                       : _buildDokterList(state),
@@ -683,38 +476,22 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
                                     ),
                                   const SizedBox(height: 20),
 
-                                  SizedBox(
-                                    width: double.infinity,
-                                    height: 55,
-                                    child: ElevatedButton(
-                                      onPressed:
-                                          state.status == BookingStatus.loading
-                                          ? null
-                                          : () {
-                                              if (_formKey.currentState!
-                                                  .validate()) {
-                                                _submitBooking(context);
-                                              }
-                                            },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: const Color(
-                                          0xFFFF6F00,
-                                        ),
-                                        foregroundColor: Colors.white,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                        ),
-                                      ),
-                                      child:
-                                          state.status == BookingStatus.loading
-                                          ? LoadingAnimationWidget.fourRotatingDots(
-                                              color: Colors.white,
-                                              size: 15,
-                                            )
-                                          : const Text("BOOKING"),
-                                    ),
+                                  AppGradientButton(
+                                    label: 'BOOKING',
+                                    icon: Icons.event_available_rounded,
+                                    gradient: AppGradients.umum,
+                                    height: 58,
+                                    loading:
+                                        state.status == BookingStatus.loading,
+                                    onPressed:
+                                        state.status == BookingStatus.loading
+                                        ? null
+                                        : () {
+                                            if (_formKey.currentState!
+                                                .validate()) {
+                                              _submitBooking(context);
+                                            }
+                                          },
                                   ),
                                 ],
                               ),
@@ -726,13 +503,11 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
 
                         Expanded(
                           flex: 2,
-                          child: SizedBox(
-                            height: 550,
-                            child: KeypadSection(
-                              onNumberPressed: _appendNumber,
-                              onBackspacePressed: _backspace,
-                              onClearPressed: _clear,
-                            ),
+                          child: NumberKeypad(
+                            accent: AppColors.umum,
+                            onDigit: _appendNumber,
+                            onBackspace: _backspace,
+                            onClear: _clear,
                           ),
                         ),
                       ],
@@ -750,80 +525,8 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
   }
 
   Widget _footer() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-      decoration: BoxDecoration(
-        color: primaryColor,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(25),
-          topRight: Radius.circular(25),
-        ),
-      ),
-      child: Stack(
-        children: [
-          Center(
-            child: Text(
-              "RSU Sakina Idaman • Pelayanan Booking Umum",
-              style: GoogleFonts.poppins(
-                fontSize: 13,
-                color: Colors.white,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-
-          Positioned(
-            right: 0,
-            top: 0,
-            bottom: 0,
-            child: Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    "#pedulisesama | #sakinapilihanku",
-                    style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      color: Colors.white.withOpacity(0.4),
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 1,
-                    height: 14,
-                    color: Colors.white.withOpacity(0.3),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    "v1.1.1",
-                    style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      color: Colors.white.withOpacity(0.6),
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Container(
-                    width: 1,
-                    height: 14,
-                    color: Colors.white.withOpacity(0.3),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    "2026",
-                    style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      color: Colors.white.withOpacity(0.4),
-                      fontWeight: FontWeight.w300,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+    return const AppPageFooter(
+      message: 'RSU Sakina Idaman - Pelayanan Booking Umum',
     );
   }
 
