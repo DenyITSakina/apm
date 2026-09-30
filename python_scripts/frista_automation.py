@@ -1,4 +1,4 @@
-"""Automasi Frista + BPJS Sidik Jari (After.exe).
+"""Automasi BPJS Sidik Jari (After.exe).
 
 Fokus: proses cepat (tidak ada delay tetap yang panjang), window diaktifkan
 via Win32, dan selesai/keluar dilaporkan lewat exit code.
@@ -25,19 +25,19 @@ DB_CONFIG = {
     "password": "12344321",
 }
 
-FRISTA_PATH = r"C:\frista_v3.0.2\frista\Frista.exe"
+# FRISTA_PATH = r"C:\frista_v3.0.2\frista\Frista.exe"
 AFTER_PATH = (
     r"C:\Program Files (x86)\BPJS Kesehatan"
     r"\Aplikasi Sidik Jari BPJS Kesehatan\After.exe"
 )
 
 AFTER_PROCESS_NAME = "After.exe"
-FRISTA_PROCESS_NAME = "Frista.exe"
+# FRISTA_PROCESS_NAME = "Frista.exe"
 
 # ===== WAKTU TUNGGU (detik) =====
 POLL_INTERVAL = 0.1
 AFTER_LAUNCH_TIMEOUT = 6
-AFTER_LOGIN_TIMEOUT = 12
+# AFTER_LOGIN_TIMEOUT = 12
 AFTER_EXIT_TIMEOUT = 180
 FRISTA_LAUNCH_TIMEOUT = 15
 
@@ -191,34 +191,32 @@ def run_after(username, password):
     print(f">>> After.exe selesai, exit code: {code}")
     return code == 0
 
+# # ===== FRISTA =====
+# def start_frista_and_login(username, password):
+#     """Buka Frista dan login otomatis (tanpa input no_peserta)."""
+#     if not os.path.exists(FRISTA_PATH):
+#         print(f"[!] Frista.exe tidak ditemukan: {FRISTA_PATH}")
+#         return False
 
-# ===== FRISTA =====
-def start_frista_and_login(username, password):
-    """Buka Frista dan login otomatis (tanpa input no_peserta)."""
-    if not os.path.exists(FRISTA_PATH):
-        print(f"[!] Frista.exe tidak ditemukan: {FRISTA_PATH}")
-        return False
+#     print(">>> Membuka Frista ...")
+#     subprocess.Popen([FRISTA_PATH])
 
-    print(">>> Membuka Frista ...")
-    subprocess.Popen([FRISTA_PATH])
+#     if not wait_until(
+#         lambda: is_process_running(FRISTA_PROCESS_NAME), FRISTA_LAUNCH_TIMEOUT
+#     ):
+#         print("[!] Frista gagal start / verifikasi wajah")
+#         return False
 
-    if not wait_until(
-        lambda: is_process_running(FRISTA_PROCESS_NAME), FRISTA_LAUNCH_TIMEOUT
-    ):
-        print("[!] Frista gagal start / verifikasi wajah")
-        return False
+#     activate_window("Frista.exe", 3)
 
-    activate_window("Frista.exe", 3)
+#     pyautogui.write(username, interval=0.02)
+#     pyautogui.press("tab")
+#     pyautogui.write(password, interval=0.02)
+#     pyautogui.press("enter")
+#     print(">>> Auto login Frista dikirim")
+#     time.sleep(1.5)
 
-    pyautogui.write(username, interval=0.02)
-    pyautogui.press("tab")
-    pyautogui.write(password, interval=0.02)
-    pyautogui.press("enter")
-    print(">>> Auto login Frista dikirim")
-    time.sleep(1.5)
-
-    return True
-
+#     return True
 
 # ===== EKSEKUSI =====
 def main():
