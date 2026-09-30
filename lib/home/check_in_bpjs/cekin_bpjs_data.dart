@@ -211,6 +211,9 @@ class CekinBpjsDataPage extends StatelessWidget {
         final isLoadingPoli = state is AntrianApmLoading;
         final isLoadingLoket = state is AntrianApmPrinting;
 
+        // Cegah tap ganda saat proses sidik jari berjalan.
+        var sedangProses = false;
+
         // pasien_baru: 1 = Ya (tampil ke Loket), 0 = Tidak (tampil ke Poli)
         final pasienBaruFlag = data.pasienBaru;
         final isPasienBaru = pasienBaruFlag == 1;
@@ -228,6 +231,10 @@ class CekinBpjsDataPage extends StatelessWidget {
                           onTap: isLoadingPoli
                               ? null
                               : () async {
+                                  if (sedangProses) {
+                                    return;
+                                  }
+                                  sedangProses = true;
                                   final nomor = data.noPeserta?.trim() ?? '';
                                   if (nomor.isEmpty) {
                                     TopToast.error(
@@ -244,16 +251,30 @@ class CekinBpjsDataPage extends StatelessWidget {
                                     return;
                                   }
 
+                                  // Tunggu proses After.exe selesai.
+                                  showSidikJariProgress(context);
                                   final sukses = await openExeFromMap(context, {
                                     "nomor": nomor,
                                   });
+                                  if (context.mounted) {
+                                    Navigator.of(context, rootNavigator: true)
+                                        .pop();
+                                  }
 
-                                  // Validasi sukses/gagal: jika gagal, tombol tidak lanjut ke poli.
+                                  // Validasi sukses/gagal: jika gagal, tombol
+                                  // tidak lanjut ke poli dan tidak menampilkan
+                                  // konfirmasi.
                                   if (sukses != true) {
-                                    TopToast.error(
-                                      context,
-                                      "Gagal membuka aplikasi BPJS/menyiapkan input. Silakan coba lagi.",
-                                    );
+                                    if (context.mounted) {
+                                      TopToast.error(
+                                        context,
+                                        "Sidik jari gagal diproses. Silakan coba lagi.",
+                                      );
+                                    }
+                                    return;
+                                  }
+
+                                  if (!context.mounted) {
                                     return;
                                   }
 

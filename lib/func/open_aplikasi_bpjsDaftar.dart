@@ -1,13 +1,24 @@
 // ignore: file_names
+import 'dart:async';
 import 'dart:io';
 
 import 'package:apm/dialog/top_toast.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:apm/api/vclaim_api_service.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 const int vkReturn = 0x0D;
 const int vkTab = 0x09;
+
+const String sidikJariExePath =
+    r"C:\Program Files (x86)\BPJS Kesehatan\Aplikasi Sidik Jari BPJS Kesehatan\After.exe";
+
+/// Batas waktu menunggu After.exe muncul di tasklist.
+const Duration _sidikJariLaunchTimeout = Duration(seconds: 6);
+
+/// Batas waktu menunggu After.exe selesai (pasien selesai sidik jari).
+const Duration _sidikJariExitTimeout = Duration(seconds: 180);
 
 Future<bool> isSidikJariRunning() async {
   if (kIsWeb) {
@@ -17,6 +28,24 @@ Future<bool> isSidikJariRunning() async {
 
   final result = await Process.run('tasklist', [], runInShell: true);
   return result.stdout.toString().contains("After.exe");
+}
+
+/// Polling cepat sampai [condition] terpenuhi atau [timeout] habis.
+Future<bool> waitUntil(
+  Future<bool> Function() condition, {
+  required Duration timeout,
+  Duration interval = const Duration(milliseconds: 150),
+}) async {
+  final stopwatch = Stopwatch()..start();
+  while (true) {
+    if (await condition()) {
+      return true;
+    }
+    if (stopwatch.elapsed >= timeout) {
+      return false;
+    }
+    await Future<void>.delayed(interval);
+  }
 }
 
 Future<void> closeSidikJariExe() async {
@@ -141,11 +170,67 @@ Future<void> sendAutoLogin({
   required String username,
   required String password,
 }) async {
-  await Future.delayed(const Duration(milliseconds: 400));
+  await Future.delayed(const Duration(milliseconds: 250));
   sendKeys(username);
   pressTab();
   sendKeys(password);
   pressEnter();
+}
+
+/// Dialog proses sidik jari, dipanggil di halaman cek-in.
+void showSidikJariProgress(BuildContext context) {
+  showGeneralDialog(
+    context: context,
+    barrierDismissible: false,
+    barrierLabel: "Memproses sidik jari",
+    barrierColor: Colors.black.withOpacity(0.45),
+    pageBuilder: (_, _, _) => const SizedBox.shrink(),
+    transitionBuilder: (context, anim, _, child) {
+      return Opacity(
+        opacity: anim.value,
+        child: Center(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.8,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.15),
+                  blurRadius: 20,
+                  offset: const Offset(0, 8),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                LoadingAnimationWidget.fourRotatingDots(
+                  color: const Color(0xFF0ABF68),
+                  size: 40,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  "Memproses Sidik Jari",
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  "Mohon takeover dan letakkan sidik jari pada reader.",
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    },
+    transitionDuration: const Duration(milliseconds: 200),
+  );
 }
 
 Future<bool> openExeFromMap(
@@ -167,78 +252,104 @@ Future<bool> openExeFromMap(
   debugPrint("Nomor dipakai: $nomor");
 
   try {
-    await openExe(context, nomor);
-    return true;
+    return await openExe(context, nomor);
   } catch (e) {
     TopToast.error(context, "Gagal membuka aplikasi BPJS");
     return false;
   }
 }
 
-Future<void> openExe(BuildContext context, String noPeserta) async {
+/// Menjalankan After.exe, login otomatis, input nomor, lalu menunggu proses selesai.
+///
+/// Mengembalikan `true` bila sidik jari berhasil diproses, `false` bila gagal.
+Future<bool> openExe(BuildContext context, String noPeserta) async {
+  void gagal(String pesan) {
+    if (context.mounted) {
+      TopToast.error(context, pesan);
+    }
+  }
+
   if (kIsWeb) {
     if (context.mounted) {
       TopToast.error(context, 'Fitur ini hanya tersedia di aplikasi desktop');
     }
-    return;
+    return false;
   }
 
-  const exePath =
-      r"C:\Program Files (x86)\BPJS Kesehatan\Aplikasi Sidik Jari BPJS Kesehatan\After.exe";
+  Process? process;
 
   try {
-    Process? process;
+    final sudahBerjalan = await isSidikJariRunning();
 
-    // Cegah dobel: hanya buka After.exe jika belum berjalan
-    if (await isSidikJariRunning()) {
+    if (sudahBerjalan) {
       debugPrint("After.exe sudah berjalan -> tidak membuka instance lagi");
     } else {
+      if (!File(sidikJariExePath).existsSync()) {
+        gagal("Aplikasi sidik jari tidak ditemukan. Silakan coba lagi.");
+        return false;
+      }
+
       process = await Process.start(
-        exePath,
+        sidikJariExePath,
         [],
         runInShell: true,
         mode: ProcessStartMode.normal,
       );
+
+      // Tunggu proses muncul (polling cepat, bukan delay tetap).
+      final muncul = await waitUntil(
+        isSidikJariRunning,
+        timeout: _sidikJariLaunchTimeout,
+      );
+
+      if (!muncul) {
+        gagal("Aplikasi sidik jari gagal dibuka. Silakan coba lagi.");
+        return false;
+      }
     }
 
-    await Future.delayed(const Duration(seconds: 2));
+    // Beri waktu window siap difokuskan tanpa delay panjang.
+    await Future<void>.delayed(const Duration(milliseconds: 400));
     focusWindow("After.exe");
-
-    // await sendAutoLogin(username: "cicifitria", password: "Idaman10!");
 
     final accounts = await VclaimApiService.getVclaimAccounts();
     if (accounts.isEmpty) {
-      if (context.mounted) {
-        TopToast.error(
-          context,
-          "Data VClaim accounts kosong. Auto-login dihentikan.",
-        );
-      }
-      return;
+      gagal("Data VClaim accounts kosong. Auto-login dihentikan. Silakan coba lagi.");
+      return false;
     }
 
     final account = accounts.first;
     if (account.username.isEmpty || account.password.isEmpty) {
-      if (context.mounted) {
-        TopToast.error(
-          context,
-          "Username/password VClaim tidak valid. Auto-login dihentikan.",
-        );
-      }
-      return;
+      gagal("Username/password VClaim tidak valid. Silakan coba lagi.");
+      return false;
     }
 
     await sendAutoLogin(username: account.username, password: account.password);
 
-    await Future.delayed(const Duration(seconds: 2));
+    await Future.delayed(const Duration(milliseconds: 800));
+    if (!context.mounted) {
+      return false;
+    }
     await sendNoPeserta(context, noPeserta);
 
-    if (process != null) {
-      await process.exitCode;
-      debugPrint("EXE menutup sendiri.");
+    if (process == null) {
+      // Setelah.exe sudah berjalan sebelumnya, tidak ada proses yang dipantau.
+      return true;
+    }
+
+    // Tunggu After.exe selesai (pasien selesai sidik jari).
+    try {
+      final code = await process.exitCode.timeout(_sidikJariExitTimeout);
+      debugPrint("After.exe selesai, exit code: $code");
+      return code == 0;
+    } on TimeoutException {
+      // Masih berjalan melewati batas waktu: proses dianggap sedang jalan.
+      debugPrint("After.exe masih berjalan, lanjut ke tahap berikutnya");
+      return true;
     }
   } catch (e) {
     debugPrint("Error: $e");
+    return false;
   }
 }
 
