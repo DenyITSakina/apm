@@ -113,10 +113,12 @@ bool isWindowOpen(String windowTitle) {
   }
 }
 
-void focusWindow(String windowTitle) {
+/// Fokuskan window aplikasi sidik jari. Non-blocking, mengembalikan `true`
+/// bila window ditemukan.
+Future<bool> focusWindow(String windowTitle) async {
   if (kIsWeb) {
     debugPrint('Fokus window tidak tersedia di web');
-    return;
+    return false;
   }
 
   final pattern = windowTitle
@@ -153,19 +155,23 @@ void focusWindow(String windowTitle) {
       [Win32]::ShowWindow(\$handle, 9) | Out-Null
     }
     [Win32]::SetForegroundWindow(\$handle) | Out-Null
+    exit 0
   }
+  exit 1
   ''';
 
   try {
-    Process.runSync('powershell.exe', [
+    final result = await Process.run('powershell.exe', [
       '-NoProfile',
       '-ExecutionPolicy',
       'Bypass',
       '-Command',
       script,
     ]);
+    return result.exitCode == 0;
   } catch (e) {
     debugPrint("focusWindow error: $e");
+    return false;
   }
 }
 
@@ -181,45 +187,79 @@ void sendVirtualKey(int keyCode) {
     return;
   }
 
-  sendKeys(key);
+  unawaited(sendKeySequence([key]));
 }
 
 void sendKeys(String text) {
-  if (kIsWeb || text.isEmpty) {
+  if (text.isEmpty) {
     return;
   }
-
-  final script =
-      '''
-  Add-Type -AssemblyName System.Windows.Forms
-  [System.Windows.Forms.SendKeys]::SendWait('${_escapePowerShell(text)}')
-  ''';
-
-  try {
-    Process.runSync('powershell.exe', [
-      '-NoProfile',
-      '-ExecutionPolicy',
-      'Bypass',
-      '-Command',
-      script,
-    ]);
-  } catch (e) {
-    debugPrint("sendKeys error: $e");
-  }
+  unawaited(sendKeySequence([text]));
 }
 
 void pressEnter() => sendVirtualKey(vkReturn);
 void pressTab() => sendVirtualKey(vkTab);
+
+/// Escape karakter khusus SendKeys pada teks biasa (username/password).
+String _escapeSendKeysText(String text) {
+  final buffer = StringBuffer();
+  for (final rune in text.runes) {
+    final char = String.fromCharCode(rune);
+    if ('+^%~(){}[]'.contains(char)) {
+      buffer.write('{$char}');
+    } else {
+      buffer.write(char);
+    }
+  }
+  return buffer.toString();
+}
+
+/// Mengirim seluruh rangkaian tombol dalam SATU proses PowerShell.
+///
+/// Sebelumnya tiap tombol spawn `powershell.exe` sendiri (~23 kali), sehingga
+/// UI membeku 7-10 detik. Sekarang satu spawn untuk semua tombol.
+Future<void> sendKeySequence(
+  List<String> keys, {
+  int jedaMs = 25,
+}) async {
+  if (kIsWeb || keys.isEmpty) {
+    return;
+  }
+
+  final buffer = StringBuffer('Add-Type -AssemblyName System.Windows.Forms\n');
+  for (final key in keys) {
+    buffer.writeln(
+      "[System.Windows.Forms.SendKeys]::SendWait('${_escapePowerShell(key)}')",
+    );
+    if (jedaMs > 0) {
+      buffer.writeln('Start-Sleep -Milliseconds $jedaMs');
+    }
+  }
+
+  try {
+    await Process.run('powershell.exe', [
+      '-NoProfile',
+      '-ExecutionPolicy',
+      'Bypass',
+      '-Command',
+      buffer.toString(),
+    ]);
+  } catch (e) {
+    debugPrint("sendKeySequence error: $e");
+  }
+}
 
 Future<void> sendAutoLogin({
   required String username,
   required String password,
 }) async {
   await Future.delayed(const Duration(milliseconds: 250));
-  sendKeys(username);
-  pressTab();
-  sendKeys(password);
-  pressEnter();
+  await sendKeySequence([
+    _escapeSendKeysText(username),
+    '{TAB}',
+    _escapeSendKeysText(password),
+    '{ENTER}',
+  ]);
 }
 
 Future<void> Function() showSidikJariProgress(BuildContext context) {
@@ -403,8 +443,8 @@ Future<bool> openExe(
     }
 
     await Future<void>.delayed(const Duration(milliseconds: 200));
-    focusWindow(sidikJariExePath);
-    _logSidikJari("Window After.exe difokuskan");
+    final terfokus = await focusWindow(sidikJariExePath);
+    _logSidikJari("Window After.exe difokuskan: $terfokus");
 
     List<VclaimAccount> accounts;
     try {
@@ -443,7 +483,7 @@ Future<bool> openExe(
     final berhenti = await waitUntil(
       () async => !(await isSidikJariRunning()),
       timeout: _sidikJariExitTimeout,
-      interval: const Duration(seconds: 1),
+      interval: const Duration(seconds: 2),
     );
 
     if (berhenti) {
@@ -510,34 +550,23 @@ Future<void> sendNoPeserta(BuildContext context, String nomor) async {
 
     await Future.delayed(const Duration(milliseconds: 100));
 
-    focusWindow(sidikJariExePath);
-    for (int i = 0; i < 5; i++) {
-      sendKeys("{ESC}");
-    }
+    await focusWindow(sidikJariExePath);
 
-    sendKeys("{TAB}");
-    for (int i = 0; i < 10; i++) {
-      sendKeys("+{TAB}");
-    }
+    // Seluruh urutan tombol dikirim dalam satu proses PowerShell.
+    final keys = <String>[
+      for (int i = 0; i < 5; i++) "{ESC}",
+      "{TAB}",
+      for (int i = 0; i < 10; i++) "+{TAB}",
+      if (tipe == "BPJS") ...["{TAB}", "{TAB}", " "] else if (tipe == "NIK") ...["{TAB}", "{TAB}", "{TAB}", " "],
+      "{TAB}",
+      "{HOME}",
+      "+{END}",
+      "{DELETE}",
+      normalizedNomor,
+      "{ENTER}",
+    ];
 
-    if (tipe == "BPJS") {
-      sendKeys("{TAB}");
-      sendKeys("{TAB}");
-      sendKeys(" ");
-    } else if (tipe == "NIK") {
-      sendKeys("{TAB}");
-      sendKeys("{TAB}");
-      sendKeys("{TAB}");
-      sendKeys(" ");
-    }
-
-    sendKeys("{TAB}");
-    sendKeys("{HOME}");
-    sendKeys("+{END}");
-    sendKeys("{DELETE}");
-
-    sendKeys(normalizedNomor);
-    sendKeys("{ENTER}");
+    await sendKeySequence(keys);
   } catch (e) {
     debugPrint("sendNoPeserta error: $e");
   }
