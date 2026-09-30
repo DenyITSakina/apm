@@ -17,6 +17,58 @@ const String sidikJariExePath =
 const Duration _sidikJariLaunchTimeout = Duration(seconds: 10);
 const Duration _sidikJariExitTimeout = Duration(seconds: 180);
 
+const int _maxLogBytes = 2 * 1024 * 1024;
+
+File? _logFile;
+
+/// Lokasi log: folder aplikasi bila bisa ditulis, jika tidak ke folder TEMP.
+File _resolusiLogFile() {
+  final cached = _logFile;
+  if (cached != null) {
+    return cached;
+  }
+
+  final kandidat = <File>[
+    File(
+      '${Directory.current.path}${Platform.pathSeparator}sidik_jari_log.txt',
+    ),
+    File(
+      '${Directory.systemTemp.path}${Platform.pathSeparator}sidik_jari_log.txt',
+    ),
+  ];
+
+  for (final file in kandidat) {
+    try {
+      file.writeAsStringSync('', mode: FileMode.append);
+      _logFile = file;
+      return file;
+    } catch (_) {
+      // coba lokasi berikutnya
+    }
+  }
+
+  _logFile = kandidat.last;
+  return _logFile!;
+}
+
+/// Log ke console + file `sidik_jari_log.txt` supaya bisa dicek di lapangan
+/// tanpa membuka debug console.
+void _logSidikJari(String pesan) {
+  final stamp = DateTime.now().toIso8601String();
+  final baris = "[$stamp] $pesan";
+  debugPrint("[SidikJari] $pesan");
+
+  try {
+    final file = _resolusiLogFile();
+    if (file.existsSync() && file.lengthSync() > _maxLogBytes) {
+      file.writeAsStringSync('');
+    }
+    file.writeAsStringSync('$baris\n', mode: FileMode.append, flush: true);
+  } catch (e) {
+    debugPrint("Gagal menulis log sidik jari: $e");
+  }
+}
+
 Future<bool> isSidikJariRunning() async {
   if (kIsWeb) {
     debugPrint('Fitur proses native tidak tersedia di web');
@@ -74,6 +126,132 @@ Future<void> closeSidikJariExe() async {
 }
 
 String _escapePowerShell(String value) => value.replaceAll("'", "''");
+
+/// Judul semua window milik proses After.exe (termasuk dialog/popup).
+Future<List<String>> getSidikJariWindowTitles() async {
+  if (kIsWeb) {
+    return const [];
+  }
+
+  final script = r'''
+$sig = @"
+using System;
+using System.Text;
+using System.Runtime.InteropServices;
+public class WndEnum {
+  public delegate bool EnumProc(IntPtr h, IntPtr l);
+  [DllImport("user32.dll")] public static extern bool EnumWindows(EnumProc cb, IntPtr l);
+  [DllImport("user32.dll")] public static extern int GetWindowText(IntPtr h, StringBuilder s, int n);
+  [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+}
+"@
+Add-Type -TypeDefinition $sig
+$targets = @(Get-Process -Name After -ErrorAction SilentlyContinue | ForEach-Object { $_.Id })
+if ($targets.Count -eq 0) { Write-Output ""; exit 0 }
+$found = New-Object System.Collections.ArrayList
+$cb = [WndEnum+EnumProc]{
+  param($h, $l)
+  $procId = 0
+  [WndEnum]::GetWindowThreadProcessId($h, [ref]$procId) | Out-Null
+  if ($targets -contains $procId) {
+    $sb = New-Object System.Text.StringBuilder 512
+    [WndEnum]::GetWindowText($h, $sb, 512) | Out-Null
+    if ($sb.Length -gt 0) { $found.Add($sb.ToString()) | Out-Null }
+  }
+  return $true
+}
+[WndEnum]::EnumWindows($cb, [IntPtr]::Zero) | Out-Null
+Write-Output ($found -join '~')
+''';
+
+  try {
+    final result = await Process.run('powershell.exe', [
+      '-NoProfile',
+      '-ExecutionPolicy',
+      'Bypass',
+      '-Command',
+      script,
+    ]);
+
+    final output = result.stdout.toString().trim();
+    if (output.isEmpty) {
+      return const [];
+    }
+    return output
+        .split('~')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+  } catch (e) {
+    debugPrint("Gagal membaca judul window: $e");
+    return const [];
+  }
+}
+
+const List<String> _kunciPopupError = [
+  'error',
+  'gagal',
+  'tidak ditemukan',
+  'perhatian',
+  'invalid',
+  'failed',
+  'salah',
+  'penolakan',
+  'ditolak',
+];
+
+/// Window bantu Windows/IME yang ikut muncul tapi bukan popup aplikasi.
+const List<String> _abaikanWindow = [
+  'ime',
+  'cicero',
+  'msctf',
+  'med(context',
+  'systemresourcenotifywindow',
+  'applicationframewindow',
+  'default ime',
+];
+
+bool _adalahPopupError(String title) {
+  final lower = title.toLowerCase();
+  if (_abaikanWindow.any(lower.contains)) {
+    return false;
+  }
+  return _kunciPopupError.any(lower.contains);
+}
+
+enum SidikJariStatus { selesai, popupError, timeout }
+
+/// Menunggu After.exe selesai, sekaligus mendeteksi popup error lebih cepat
+/// (selama ini popup hanya membuat kita menunggu sampai 3 menit).
+Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
+  const interval = Duration(seconds: 2);
+  const cekPopup = Duration(seconds: 5);
+  final stopwatch = Stopwatch()..start();
+  var nextCekPopup = Duration.zero;
+
+  while (true) {
+    if (!(await isSidikJariRunning())) {
+      return SidikJariStatus.selesai;
+    }
+
+    if (stopwatch.elapsed >= nextCekPopup) {
+      nextCekPopup = stopwatch.elapsed + cekPopup;
+      final judul = await getSidikJariWindowTitles();
+      for (final title in judul) {
+        if (_adalahPopupError(title)) {
+          _logSidikJari("Popup error terdeteksi: $title");
+          return SidikJariStatus.popupError;
+        }
+      }
+    }
+
+    if (stopwatch.elapsed >= timeout) {
+      return SidikJariStatus.timeout;
+    }
+
+    await Future<void>.delayed(interval);
+  }
+}
 
 bool isWindowOpen(String windowTitle) {
   if (kIsWeb) {
@@ -336,8 +514,11 @@ Future<void> Function() showSidikJariProgress(BuildContext context) {
 
 String lastSidikJariReason = '';
 
-void _logSidikJari(String pesan) {
-  debugPrint("[SidikJari] $pesan");
+/// Samarkan nomor untuk log (jangan tulis nomor BPJS penuh ke file).
+String maskNomorLog(String? nomor) {
+  final value = (nomor ?? '').trim();
+  if (value.length < 8) return value;
+  return "${value.substring(0, 4)}****${value.substring(value.length - 4)}";
 }
 
 Future<bool> openExeFromMap(
@@ -398,13 +579,20 @@ Future<bool> openExe(
   }
 
   Process? process;
+  int? pid;
 
   try {
-    _logSidikJari("Mulai proses, nomor: $noPeserta");
+    _logSidikJari(
+      "Mulai proses | nomor=${maskNomorLog(noPeserta)} | app=${Directory.current.path}",
+    );
+    _logSidikJari("Log file: ${_resolusiLogFile().path}");
     final sudahBerjalan = await isSidikJariRunning();
 
     if (sudahBerjalan) {
-      _logSidikJari("After.exe sudah berjalan -> tidak membuka instance baru");
+      _logSidikJari(
+        "PERINGATAN: After.exe sudah berjalan dari sesi sebelumnya, "
+        "nomor diketik ke window yang ada",
+      );
     } else {
       if (!File(sidikJariExePath).existsSync()) {
         gagal("exe tidak ditemukan", "Aplikasi sidik jari tidak ditemukan.");
@@ -417,7 +605,8 @@ Future<bool> openExe(
         runInShell: true,
         mode: ProcessStartMode.normal,
       );
-      _logSidikJari("After.exe dijalankan, menunggu proses muncul");
+      pid = process.pid;
+      _logSidikJari("After.exe dijalankan (pid=$pid), menunggu proses muncul");
 
       final muncul = await waitUntil(
         isSidikJariRunning,
@@ -432,10 +621,11 @@ Future<bool> openExe(
       }
     }
 
+    // Tunggu window siap. Spasi 500 ms: isWindowOpen spawn PowerShell (~300 ms).
     final windowSiap = await waitUntil(
       () async => isWindowOpen(sidikJariExePath),
       timeout: _sidikJariLaunchTimeout,
-      interval: const Duration(milliseconds: 200),
+      interval: const Duration(milliseconds: 500),
     );
 
     if (!windowSiap) {
@@ -466,36 +656,52 @@ Future<bool> openExe(
       return false;
     }
 
-    _logSidikJari("Auto login: user=${account.username}");
-    await sendAutoLogin(username: account.username, password: account.password);
+    _logSidikJari("Auto login dikirim: user=${account.username}");
+    final swLogin = Stopwatch()..start();
+    await sendAutoLogin(
+      username: account.username,
+      password: account.password,
+    );
+    _logSidikJari("Auto login terkirim (${swLogin.elapsedMilliseconds} ms)");
 
     await Future.delayed(const Duration(milliseconds: 800));
     if (!context.mounted) {
       return false;
     }
+    final swNomor = Stopwatch()..start();
     await sendNoPeserta(context, noPeserta);
-    _logSidikJari("Nomor dikirim, menunggu After.exe selesai");
+    _logSidikJari(
+      "Nomor dikirim (${swNomor.elapsedMilliseconds} ms), "
+      "menunggu After.exe selesai",
+    );
 
     if (process == null) {
       _logSidikJari("Dipantau proses yang sudah berjalan sebelumnya");
     }
 
-    final berhenti = await waitUntil(
-      () async => !(await isSidikJariRunning()),
-      timeout: _sidikJariExitTimeout,
-      interval: const Duration(seconds: 2),
+    final swTunggu = Stopwatch()..start();
+    final status = await waitSidikJariSelesai(_sidikJariExitTimeout);
+    _logSidikJari(
+      "Status setelah ${swTunggu.elapsed.inSeconds} detik: $status",
     );
 
-    if (berhenti) {
-      _logSidikJari("After.exe selesai -> dianggap sukses");
-      return true;
+    switch (status) {
+      case SidikJariStatus.selesai:
+        _logSidikJari("After.exe selesai -> dianggap sukses");
+        return true;
+      case SidikJariStatus.popupError:
+        gagal(
+          "popup error di aplikasi sidik jari",
+          "Aplikasi sidik jari menampilkan pesan error.",
+        );
+        return false;
+      case SidikJariStatus.timeout:
+        gagal(
+          "belum selesai dalam ${_sidikJariExitTimeout.inMinutes} menit",
+          "Sidik jari belum selesai diproses.",
+        );
+        return false;
     }
-
-    gagal(
-      "belum selesai dalam ${_sidikJariExitTimeout.inMinutes} menit",
-      "Sidik jari belum selesai diproses.",
-    );
-    return false;
   } catch (e) {
     lastSidikJariReason = 'error tidak terduga: $e';
     _logSidikJari("GAGAL: $lastSidikJariReason");
