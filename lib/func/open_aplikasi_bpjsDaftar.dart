@@ -369,6 +369,12 @@ function Activate-After($proc) {
   $hh = $proc.MainWindowHandle
   if ([Fg]::IsIconic($hh)) { [Fg]::ShowWindow($hh, 9) | Out-Null }
   [Fg]::SetForegroundWindow($hh) | Out-Null
+  # AppActivate jauh lebih andal daripada SetForegroundWindow untuk proses
+  # yang dijalankan dari background service/terminal.
+  try {
+    $sh = New-Object -ComObject WScript.Shell
+    $sh.AppActivate($proc.Id) | Out-Null
+  } catch { }
 }
 
 $deadline = (Get-Date).AddSeconds($WindowTimeoutSec)
@@ -441,41 +447,37 @@ try {
   exit 4
 }
 
-# Password: WPF PasswordBox menolak SetFocus saat window belum aktif, jadi
-# fokuskan field username lalu pindah dengan TAB.
+# Password: WPF PasswordBox menolak SetFocus saat window belum benar-benar aktif.
+# Coba beberapa strategi: (1) SetFocus langsung, (2) fokus username lalu TAB.
 $passOk = $false
-$viaTab = $false
-for ($i = 0; $i -lt 6; $i++) {
+$lewatTab = $false
+for ($i = 0; $i -lt 8; $i++) {
   Activate-After $proc
-  Start-Sleep -Milliseconds 150
+  Start-Sleep -Milliseconds 200
   try {
     $editPass.SetFocus()
     $passOk = $true
     break
-  } catch {
-    try {
-      $editUser.SetFocus()
-      Start-Sleep -Milliseconds 120
-      $passOk = $true
-      $viaTab = $true
-      break
-    } catch { }
-    Start-Sleep -Milliseconds 150
-  }
+  } catch { }
+  try {
+    $editUser.SetFocus()
+    Start-Sleep -Milliseconds 120
+    [System.Windows.Forms.SendKeys]::SendWait('{TAB}')
+    $passOk = $true
+    $lewatTab = $true
+    break
+  } catch { }
+  Start-Sleep -Milliseconds 200
 }
 if (-not $passOk) {
   Write-Output 'STEP=PASS_FAIL tidak bisa memfokuskan field password'
   exit 5
 }
+if ($lewatTab) { Write-Output 'STEP=PASS_VIA_TAB' }
 
-Start-Sleep -Milliseconds 120
-if ($viaTab) {
-  [System.Windows.Forms.SendKeys]::SendWait('{TAB}')
-  Start-Sleep -Milliseconds 80
-} else {
-  [System.Windows.Forms.SendKeys]::SendWait('^a')
-  Start-Sleep -Milliseconds 50
-}
+Start-Sleep -Milliseconds 150
+[System.Windows.Forms.SendKeys]::SendWait('^a')
+Start-Sleep -Milliseconds 50
 Send-Text $Password
 Write-Output 'STEP=PASS_OK'
 
@@ -955,6 +957,15 @@ String maskNomorLog(String? nomor) {
   return "${value.substring(0, 4)}****${value.substring(value.length - 4)}";
 }
 
+/// Samarkan username untuk log: cicifitria -> ci*******a
+String maskUserLog(String? user) {
+  final value = (user ?? '').trim();
+  if (value.isEmpty) return '-';
+  if (value.length <= 3) return '${value[0]}**';
+  final tengah = '*' * (value.length - 3);
+  return '${value.substring(0, 2)}$tengah${value[value.length - 1]}';
+}
+
 Future<bool> openExeFromMap(
   BuildContext context,
   Map<String, dynamic> pasien, {
@@ -1020,12 +1031,27 @@ Future<bool> openExe(
       "Mulai proses | nomor=${maskNomorLog(noPeserta)} | app=${Directory.current.path}",
     );
     _logSidikJari("Log file: ${_resolusiLogFile().path}");
+
+    final nomor = normalizeNomor(noPeserta);
+    final tipe = detectNomorType(nomor);
+
+    // Validasi akun login OTOMATIS lebih dulu: jangan buka After.exe kalau
+    // memang tidak akan bisa login.
+    final swAkun = Stopwatch()..start();
+    final akun = await _ambilAkunVclaim();
+    _logSidikJari("Ambil akun VClaim (${swAkun.elapsedMilliseconds} ms)");
+    if (!akun.berhasil) {
+      gagal(akun.alasan, "Data akun VClaim tidak dapat diakses.");
+      return false;
+    }
+    _logSidikJari("Login otomatis memakai user=${maskUserLog(akun.username)}");
+
     final sudahBerjalan = await isSidikJariRunning();
 
     if (sudahBerjalan) {
       _logSidikJari(
         "PERINGATAN: After.exe sudah berjalan dari sesi sebelumnya, "
-        "nomor diketik ke window yang ada",
+        "nomor dikirim ke window yang ada",
       );
     } else {
       if (!File(sidikJariExePath).existsSync()) {
@@ -1055,19 +1081,8 @@ Future<bool> openExe(
       }
     }
 
-    // Ambil akun VClaim (network) bersamaan dengan persiapan window.
-    final futureAkun = _ambilAkunVclaim();
-    final nomor = normalizeNomor(noPeserta);
-    final tipe = detectNomorType(nomor);
-
-    final swOto = Stopwatch()..start();
-    final akun = await futureAkun;
-    if (!akun.berhasil) {
-      gagal(akun.alasan, "Data akun VClaim tidak dapat diakses.");
-      return false;
-    }
-
     // Jalur cepat: kendalikan UI After.exe langsung (bukan mengetik buta).
+    final swOto = Stopwatch()..start();
     final hasilOto = await jalankanOtomatisSidikJari(
       username: akun.username!,
       password: akun.password!,
