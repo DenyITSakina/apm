@@ -117,8 +117,7 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
                               }
 
                               return Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.stretch,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   Expanded(child: card),
                                   const SizedBox(height: AppSpacing.sm),
@@ -290,11 +289,9 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
     final tutupDialog = showSidikJariProgress(context);
     var sukses = false;
     try {
-      sukses = await openExeFromMap(
-        context,
-        {'nomor': nomor},
-        tampilkanToast: false,
-      );
+      sukses = await openExeFromMap(context, {
+        'nomor': nomor,
+      }, tampilkanToast: false);
     } catch (e) {
       debugPrint('Gagal proses sidik jari: $e');
     }

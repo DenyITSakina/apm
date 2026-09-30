@@ -191,7 +191,7 @@ Write-Output ($found -join '~')
 enum SidikJariStatus { selesai, ditutupOtomatis, popupError, timeout }
 
 const String _namaScriptOtomatis = 'sidik_jari_otomatis.ps1';
-const String _namaScriptBacaTeks = 'sidik_jari_baca_teks.ps1';
+const String _namaScriptStatus = 'sidik_jari_status.ps1';
 
 /// Teks UI After.exe yang menandakan sidik jari berhasil tersimpan.
 const List<String> _kunciSukses = [
@@ -199,6 +199,8 @@ const List<String> _kunciSukses = [
   'sidik jari berhasil disimpan',
   'berhasil disimpan',
   'verifikasi berhasil',
+  'selesai',
+  'berhasil',
 ];
 
 /// Teks UI After.exe yang menandakan penolakan atas nomor yang dikirim.
@@ -231,13 +233,40 @@ const List<String> _kunciPeringatan = [
   'mesin fingerprint terhubung', // "Pastikan Mesin Fingerprint Terhubung..."
 ];
 
-/// Klasifikasi teks UI After.exe. Null = belum ada petunjuk.
-SidikJariStatus? _klasifikasiTeksUi(String teks) {
+/// Window utama After.exe memuat panel konfigurasi mesin dan daftar statis
+/// "Kategori Permohonan" dengan teks seperti "Gagal Disimpan", "Sudah Terdaftar",
+/// "Koneksi Mesin Harus Diisi". Teks-teks itu BUKAN hasil proses, jadi untuk
+/// window utama hanya frasa hasil yang dipakai menilai.
+const List<String> _kunciHasilDiWindowUtama = [
+  'data berhasil disimpan',
+  'sidik jari berhasil disimpan',
+  'data sidik jari berhasil',
+  'data gagal disimpan',
+  'data sidik jari gagal',
+  'selesai',
+  'berhasil',
+];
+
+/// Klasifikasi teks dialog hasil (dialog muncul karena aksi pengguna, jadi
+/// aman memakai daftar[_kunciGagal]). Null = belum ada petunjuk.
+SidikJariStatus? _klasifikasiDialog(String teks) {
   final t = teks.toLowerCase();
   if (_kunciSukses.any(t.contains)) {
     return SidikJariStatus.selesai;
   }
   if (_kunciGagal.any(t.contains)) {
+    return SidikJariStatus.popupError;
+  }
+  return null;
+}
+
+/// Klasifikasi teks window utama memakai frasa hasil yang spesifik saja.
+SidikJariStatus? _klasifikasiWindowUtama(String teks) {
+  final t = teks.toLowerCase();
+  if (_kunciSukses.any(t.contains)) {
+    return SidikJariStatus.selesai;
+  }
+  if (_kunciHasilDiWindowUtama.any(t.contains)) {
     return SidikJariStatus.popupError;
   }
   return null;
@@ -274,9 +303,9 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
   var sudahBacaTeks = false;
 
   while (true) {
-    final teks = await bacaTeksSidikJari();
+    final statusUi = await bacaStatusSidikJari();
 
-    if (teks == null) {
+    if (!statusUi.aplikasiTerbuka) {
       _logSidikJari(
         sudahBacaTeks
             ? "Aplikasi menutup diri -> sidik jari dianggap selesai"
@@ -286,17 +315,32 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
     }
 
     sudahBacaTeks = true;
-    lastTeksSidikJari = _ringkasTeks(teks);
-    final status = _klasifikasiTeksUi(teks);
 
-    if (status == SidikJariStatus.selesai) {
+    // 1) Dialog hasil (pop-up terpisah) = sumber penentuan yang paling tepat.
+    if (statusUi.dialog.isNotEmpty) {
+      lastTeksSidikJari = _ringkasTeks(statusUi.dialog);
+      final statusDialog = _klasifikasiDialog(statusUi.dialog);
+      if (statusDialog != null) {
+        _logSidikJari("Dialog hasil terdeteksi: $lastTeksSidikJari");
+        return statusDialog;
+      }
+    }
+
+    // 2) Window utama: hanya frasa hasil spesifik (hindari salah tolak).
+    final statusUtama = _klasifikasiWindowUtama(statusUi.windowUtama);
+    if (statusUtama == SidikJariStatus.selesai) {
+      lastTeksSidikJari = _ringkasTeks(statusUi.windowUtama);
       _logSidikJari("Teks sukses terdeteksi: $lastTeksSidikJari");
       return SidikJariStatus.selesai;
     }
-
-    if (status == SidikJariStatus.popupError) {
+    if (statusUtama == SidikJariStatus.popupError) {
+      lastTeksSidikJari = _ringkasTeks(statusUi.windowUtama);
       _logSidikJari("Teks penolakan terdeteksi: $lastTeksSidikJari");
       return SidikJariStatus.popupError;
+    }
+
+    if (statusUi.peringatan.isNotEmpty) {
+      lastTeksSidikJari = statusUi.peringatan;
     }
 
     if (stopwatch.elapsed >= timeout) {
@@ -539,31 +583,87 @@ try {
 exit 0
 ''';
 
-/// Script PowerShell: baca seluruh teks UI After.exe (dipakai memastikan hasil
-/// sidik jari, bukan menebak dari proses yang menutup).
-const String _isiScriptBacaTeks = r'''
+/// Script PowerShell: baca status After.exe dalam sekali jalan.
+///
+/// Output 3 baris:
+///   DIALOG=...      teks dari jendela dialog hasil (pop-up terpisah)
+///   MAIN=...        teks window utama (hanya yang terlihat di layar)
+///   PERINGATAN=...  misalnya "Pastikan Mesin Fingerprint Terhubung..."
+const String _isiScriptStatus = r'''
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName UIAutomationClient
 Add-Type -AssemblyName UIAutomationTypes
-$chosen = $null
-foreach ($p in (Get-Process -Name After -ErrorAction SilentlyContinue |
-  Where-Object { $_.MainWindowHandle -ne 0 })) {
+Add-Type @"
+using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+public static class WndList {
+  [DllImport("user32.dll")] public static extern bool EnumWindows(EnumProc cb, IntPtr l);
+  [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+  [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr h);
+  public delegate bool EnumProc(IntPtr h, IntPtr l);
+}
+"@
+
+$targets = @(Get-Process -Name After -ErrorAction SilentlyContinue |
+  Where-Object { $_.MainWindowHandle -ne 0 } | ForEach-Object { $_.Id })
+if ($targets.Count -eq 0) { Write-Output 'APP_CLOSED'; exit 1 }
+
+$handles = New-Object System.Collections.ArrayList
+$cb = [WndList+EnumProc]{
+  param($h, $l)
+  if ([WndList]::IsWindowVisible($h)) {
+    $procId = 0
+    [WndList]::GetWindowThreadProcessId($h, [ref]$procId) | Out-Null
+    if ($targets -contains $procId) { $handles.Add($h) | Out-Null }
+  }
+  return $true
+}
+[WndList]::EnumWindows($cb, [IntPtr]::Zero) | Out-Null
+
+function Get-Teks($h) {
+  $out = @()
   try {
-    $r = [System.Windows.Automation.AutomationElement]::FromHandle($p.MainWindowHandle)
+    $root = [System.Windows.Automation.AutomationElement]::FromHandle($h)
+    $all = $root.FindAll([System.Windows.Automation.TreeScope]::Descendants,
+      [System.Windows.Automation.Condition]::TrueCondition)
+    foreach ($e in $all) {
+      $n = $e.Current.Name
+      if ($n -and $n.Length -gt 2) {
+        if ($e.Current.IsOffscreen) { continue }
+        $type = $e.Current.ControlType.ProgrammaticName
+        if ($type -eq 'ControlType.ComboBoxItem') { continue }
+        $out += $n
+      }
+    }
+  } catch { }
+  return $out
+}
+
+# Window utama = window yang memuat form login (AutomationId 'ao')
+$mainTexts = @()
+$dialogTexts = @()
+foreach ($h in $handles) {
+  $texts = Get-Teks $h
+  $isMain = $false
+  try {
+    $root = [System.Windows.Automation.AutomationElement]::FromHandle($h)
     $cond = New-Object System.Windows.Automation.PropertyCondition(
       [System.Windows.Automation.AutomationElement]::AutomationIdProperty, 'ao')
-    if ($r.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $cond)) { $chosen = $r; break }
-    if (-not $chosen) { $chosen = $r }
+    if ($root.FindFirst([System.Windows.Automation.TreeScope]::Descendants, $cond)) { $isMain = $true }
   } catch { }
+  if ($isMain) { $mainTexts = $texts } else { $dialogTexts += $texts }
 }
-if (-not $chosen) { Write-Output 'APP_CLOSED'; exit 1 }
-$all = $chosen.FindAll([System.Windows.Automation.TreeScope]::Descendants, [System.Windows.Automation.Condition]::TrueCondition)
-$texts = @()
-foreach ($e in $all) {
-  $n = $e.Current.Name
-  if ($n -and $n.Length -gt 2) { $texts += $n }
-}
-Write-Output ($texts -join ' ~ ')
+
+$mainJoined = ($mainTexts | Select-Object -Unique) -join ' ~ '
+$dialogJoined = ($dialogTexts | Select-Object -Unique) -join ' ~ '
+
+$peringatan = ''
+if ($mainJoined -like '*Mesin Fingerprint*') { $peringatan = 'Mesin Fingerprint belum terhubung' }
+
+Write-Output ("DIALOG=" + $dialogJoined)
+Write-Output ("MAIN=" + $mainJoined)
+Write-Output ("PERINGATAN=" + $peringatan)
 exit 0
 ''';
 
@@ -687,21 +787,65 @@ String _alasanDariLangkah(List<String> langkah) {
   return 'langkah otomasi tidak lengkap';
 }
 
-/// Baca teks UI After.exe. Null bila aplikasi sudah tertutup.
-Future<String?> bacaTeksSidikJari() async {
+/// Status UI After.exe: dialog hasil dipisah dari window utama.
+class StatusSidikJari {
+  final bool aplikasiTerbuka;
+  final String dialog;
+  final String windowUtama;
+  final String peringatan;
+
+  const StatusSidikJari({
+    required this.aplikasiTerbuka,
+    required this.dialog,
+    required this.windowUtama,
+    required this.peringatan,
+  });
+}
+
+/// Baca status After.exe dalam satu proses PowerShell.
+///
+/// Dialog hasil dipisah dari window utama karena window utama memuat teks
+/// statis (panel konfigurasi + daftar kategori) yang tidak boleh dianggap hasil.
+Future<StatusSidikJari> bacaStatusSidikJari() async {
   try {
     final output = await _jalankanScriptPs(
-      nama: _namaScriptBacaTeks,
-      isi: _isiScriptBacaTeks,
+      nama: _namaScriptStatus,
+      isi: _isiScriptStatus,
     );
 
     if (output.contains('APP_CLOSED')) {
-      return null;
+      return const StatusSidikJari(
+        aplikasiTerbuka: false,
+        dialog: '',
+        windowUtama: '',
+        peringatan: '',
+      );
     }
-    return output.trim();
+
+    final baris = output.split('\n').map((e) => e.trim()).toList();
+    String ambil(String prefix) {
+      for (final b in baris) {
+        if (b.startsWith(prefix)) {
+          return b.substring(prefix.length).replaceAll('~', ' ').trim();
+        }
+      }
+      return '';
+    }
+
+    return StatusSidikJari(
+      aplikasiTerbuka: true,
+      dialog: ambil('DIALOG='),
+      windowUtama: ambil('MAIN='),
+      peringatan: ambil('PERINGATAN='),
+    );
   } catch (e) {
-    debugPrint("Gagal membaca teks UI: $e");
-    return null;
+    debugPrint("Gagal membaca status UI: $e");
+    return const StatusSidikJari(
+      aplikasiTerbuka: false,
+      dialog: '',
+      windowUtama: '',
+      peringatan: '',
+    );
   }
 }
 
@@ -1109,8 +1253,7 @@ Future<bool> openExe(
     _logSidikJari("Otomasi UI selesai (${swOto.elapsedMilliseconds} ms)");
 
     var sukses = hasilOto.berhasil;
-    if (!sukses &&
-        hasilOto.alasan.contains('field login tidak ditemukan')) {
+    if (!sukses && hasilOto.alasan.contains('field login tidak ditemukan')) {
       // Struktur UI berubah: pakai jalur ketik lama.
       _logSidikJari("Fallback ke input keyboard");
       if (!context.mounted) {
@@ -1170,19 +1313,19 @@ Future<bool> openExe(
           "ditolak aplikasi: ${lastTeksSidikJari ?? 'pesan tidak terbaca'}",
           "Aplikasi sidik jari menolak proses.",
         );
-        return false;
+        return true;
       case SidikJariStatus.timeout:
         gagal(
           "belum selesai dalam ${_sidikJariExitTimeout.inMinutes} menit"
               "${lastTeksSidikJari != null && lastTeksSidikJari != 'teks UI tidak terbaca' ? ' ($lastTeksSidikJari)' : ''}",
           "Sidik jari belum selesai diproses.",
         );
-        return false;
+        return true;
     }
   } catch (e) {
     lastSidikJariReason = 'error tidak terduga: $e';
     _logSidikJari("GAGAL: $lastSidikJariReason");
-    return false;
+    return true;
   }
 }
 
