@@ -76,24 +76,21 @@ class AppPageHeader extends StatelessWidget {
                   ),
                   const Spacer(),
                   if (showLogo)
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'RSU SAKINA IDAMAN',
-                          style: TextStyle(
-                            fontFamily: AppText.family,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: 1,
-                            color: Colors.white.withValues(alpha: 0.92),
-                          ),
-                        ),
-                      ],
+                    Text(
+                      'RSU SAKINA IDAMAN',
+                      style: TextStyle(
+                        fontFamily: AppText.family,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1,
+                        color: Colors.white.withValues(alpha: 0.92),
+                      ),
                     ),
                   const Spacer(),
                   if (trailing != null)
                     trailing!
+                  else if (showLogo)
+                    _HeaderLogo(size: dense ? 46 : 56)
                   else
                     const SizedBox(width: 44),
                 ],
@@ -183,6 +180,41 @@ class AppPageHeader extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Logo rumah sakit di sisi kanan header.
+class _HeaderLogo extends StatelessWidget {
+  const _HeaderLogo({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.6),
+          width: 1.5,
+        ),
+      ),
+      child: ClipOval(
+        child: Image.asset(
+          'assets/images/logo_sakina.png',
+          fit: BoxFit.contain,
+          errorBuilder: (_, _, _) => Icon(
+            Icons.local_hospital_rounded,
+            size: size * 0.6,
+            color: AppColors.primary,
+          ),
+        ),
       ),
     );
   }
