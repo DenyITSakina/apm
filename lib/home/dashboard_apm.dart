@@ -207,64 +207,78 @@ class _DashboardApmState extends State<DashboardApm>
                 ),
               ),
             ),
-            Column(
+            Row(
               children: [
-                Text(
-                  'RSU SAKINA IDAMAN',
-                  textAlign: TextAlign.center,
-                  style: AppText.headerTitle(
-                    context,
-                  ).copyWith(fontSize: isWide ? 30 : 24),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Peduli Sesama, Sakina Pilihanku',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: AppText.family,
-                    fontSize: isWide ? 16 : 13.5,
-                    fontStyle: FontStyle.italic,
-                    fontWeight: FontWeight.w500,
-                    color: Colors.white.withValues(alpha: 0.92),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.16),
-                    borderRadius: BorderRadius.circular(AppRadius.pill),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+                Expanded(
+                  child: Column(
                     children: [
-                      const Icon(
-                        Icons.touch_app_rounded,
-                        size: 16,
-                        color: Colors.white,
+                      Text(
+                        'RSU SAKINA IDAMAN',
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppText.headerTitle(
+                          context,
+                        ).copyWith(fontSize: isWide ? 30 : 24),
                       ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
-                          'ANJUNGAN PENDAFTARAN MANDIRI',
-                          style: const TextStyle(
-                            fontFamily: AppText.family,
-                            fontSize: 12.5,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.8,
-                            color: Colors.white,
+                      const SizedBox(height: 4),
+                      Text(
+                        'Peduli Sesama, Sakina Pilihanku',
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: AppText.family,
+                          fontSize: isWide ? 16 : 13.5,
+                          fontStyle: FontStyle.italic,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withValues(alpha: 0.92),
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.16),
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.3),
                           ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.touch_app_rounded,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                            const SizedBox(width: 8),
+                            Flexible(
+                              child: Text(
+                                'ANJUNGAN PENDAFTARAN MANDIRI',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontFamily: AppText.family,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  letterSpacing: 0.8,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
+                const SizedBox(width: AppSpacing.md),
+                _BrandLogo(size: isWide ? 96 : 76),
               ],
             ),
           ],
@@ -727,6 +741,43 @@ class _ServiceCardState extends State<_ServiceCard> {
                 ),
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BrandLogo extends StatelessWidget {
+  const _BrandLogo({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.15),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: ClipOval(
+        child: Image.asset(
+          'assets/images/logo_sakina.png',
+          fit: BoxFit.contain,
+          errorBuilder: (_, _, _) => Icon(
+            Icons.local_hospital_rounded,
+            size: size * 0.55,
+            color: AppColors.primary,
           ),
         ),
       ),
