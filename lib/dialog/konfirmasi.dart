@@ -6,12 +6,14 @@ class ConfirmationDialog extends StatefulWidget {
   final String title;
   final String message;
   final VoidCallback onConfirm;
+  final VoidCallback? onCancel;
 
   const ConfirmationDialog({
     super.key,
     required this.title,
     required this.message,
     required this.onConfirm,
+    this.onCancel,
   });
 
   static void show(
@@ -19,6 +21,7 @@ class ConfirmationDialog extends StatefulWidget {
     required String title,
     required String message,
     required VoidCallback onConfirm,
+    VoidCallback? onCancel,
   }) {
     showDialog(
       context: context,
@@ -28,6 +31,7 @@ class ConfirmationDialog extends StatefulWidget {
         title: title,
         message: message,
         onConfirm: onConfirm,
+        onCancel: onCancel,
       ),
     );
   }
@@ -140,7 +144,20 @@ class _ConfirmationDialogState extends State<ConfirmationDialog>
                       color: Colors.white,
                       fontColor: Colors.red.shade600,
                       fontSize: fontSize,
-                      onTap: () => Navigator.pop(context),
+                      onTap: () {
+                        Navigator.pop(context);
+                        // Tunggu dialog selesai menutup dulu, baru jalankan
+                        // aksi lanjutan (mis. kembali ke home).
+                        Future<void>.delayed(
+                          const Duration(milliseconds: 250),
+                          () {
+                            final onCancel = widget.onCancel;
+                            if (onCancel != null) {
+                              onCancel();
+                            }
+                          },
+                        );
+                      },
                     ),
                     const SizedBox(width: 12),
                     _dialogButton(

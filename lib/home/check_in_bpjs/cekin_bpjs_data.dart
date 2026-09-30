@@ -32,6 +32,18 @@ class CekinBpjsDataPage extends StatelessWidget {
     return "${value.substring(0, 4)}...${value.substring(value.length - 4)}";
   }
 
+  /// Kembali ke halaman utama (dashboard) dan membersihkan stack.
+  static void kembaliKeHome(BuildContext context) {
+    if (!context.mounted) {
+      return;
+    }
+
+    final navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      navigator.popUntil((route) => route.isFirst);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<AntrianApmBloc, AntrianApmState>(
@@ -314,6 +326,8 @@ class CekinBpjsDataPage extends StatelessWidget {
                                         ),
                                       );
                                     },
+                                    onCancel: () =>
+                                        CekinBpjsDataPage.kembaliKeHome(context),
                                   );
                                 },
                           child: Container(
