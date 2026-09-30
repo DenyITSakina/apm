@@ -107,7 +107,8 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
             children: [
               AppPageHeader(
                 title: _isBpjs ? 'CEK-IN BPJS' : 'CEK-IN UMUM',
-                subtitle: 'Pindai kartu, NIK, nomor rekam medis, atau No Booking',
+                subtitle:
+                    'Pindai kartu, NIK, nomor rekam medis, atau No Booking',
                 badge: _isBpjs ? 'Layanan BPJS' : 'Layanan Pasien Umum',
                 badgeIcon: _isBpjs
                     ? Icons.health_and_safety_rounded
@@ -149,6 +150,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
                             onSubmit: _submitData,
                             submitLabel: 'CARI DATA',
                             submitIcon: Icons.search_rounded,
+                            submitCaption: 'Cari data pasien',
                             submitGradient: _isBpjs
                                 ? AppGradients.bpjs
                                 : AppGradients.umum,

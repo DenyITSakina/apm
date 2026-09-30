@@ -135,8 +135,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
                           return NumberEntryBoard(
                             controller: controller,
                             focusNode: focusNode,
-                            label:
-                                'NOMOR KARTU BPJS / NIK / NO REKAM MEDIS',
+                            label: 'NOMOR KARTU BPJS / NIK / NO REKAM MEDIS',
                             accent: AppColors.bpjs,
                             maxLength: 16,
                             onDigit: _onNumberPressed,
@@ -145,6 +144,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
                             onSubmit: _submitData,
                             submitLabel: 'CEK BPJS',
                             submitIcon: Icons.verified_rounded,
+                            submitCaption: 'Kirim data ke server',
                             submitGradient: AppGradients.bpjs,
                             submitLoading: loading,
                             submitEnabled: controller.text.isNotEmpty,
@@ -280,9 +280,7 @@ class _BpjsGuide extends StatelessWidget {
             decoration: BoxDecoration(
               color: AppColors.infoSoft,
               borderRadius: BorderRadius.circular(AppRadius.pill),
-              border: Border.all(
-                color: AppColors.bpjs.withValues(alpha: 0.22),
-              ),
+              border: Border.all(color: AppColors.bpjs.withValues(alpha: 0.22)),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,

@@ -26,6 +26,7 @@ class NumberEntryBoard extends StatefulWidget {
     this.hint = 'Masukkan nomor / pindai barcode',
     this.submitLabel = 'LANJUT',
     this.submitIcon = Icons.arrow_forward_rounded,
+    this.submitCaption,
     this.maxLength = 16,
     this.accent = AppColors.primary,
     this.submitGradient = AppGradients.brand,
@@ -45,6 +46,9 @@ class NumberEntryBoard extends StatefulWidget {
   final VoidCallback onSubmit;
   final String submitLabel;
   final IconData submitIcon;
+
+  /// Keterangan singkat di bawah tombol untuk memandu pengguna.
+  final String? submitCaption;
   final int maxLength;
   final Color accent;
   final Gradient submitGradient;
@@ -120,14 +124,14 @@ class _NumberEntryBoardState extends State<NumberEntryBoard> {
           onBackspace: _handleBackspace,
           onClear: _handleClear,
         );
-        final submit = AppGradientButton(
+        final submit = _SubmitBlock(
           label: widget.submitLabel,
           icon: widget.submitIcon,
-          onPressed: _handleSubmit,
+          caption: widget.submitCaption,
+          gradient: widget.submitGradient,
           loading: widget.submitLoading,
           enabled: widget.submitEnabled,
-          gradient: widget.submitGradient,
-          height: 64,
+          onPressed: _handleSubmit,
         );
 
         final header = _ScannerDisplay(
@@ -151,9 +155,9 @@ class _NumberEntryBoardState extends State<NumberEntryBoard> {
             children: [
               header,
               const SizedBox(height: AppSpacing.md),
-              keypad,
-              const SizedBox(height: AppSpacing.md),
               submit,
+              const SizedBox(height: AppSpacing.md),
+              keypad,
               if (notice != null) ...[
                 const SizedBox(height: AppSpacing.md),
                 notice,
@@ -162,20 +166,22 @@ class _NumberEntryBoardState extends State<NumberEntryBoard> {
           );
         }
 
+        // Tombol aksi diletakkan di kanan atas, sejajar dengan display scanner,
+        // sehingga tidak berada di tengah dan mudah dijangkau ibu jari.
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            header,
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: header),
+                const SizedBox(width: AppSpacing.md),
+                SizedBox(width: 280, child: submit),
+              ],
+            ),
             const SizedBox(height: AppSpacing.md),
             Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(flex: 3, child: keypad),
-                  const SizedBox(width: AppSpacing.md),
-                  SizedBox(width: 210, height: 64, child: submit),
-                ],
-              ),
+              child: Align(alignment: Alignment.topCenter, child: keypad),
             ),
             if (notice != null) ...[
               const SizedBox(height: AppSpacing.md),
@@ -185,6 +191,117 @@ class _NumberEntryBoardState extends State<NumberEntryBoard> {
         );
       },
     );
+  }
+}
+
+/// Blok tombol submit: judul kecil, tombol besar, dan keterangan singkat.
+class _SubmitBlock extends StatelessWidget {
+  const _SubmitBlock({
+    required this.label,
+    required this.icon,
+    required this.gradient,
+    required this.onPressed,
+    required this.loading,
+    required this.enabled,
+    this.caption,
+  });
+
+  final String label;
+  final IconData icon;
+  final Gradient gradient;
+  final VoidCallback onPressed;
+  final bool loading;
+  final bool enabled;
+  final String? caption;
+
+  @override
+  Widget build(BuildContext context) {
+    final ready = enabled && !loading;
+    final accent = _accentOf(gradient);
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        boxShadow: AppShadow.soft,
+        border: Border.all(color: ready ? accent : AppColors.border),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppRadius.sm),
+                ),
+                child: Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 16,
+                  color: accent,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Flexible(
+                child: Text(
+                  'LANGKAH BERIKUTNYA',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: AppText.family,
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1,
+                    color: accent,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          AppGradientButton(
+            label: label,
+            icon: icon,
+            caption: caption,
+            onPressed: onPressed,
+            loading: loading,
+            enabled: enabled,
+            gradient: gradient,
+            height: 66,
+            fontSize: 16,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            loading
+                ? 'Mohon tunggu, sedang memproses data...'
+                : ready
+                ? caption ?? 'Periksa nomor lalu tekan tombol di atas'
+                : 'Isi atau pindai nomor terlebih dahulu',
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontFamily: AppText.family,
+              fontSize: 11,
+              height: 1.3,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textMuted,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Color _accentOf(Gradient gradient) {
+    if (gradient is LinearGradient && gradient.colors.isNotEmpty) {
+      return gradient.colors.first;
+    }
+    return AppColors.primary;
   }
 }
 
@@ -273,10 +390,7 @@ class _ScannerDisplay extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: hasText
-                            ? AppText.numeric(
-                                context,
-                                size: compact ? 24 : 30,
-                              )
+                            ? AppText.numeric(context, size: compact ? 24 : 30)
                             : TextStyle(
                                 fontFamily: AppText.family,
                                 fontSize: 15,
@@ -308,32 +422,32 @@ class _ScannerDisplay extends StatelessWidget {
                 ),
               ),
               if (hasText) const Positioned.fill(child: ScanPulse()),
-          // Kolom tersembunyi untuk menangkap input barcode scanner.
-          SizedBox(
-            width: 0,
-            height: 0,
-            child: TextField(
-              controller: controller,
-              focusNode: focusNode,
-              autofocus: true,
-              showCursor: false,
-              keyboardType: TextInputType.text,
-              enableInteractiveSelection: false,
-              enableIMEPersonalizedLearning: false,
-              style: const TextStyle(
-                color: Colors.transparent,
-                fontSize: 1,
-                height: 1,
+              // Kolom tersembunyi untuk menangkap input barcode scanner.
+              SizedBox(
+                width: 0,
+                height: 0,
+                child: TextField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  autofocus: true,
+                  showCursor: false,
+                  keyboardType: TextInputType.text,
+                  enableInteractiveSelection: false,
+                  enableIMEPersonalizedLearning: false,
+                  style: const TextStyle(
+                    color: Colors.transparent,
+                    fontSize: 1,
+                    height: 1,
+                  ),
+                  cursorColor: Colors.transparent,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    isCollapsed: true,
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                  onSubmitted: onSubmitted,
+                ),
               ),
-              cursorColor: Colors.transparent,
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                isCollapsed: true,
-                contentPadding: EdgeInsets.zero,
-              ),
-              onSubmitted: onSubmitted,
-            ),
-          ),
             ],
           ),
         ],
@@ -380,7 +494,8 @@ class NumberKeypad extends StatelessWidget {
         );
         final fontSize = (size * 0.38).clamp(18.0, 32.0);
 
-        Widget row(List<String> keys) => _row(keys, size, fontSize, fill: bounded);
+        Widget row(List<String> keys) =>
+            _row(keys, size, fontSize, fill: bounded);
 
         final rows = [
           row(['1', '2', '3']),
@@ -398,15 +513,8 @@ class NumberKeypad extends StatelessWidget {
             border: Border.all(color: AppColors.border),
           ),
           child: bounded
-              ? Column(
-                  children: [
-                    for (final r in rows) Expanded(child: r),
-                  ],
-                )
-              : Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: rows,
-                ),
+              ? Column(children: [for (final r in rows) Expanded(child: r)])
+              : Column(mainAxisSize: MainAxisSize.min, children: rows),
         );
       },
     );
