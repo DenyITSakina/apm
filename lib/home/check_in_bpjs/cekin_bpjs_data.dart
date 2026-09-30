@@ -302,7 +302,9 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
 
     if (!mounted) return;
 
-    if (sukses != true) {
+    // After.exe yang menutup dirinya sendiri (popup error, versi kadaluarsa,
+    // dll) tetap diteruskan ke dialog konfirmasi, tidak dianggap gagal.
+    if (sukses != true && !lastSidikJariDitutupOtomatis) {
       sedangProses = false;
       debugPrint('Alasan gagal: $lastSidikJariReason');
       TopToast.error(

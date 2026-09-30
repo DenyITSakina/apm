@@ -188,7 +188,7 @@ Write-Output ($found -join '~')
   }
 }
 
-enum SidikJariStatus { selesai, popupError, timeout }
+enum SidikJariStatus { selesai, ditutupOtomatis, popupError, timeout }
 
 const String _namaScriptOtomatis = 'sidik_jari_otomatis.ps1';
 const String _namaScriptBacaTeks = 'sidik_jari_baca_teks.ps1';
@@ -210,9 +210,20 @@ const List<String> _kunciGagal = [
   'belum terdaftar',
   'tidak sesuai',
   'harus 13 digit',
+  'harus 16 digit',
   'format no',
   'sudah terdaftar',
   'penolakan',
+  'tidak dapat terhubung',
+  'tidak dapat tehubung',
+  'transaksi belum dapat diproses',
+  'sudah kadaluarsa',
+  'update versi terbaru',
+  'koneksi mesin harus diisi',
+  'url mesin harus diisi',
+  'ip address salah',
+  'ip lan harus diisi',
+  'harus diisi',
 ];
 
 /// Kondisi lingkungan (bukan penolakan nomor). Hanya untuk pesan informatif.
@@ -252,11 +263,13 @@ String _ringkasTeks(String teks) {
 
 /// Menunggu sidik jari selesai dengan membaca teks UI After.exe.
 ///
-/// Dua penanda sukses: aplikasi menampilkan teks berhasil, atau aplikasi
-/// menutup dirinya sendiri (After.exe menutup diri setelah nomor diproses).
-/// Teks error/penolakan menghasilkan kegagalan lebih awal.
+/// Penanda sukses: aplikasi menampilkan teks berhasil, atau aplikasi menutup
+/// dirinya sendiri (After.exe menutup diri setelah nomor diproses). Penutupan
+/// sendiri dilaporkan sebagai [SidikJariStatus.ditutupOtomatis] supaya pemanggil
+/// bisa tetap melanjutkan ke dialog konfirmasi. Teks error/penolakan
+/// menghasilkan kegagalan lebih awal.
 Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
-  const interval = Duration(milliseconds: 1500);
+  const interval = Duration(milliseconds: 1000);
   final stopwatch = Stopwatch()..start();
   var sudahBacaTeks = false;
 
@@ -266,10 +279,10 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
     if (teks == null) {
       _logSidikJari(
         sudahBacaTeks
-            ? "Aplikasi menutup diri -> sidik jari selesai"
+            ? "Aplikasi menutup diri -> sidik jari dianggap selesai"
             : "Aplikasi menutup diri (${stopwatch.elapsed.inSeconds} dtk setelah nomor dikirim)",
       );
-      return SidikJariStatus.selesai;
+      return SidikJariStatus.ditutupOtomatis;
     }
 
     sudahBacaTeks = true;
@@ -950,6 +963,9 @@ Future<void> Function() showSidikJariProgress(BuildContext context) {
 
 String lastSidikJariReason = '';
 
+/// True kalau After.exe menutup dirinya sendiri tanpa teks konfirmasi.
+bool lastSidikJariDitutupOtomatis = false;
+
 /// Samarkan nomor untuk log (jangan tulis nomor BPJS penuh ke file).
 String maskNomorLog(String? nomor) {
   final value = (nomor ?? '').trim();
@@ -1002,6 +1018,7 @@ Future<bool> openExe(
   bool tampilkanToast = true,
 }) async {
   lastSidikJariReason = '';
+  lastSidikJariDitutupOtomatis = false;
 
   void gagal(String alasan, [String? pesan]) {
     lastSidikJariReason = '$alasan${pesan != null ? ' ($pesan)' : ''}';
@@ -1108,6 +1125,19 @@ Future<bool> openExe(
     }
 
     if (!sukses) {
+      // After.exe bisa menutup dirinya sendiri di tengah jalan (misalnya popup
+      // "Tidak Dapat Terhubung Ke Server" atau versi kadaluarsa). Bila proses
+      // sudah tidak ada, perlakukan sebagai penutupan otomatis dan tetap
+      // lanjut ke dialog konfirmasi.
+      final masihBerjalan = await isSidikJariRunning();
+      if (!masihBerjalan) {
+        lastSidikJariDitutupOtomatis = true;
+        _logSidikJari(
+          "After.exe menutup diri saat otomasi (${hasilOto.alasan}), "
+          "lanjut sebagai selesai",
+        );
+        return true;
+      }
       gagal(hasilOto.alasan, "Sidik jari gagal diproses.");
       return false;
     }
@@ -1125,6 +1155,15 @@ Future<bool> openExe(
     switch (status) {
       case SidikJariStatus.selesai:
         _logSidikJari("Sidik jari terverifikasi dari UI aplikasi");
+        return true;
+      case SidikJariStatus.ditutupOtomatis:
+        // After.exe menutup diri tanpa teks konfirmasi; tetap dianggap sukses
+        // supaya alur lanjut ke dialog konfirmasi.
+        _logSidikJari(
+          "Aplikasi sidik jari menutup diri tanpa teks konfirmasi, "
+          "lanjut sebagai selesai",
+        );
+        lastSidikJariDitutupOtomatis = true;
         return true;
       case SidikJariStatus.popupError:
         gagal(
