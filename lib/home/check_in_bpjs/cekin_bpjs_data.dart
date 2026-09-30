@@ -89,26 +89,6 @@ class CekinBpjsDataPage extends StatelessWidget {
     );
   }
 
-  // Logo RSU Sakina di atas
-  Widget _logoHeader() {
-    return Center(
-      child: Column(
-        children: [
-          Image.asset('assets/images/logo_sakina.png', height: 80, color: null),
-          const SizedBox(height: 12),
-          Text(
-            "RSU Sakina Idaman",
-            style: GoogleFonts.montserrat(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.teal.shade900,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildCardData() {
     return Container(
       width: double.infinity,

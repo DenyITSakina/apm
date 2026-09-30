@@ -294,56 +294,6 @@ class _CekinBpjsState extends State<CekinBpjs> {
     );
   }
 
-  Widget _buildStepIndicator() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _stepCircle("1", "Input", true),
-        _stepLine(true),
-        _stepCircle("2", "Verifikasi", false),
-        _stepLine(false),
-        _stepCircle("3", "Selesai", false),
-      ],
-    );
-  }
-
-  Widget _stepCircle(String num, String label, bool active) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: active ? secondaryColor : Colors.grey.shade300,
-            shape: BoxShape.circle,
-          ),
-          child: Text(
-            num,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
-            color: active ? secondaryColor : Colors.grey,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _stepLine(bool active) => Container(
-    width: 30,
-    height: 2,
-    color: active ? secondaryColor : Colors.grey.shade300,
-    margin: const EdgeInsets.only(bottom: 20),
-  );
-
   Widget _inputDisplay() {
     final hasText = controller.text.isNotEmpty;
     return Container(
