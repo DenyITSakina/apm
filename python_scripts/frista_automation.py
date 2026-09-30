@@ -165,7 +165,9 @@ def run_after(username, password):
 
     if not activate_window(AFTER_PROCESS_NAME, AFTER_LAUNCH_TIMEOUT):
         print("[!] Window After.exe tidak muncul")
-        kill_process(AFTER_PROCESS_NAME)
+        if proc is not None:
+            # Hanya matikan proses yang baru kita buka.
+            kill_process(AFTER_PROCESS_NAME)
         return False
 
     # Auto login (username, tab, password, enter)

@@ -23,6 +23,15 @@ class CekinBpjsDataPage extends StatelessWidget {
     required this.jenisPasien,
   });
 
+  /// Samarkan nomor peserta tanpa pernah melempar RangeError.
+  static String maskNomor(String? nomor) {
+    final value = (nomor ?? "").trim();
+    if (value.length < 8) {
+      return value.isEmpty ? "-" : value;
+    }
+    return "${value.substring(0, 4)}...${value.substring(value.length - 4)}";
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<AntrianApmBloc, AntrianApmState>(
@@ -252,23 +261,33 @@ class CekinBpjsDataPage extends StatelessWidget {
                                   }
 
                                   // Tunggu proses After.exe selesai.
-                                  showSidikJariProgress(context);
-                                  final sukses = await openExeFromMap(context, {
-                                    "nomor": nomor,
-                                  });
-                                  if (context.mounted) {
-                                    Navigator.of(context, rootNavigator: true)
-                                        .pop();
+                                  final tutupDialog =
+                                      showSidikJariProgress(context);
+                                  bool sukses = false;
+                                  try {
+                                    sukses = await openExeFromMap(
+                                      context,
+                                      {"nomor": nomor},
+                                      tampilkanToast: false,
+                                    );
+                                  } catch (e) {
+                                    debugPrint("Gagal proses sidik jari: $e");
                                   }
+                                  tutupDialog();
 
                                   // Validasi sukses/gagal: jika gagal, tombol
                                   // tidak lanjut ke poli dan tidak menampilkan
                                   // konfirmasi.
                                   if (sukses != true) {
                                     if (context.mounted) {
+                                      debugPrint(
+                                        "Alasan gagal: $lastSidikJariReason",
+                                      );
                                       TopToast.error(
                                         context,
-                                        "Sidik jari gagal diproses. Silakan coba lagi.",
+                                        lastSidikJariReason.isEmpty
+                                            ? "Sidik jari gagal diproses. Silakan coba lagi."
+                                            : "Sidik jari gagal: ${lastSidikJariReason}",
                                       );
                                     }
                                     return;
@@ -284,6 +303,9 @@ class CekinBpjsDataPage extends StatelessWidget {
                                     message:
                                         "Anda yakin ingin melanjutkan ke pelayanan POLI?",
                                     onConfirm: () {
+                                      if (!context.mounted) {
+                                        return;
+                                      }
                                       context.read<AntrianApmBloc>().add(
                                         LanjutKePoliEvent(
                                           noRm: data.rm,
@@ -350,7 +372,7 @@ class CekinBpjsDataPage extends StatelessWidget {
                               const SizedBox(width: 4),
                               Expanded(
                                 child: Text(
-                                  "Nomor BPJS: ${data.noPeserta?.substring(0, 4)}...${data.noPeserta?.substring(data.noPeserta!.length - 4)}",
+                                  "Nomor BPJS: ${maskNomor(data.noPeserta)}",
                                   style: GoogleFonts.poppins(
                                     fontSize: 9,
                                     fontWeight: FontWeight.w500,

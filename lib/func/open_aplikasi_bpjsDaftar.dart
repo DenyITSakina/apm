@@ -14,10 +14,7 @@ const int vkTab = 0x09;
 const String sidikJariExePath =
     r"C:\Program Files (x86)\BPJS Kesehatan\Aplikasi Sidik Jari BPJS Kesehatan\After.exe";
 
-/// Batas waktu menunggu After.exe muncul di tasklist.
-const Duration _sidikJariLaunchTimeout = Duration(seconds: 6);
-
-/// Batas waktu menunggu After.exe selesai (pasien selesai sidik jari).
+const Duration _sidikJariLaunchTimeout = Duration(seconds: 10);
 const Duration _sidikJariExitTimeout = Duration(seconds: 180);
 
 Future<bool> isSidikJariRunning() async {
@@ -26,20 +23,36 @@ Future<bool> isSidikJariRunning() async {
     return false;
   }
 
-  final result = await Process.run('tasklist', [], runInShell: true);
-  return result.stdout.toString().contains("After.exe");
+  try {
+    final result = await Process.run('tasklist', [
+      '/FI',
+      'IMAGENAME eq After.exe',
+      '/NH',
+    ], runInShell: true);
+    final output = result.stdout.toString();
+    if (!output.contains("After.exe")) {
+      _logSidikJari("After.exe tidak berjalan");
+    }
+    return output.contains("After.exe");
+  } catch (e) {
+    debugPrint("Gagal cek proses After.exe: $e");
+    return false;
+  }
 }
 
-/// Polling cepat sampai [condition] terpenuhi atau [timeout] habis.
 Future<bool> waitUntil(
   Future<bool> Function() condition, {
   required Duration timeout,
-  Duration interval = const Duration(milliseconds: 150),
+  Duration interval = const Duration(milliseconds: 300),
 }) async {
   final stopwatch = Stopwatch()..start();
   while (true) {
-    if (await condition()) {
-      return true;
+    try {
+      if (await condition()) {
+        return true;
+      }
+    } catch (e) {
+      debugPrint("waitUntil error: $e");
     }
     if (stopwatch.elapsed >= timeout) {
       return false;
@@ -53,7 +66,11 @@ Future<void> closeSidikJariExe() async {
     return;
   }
 
-  await Process.run('taskkill', ['/IM', 'After.exe', '/F'], runInShell: true);
+  try {
+    await Process.run('taskkill', ['/IM', 'After.exe', '/F'], runInShell: true);
+  } catch (e) {
+    debugPrint("Gagal menutup After.exe: $e");
+  }
 }
 
 String _escapePowerShell(String value) => value.replaceAll("'", "''");
@@ -63,25 +80,37 @@ bool isWindowOpen(String windowTitle) {
     return false;
   }
 
+  final pattern = windowTitle
+      .toLowerCase()
+      .replaceAll('.exe', '')
+      .replaceAll('after', 'sidik jari');
+
   final script =
       '''
-  Add-Type -AssemblyName System.Windows.Forms
-  \$title = '${_escapePowerShell(windowTitle)}'
+  \$pattern = '${_escapePowerShell(pattern)}'
   \$process = Get-Process | Where-Object {
-    \$_.MainWindowTitle -like "*\$title*" -or \$_.ProcessName -like "*\$title*"
+    \$_.MainWindowHandle -ne 0 -and (
+      \$_.MainWindowTitle -like "*\$pattern*" -or
+      \$_.ProcessName -eq 'After'
+    )
   } | Select-Object -First 1
   if (\$process) { exit 0 } else { exit 1 }
   ''';
 
-  final result = Process.runSync('powershell.exe', [
-    '-NoProfile',
-    '-ExecutionPolicy',
-    'Bypass',
-    '-Command',
-    script,
-  ]);
+  try {
+    final result = Process.runSync('powershell.exe', [
+      '-NoProfile',
+      '-ExecutionPolicy',
+      'Bypass',
+      '-Command',
+      script,
+    ]);
 
-  return result.exitCode == 0;
+    return result.exitCode == 0;
+  } catch (e) {
+    debugPrint("isWindowOpen error: $e");
+    return false;
+  }
 }
 
 void focusWindow(String windowTitle) {
@@ -89,6 +118,11 @@ void focusWindow(String windowTitle) {
     debugPrint('Fokus window tidak tersedia di web');
     return;
   }
+
+  final pattern = windowTitle
+      .toLowerCase()
+      .replaceAll('.exe', '')
+      .replaceAll('after', 'sidik jari');
 
   final script =
       '''
@@ -105,12 +139,15 @@ void focusWindow(String windowTitle) {
   }
   "@
   Add-Type -TypeDefinition \$source
-  \$title = '${_escapePowerShell(windowTitle)}'
+  \$pattern = '${_escapePowerShell(pattern)}'
   \$process = Get-Process | Where-Object {
-    \$_.MainWindowTitle -like "*\$title*" -or \$_.ProcessName -like "*\$title*"
+    \$_.MainWindowHandle -ne 0 -and (
+      \$_.MainWindowTitle -like "*\$pattern*" -or
+      \$_.ProcessName -eq 'After'
+    )
   } | Select-Object -First 1
 
-  if (\$process -and \$process.MainWindowHandle -ne 0) {
+  if (\$process) {
     \$handle = \$process.MainWindowHandle
     if ([Win32]::IsIconic(\$handle)) {
       [Win32]::ShowWindow(\$handle, 9) | Out-Null
@@ -119,13 +156,17 @@ void focusWindow(String windowTitle) {
   }
   ''';
 
-  Process.runSync('powershell.exe', [
-    '-NoProfile',
-    '-ExecutionPolicy',
-    'Bypass',
-    '-Command',
-    script,
-  ]);
+  try {
+    Process.runSync('powershell.exe', [
+      '-NoProfile',
+      '-ExecutionPolicy',
+      'Bypass',
+      '-Command',
+      script,
+    ]);
+  } catch (e) {
+    debugPrint("focusWindow error: $e");
+  }
 }
 
 void sendVirtualKey(int keyCode) {
@@ -154,13 +195,17 @@ void sendKeys(String text) {
   [System.Windows.Forms.SendKeys]::SendWait('${_escapePowerShell(text)}')
   ''';
 
-  Process.runSync('powershell.exe', [
-    '-NoProfile',
-    '-ExecutionPolicy',
-    'Bypass',
-    '-Command',
-    script,
-  ]);
+  try {
+    Process.runSync('powershell.exe', [
+      '-NoProfile',
+      '-ExecutionPolicy',
+      'Bypass',
+      '-Command',
+      script,
+    ]);
+  } catch (e) {
+    debugPrint("sendKeys error: $e");
+  }
 }
 
 void pressEnter() => sendVirtualKey(vkReturn);
@@ -177,14 +222,26 @@ Future<void> sendAutoLogin({
   pressEnter();
 }
 
-/// Dialog proses sidik jari, dipanggil di halaman cek-in.
-void showSidikJariProgress(BuildContext context) {
+Future<void> Function() showSidikJariProgress(BuildContext context) {
+  VoidCallback? closer;
+
   showGeneralDialog(
     context: context,
     barrierDismissible: false,
     barrierLabel: "Memproses sidik jari",
     barrierColor: Colors.black.withOpacity(0.45),
-    pageBuilder: (_, _, _) => const SizedBox.shrink(),
+    pageBuilder: (dialogContext, _, _) {
+      return Builder(
+        builder: (context) {
+          closer = () {
+            if (Navigator.of(context).canPop()) {
+              Navigator.of(context).pop();
+            }
+          };
+          return const SizedBox.shrink();
+        },
+      );
+    },
     transitionBuilder: (context, anim, _, child) {
       return Opacity(
         opacity: anim.value,
@@ -214,8 +271,8 @@ void showSidikJariProgress(BuildContext context) {
                 Text(
                   "Memproses Sidik Jari",
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 6),
                 Text(
@@ -231,12 +288,23 @@ void showSidikJariProgress(BuildContext context) {
     },
     transitionDuration: const Duration(milliseconds: 200),
   );
+
+  return () async {
+    closer?.call();
+  };
+}
+
+String lastSidikJariReason = '';
+
+void _logSidikJari(String pesan) {
+  debugPrint("[SidikJari] $pesan");
 }
 
 Future<bool> openExeFromMap(
   BuildContext context,
-  Map<String, dynamic> pasien,
-) async {
+  Map<String, dynamic> pasien, {
+  bool tampilkanToast = true,
+}) async {
   final nomor = pasien["nomor"]?.toString().trim() ?? "";
 
   if (nomor.isEmpty) {
@@ -252,20 +320,33 @@ Future<bool> openExeFromMap(
   debugPrint("Nomor dipakai: $nomor");
 
   try {
-    return await openExe(context, nomor);
+    return await openExe(context, nomor, tampilkanToast: tampilkanToast);
   } catch (e) {
-    TopToast.error(context, "Gagal membuka aplikasi BPJS");
+    debugPrint("openExeFromMap error: $e");
+    if (context.mounted) {
+      TopToast.error(context, "Gagal membuka aplikasi BPJS");
+    }
     return false;
   }
 }
 
-/// Menjalankan After.exe, login otomatis, input nomor, lalu menunggu proses selesai.
-///
-/// Mengembalikan `true` bila sidik jari berhasil diproses, `false` bila gagal.
-Future<bool> openExe(BuildContext context, String noPeserta) async {
-  void gagal(String pesan) {
-    if (context.mounted) {
-      TopToast.error(context, pesan);
+Future<bool> openExe(
+  BuildContext context,
+  String noPeserta, {
+  bool tampilkanToast = true,
+}) async {
+  lastSidikJariReason = '';
+
+  void gagal(String alasan, [String? pesan]) {
+    lastSidikJariReason = '$alasan${pesan != null ? ' ($pesan)' : ''}';
+    _logSidikJari("GAGAL: $lastSidikJariReason");
+    if (tampilkanToast && context.mounted) {
+      TopToast.error(
+        context,
+        pesan == null
+            ? "Sidik jari gagal diproses. Silakan coba lagi."
+            : "$pesan Silakan coba lagi.",
+      );
     }
   }
 
@@ -279,13 +360,14 @@ Future<bool> openExe(BuildContext context, String noPeserta) async {
   Process? process;
 
   try {
+    _logSidikJari("Mulai proses, nomor: $noPeserta");
     final sudahBerjalan = await isSidikJariRunning();
 
     if (sudahBerjalan) {
-      debugPrint("After.exe sudah berjalan -> tidak membuka instance lagi");
+      _logSidikJari("After.exe sudah berjalan -> tidak membuka instance baru");
     } else {
       if (!File(sidikJariExePath).existsSync()) {
-        gagal("Aplikasi sidik jari tidak ditemukan. Silakan coba lagi.");
+        gagal("exe tidak ditemukan", "Aplikasi sidik jari tidak ditemukan.");
         return false;
       }
 
@@ -295,35 +377,56 @@ Future<bool> openExe(BuildContext context, String noPeserta) async {
         runInShell: true,
         mode: ProcessStartMode.normal,
       );
+      _logSidikJari("After.exe dijalankan, menunggu proses muncul");
 
-      // Tunggu proses muncul (polling cepat, bukan delay tetap).
       final muncul = await waitUntil(
         isSidikJariRunning,
         timeout: _sidikJariLaunchTimeout,
       );
 
       if (!muncul) {
-        gagal("Aplikasi sidik jari gagal dibuka. Silakan coba lagi.");
+        gagal(
+          "proses tidak muncul dalam ${_sidikJariLaunchTimeout.inSeconds} dtk",
+        );
         return false;
       }
     }
 
-    // Beri waktu window siap difokuskan tanpa delay panjang.
-    await Future<void>.delayed(const Duration(milliseconds: 400));
-    focusWindow("After.exe");
+    final windowSiap = await waitUntil(
+      () async => isWindowOpen(sidikJariExePath),
+      timeout: _sidikJariLaunchTimeout,
+      interval: const Duration(milliseconds: 200),
+    );
 
-    final accounts = await VclaimApiService.getVclaimAccounts();
+    if (!windowSiap) {
+      _logSidikJari("Window After.exe belum siap, lanjut mencoba fokus");
+    }
+
+    await Future<void>.delayed(const Duration(milliseconds: 200));
+    focusWindow(sidikJariExePath);
+    _logSidikJari("Window After.exe difokuskan");
+
+    List<VclaimAccount> accounts;
+    try {
+      accounts = await VclaimApiService.getVclaimAccounts();
+    } catch (e) {
+      gagal("gagal ambil akun VClaim", "Data akun VClaim tidak dapat diakses.");
+      _logSidikJari("Exception API: $e");
+      return false;
+    }
+
     if (accounts.isEmpty) {
-      gagal("Data VClaim accounts kosong. Auto-login dihentikan. Silakan coba lagi.");
+      gagal("akun VClaim kosong", "Data akun VClaim kosong.");
       return false;
     }
 
     final account = accounts.first;
     if (account.username.isEmpty || account.password.isEmpty) {
-      gagal("Username/password VClaim tidak valid. Silakan coba lagi.");
+      gagal("akun VClaim tidak lengkap");
       return false;
     }
 
+    _logSidikJari("Auto login: user=${account.username}");
     await sendAutoLogin(username: account.username, password: account.password);
 
     await Future.delayed(const Duration(milliseconds: 800));
@@ -331,24 +434,31 @@ Future<bool> openExe(BuildContext context, String noPeserta) async {
       return false;
     }
     await sendNoPeserta(context, noPeserta);
+    _logSidikJari("Nomor dikirim, menunggu After.exe selesai");
 
     if (process == null) {
-      // Setelah.exe sudah berjalan sebelumnya, tidak ada proses yang dipantau.
+      _logSidikJari("Dipantau proses yang sudah berjalan sebelumnya");
+    }
+
+    final berhenti = await waitUntil(
+      () async => !(await isSidikJariRunning()),
+      timeout: _sidikJariExitTimeout,
+      interval: const Duration(seconds: 1),
+    );
+
+    if (berhenti) {
+      _logSidikJari("After.exe selesai -> dianggap sukses");
       return true;
     }
 
-    // Tunggu After.exe selesai (pasien selesai sidik jari).
-    try {
-      final code = await process.exitCode.timeout(_sidikJariExitTimeout);
-      debugPrint("After.exe selesai, exit code: $code");
-      return code == 0;
-    } on TimeoutException {
-      // Masih berjalan melewati batas waktu: proses dianggap sedang jalan.
-      debugPrint("After.exe masih berjalan, lanjut ke tahap berikutnya");
-      return true;
-    }
+    gagal(
+      "belum selesai dalam ${_sidikJariExitTimeout.inMinutes} menit",
+      "Sidik jari belum selesai diproses.",
+    );
+    return false;
   } catch (e) {
-    debugPrint("Error: $e");
+    lastSidikJariReason = 'error tidak terduga: $e';
+    _logSidikJari("GAGAL: $lastSidikJariReason");
     return false;
   }
 }
@@ -374,60 +484,61 @@ String normalizeNomor(String nomor) {
 }
 
 Future<void> sendNoPeserta(BuildContext context, String nomor) async {
-  String normalizedNomor = normalizeNomor(nomor);
-  String tipe = detectNomorType(normalizedNomor);
+  try {
+    String normalizedNomor = normalizeNomor(nomor);
+    String tipe = detectNomorType(normalizedNomor);
 
-  if (tipe == "UNKNOWN") {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Nomor harus 13 digit (BPJS) atau 16 digit (NIK)',
-          style: TextStyle(fontSize: 14),
-        ),
-        backgroundColor: Colors.red,
-        duration: Duration(seconds: 2),
-      ),
-    );
+    if (tipe == "UNKNOWN") {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Nomor harus 13 digit (BPJS) atau 16 digit (NIK)',
+              style: TextStyle(fontSize: 14),
+            ),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
 
-    if (await isSidikJariRunning()) {
-      await closeSidikJariExe();
+      if (await isSidikJariRunning()) {
+        await closeSidikJariExe();
+      }
+      return;
     }
-    return;
+
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    focusWindow(sidikJariExePath);
+    for (int i = 0; i < 5; i++) {
+      sendKeys("{ESC}");
+    }
+
+    sendKeys("{TAB}");
+    for (int i = 0; i < 10; i++) {
+      sendKeys("+{TAB}");
+    }
+
+    if (tipe == "BPJS") {
+      sendKeys("{TAB}");
+      sendKeys("{TAB}");
+      sendKeys(" ");
+    } else if (tipe == "NIK") {
+      sendKeys("{TAB}");
+      sendKeys("{TAB}");
+      sendKeys("{TAB}");
+      sendKeys(" ");
+    }
+
+    sendKeys("{TAB}");
+    sendKeys("{HOME}");
+    sendKeys("+{END}");
+    sendKeys("{DELETE}");
+
+    sendKeys(normalizedNomor);
+    sendKeys("{ENTER}");
+  } catch (e) {
+    debugPrint("sendNoPeserta error: $e");
   }
-
-  await Future.delayed(const Duration(milliseconds: 100));
-
-  focusWindow("After.exe");
-  for (int i = 0; i < 5; i++) {
-    sendKeys("{ESC}");
-  }
-
-  sendKeys("{TAB}");
-  for (int i = 0; i < 10; i++) {
-    sendKeys("+{TAB}");
-  }
-
-  if (tipe == "BPJS") {
-    sendKeys("{TAB}");
-    sendKeys("{TAB}");
-    sendKeys(" ");
-  } else if (tipe == "NIK") {
-    sendKeys("{TAB}");
-    sendKeys("{TAB}");
-    sendKeys("{TAB}");
-    sendKeys(" ");
-  }
-
-  sendKeys("{TAB}");
-  sendKeys("{HOME}");
-  sendKeys("+{END}");
-  sendKeys("{DELETE}");
-
-  sendKeys(normalizedNomor);
-
-  // import 'package:flutter/services.dart';
-  // await Clipboard.setData(ClipboardData(text: normalizedNomor));
-  // sendKeys("^{V}");
-  sendKeys("{ENTER}");
-  // await Future.delayed(const Duration(milliseconds: 50));
 }
