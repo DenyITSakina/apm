@@ -1091,32 +1091,22 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
 
   pw.Widget _buildCardInfoRow(String label, String value) {
     return pw.Padding(
-      padding: const pw.EdgeInsets.symmetric(vertical: 0.5),
+      padding: const pw.EdgeInsets.symmetric(vertical: 1),
       child: pw.Row(
         crossAxisAlignment: pw.CrossAxisAlignment.start,
         children: [
           pw.SizedBox(
-            width: 30,
+            width: 42,
             child: pw.Text(
               label,
-              style: pw.TextStyle(
-                fontSize: 7,
-                height: 1,
-                fontWeight: pw.FontWeight.bold,
-              ),
+              style: pw.TextStyle(fontSize: 7.5, fontWeight: pw.FontWeight.bold),
             ),
           ),
-          pw.Text(
-            ': $value',
-            style: const pw.TextStyle(fontSize: 7, height: 1),
-          ),
+          pw.Text(': $value', style: const pw.TextStyle(fontSize: 7.5)),
         ],
       ),
     );
   }
-
-  static const _cellHeight = 9.0;
-  static const _cellHeightLabel = 11.0;
 
   pw.Widget _buildCardFormTable() {
     return pw.Table(
@@ -1132,31 +1122,26 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
           children: [
             _buildCardTableCell(
               'Ket.',
-              height: _cellHeightLabel,
               textAlign: pw.TextAlign.center,
               fontWeight: pw.FontWeight.bold,
             ),
             _buildCardTableCell(
               'No.',
-              height: _cellHeightLabel,
               textAlign: pw.TextAlign.center,
               fontWeight: pw.FontWeight.bold,
             ),
             _buildCardTableCell(
               'Prosedur',
-              height: _cellHeightLabel,
               textAlign: pw.TextAlign.center,
               fontWeight: pw.FontWeight.bold,
             ),
             _buildCardTableCell(
               'Paraf',
-              height: _cellHeightLabel,
               textAlign: pw.TextAlign.center,
               fontWeight: pw.FontWeight.bold,
             ),
             _buildCardTableCell(
               'Keterangaan',
-              height: _cellHeightLabel,
               textAlign: pw.TextAlign.center,
               fontWeight: pw.FontWeight.bold,
             ),
@@ -1166,18 +1151,15 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
           children: [
             _buildCardTableCell(
               'A',
-              height: _cellHeightLabel,
               textAlign: pw.TextAlign.center,
               fontWeight: pw.FontWeight.bold,
             ),
             _buildCardTableCell(
               '',
-              height: _cellHeightLabel,
               textAlign: pw.TextAlign.center,
             ),
             _buildCardTableCell(
               'Konsultasi',
-              height: _cellHeightLabel,
               fontWeight: pw.FontWeight.bold,
             ),
           ],
@@ -1200,18 +1182,15 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
           children: [
             _buildCardTableCell(
               'B',
-              height: _cellHeightLabel,
               textAlign: pw.TextAlign.center,
               fontWeight: pw.FontWeight.bold,
             ),
             _buildCardTableCell(
               '',
-              height: _cellHeightLabel,
               textAlign: pw.TextAlign.center,
             ),
             _buildCardTableCell(
               'Tindakan Medis',
-              height: _cellHeightLabel,
               fontWeight: pw.FontWeight.bold,
             ),
           ],
@@ -1234,18 +1213,15 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
           children: [
             _buildCardTableCell(
               'C',
-              height: _cellHeightLabel,
               textAlign: pw.TextAlign.center,
               fontWeight: pw.FontWeight.bold,
             ),
             _buildCardTableCell(
               '',
-              height: _cellHeightLabel,
               textAlign: pw.TextAlign.center,
             ),
             _buildCardTableCell(
               'Penunjang Medis',
-              height: _cellHeightLabel,
               fontWeight: pw.FontWeight.bold,
             ),
           ],
@@ -1268,18 +1244,15 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
           children: [
             _buildCardTableCell(
               'D',
-              height: _cellHeightLabel,
               textAlign: pw.TextAlign.center,
               fontWeight: pw.FontWeight.bold,
             ),
             _buildCardTableCell(
               '',
-              height: _cellHeightLabel,
               textAlign: pw.TextAlign.center,
             ),
             _buildCardTableCell(
               'Resep',
-              height: _cellHeightLabel,
               fontWeight: pw.FontWeight.bold,
             ),
           ],
@@ -1288,18 +1261,15 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
           children: [
             _buildCardTableCell(
               'E',
-              height: _cellHeightLabel,
               textAlign: pw.TextAlign.center,
               fontWeight: pw.FontWeight.bold,
             ),
             _buildCardTableCell(
               '',
-              height: _cellHeightLabel,
               textAlign: pw.TextAlign.center,
             ),
             _buildCardTableCell(
               'Lain-lain',
-              height: _cellHeightLabel,
               fontWeight: pw.FontWeight.bold,
             ),
           ],
@@ -1312,17 +1282,13 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     String text, {
     pw.TextAlign textAlign = pw.TextAlign.left,
     pw.FontWeight fontWeight = pw.FontWeight.normal,
-    double height = _cellHeight,
   }) {
-    return pw.SizedBox(
-      height: height,
-      child: pw.Padding(
-        padding: const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 1),
-        child: pw.Text(
-          text,
-          textAlign: textAlign,
-          style: pw.TextStyle(fontSize: 7, height: 1, fontWeight: fontWeight),
-        ),
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+      child: pw.Text(
+        text,
+        textAlign: textAlign,
+        style: pw.TextStyle(fontSize: 7, fontWeight: fontWeight),
       ),
     );
   }
@@ -1389,7 +1355,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                           border: pw.Border(top: pw.BorderSide(width: 1.5)),
                         ),
                         padding: const pw.EdgeInsets.symmetric(
-                          vertical: 3,
+                          vertical: 5,
                           horizontal: 4,
                         ),
                         child: pw.Row(
@@ -1403,16 +1369,16 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                                   pw.Text(
                                     'NO ANTRIAN',
                                     style: pw.TextStyle(
-                                      fontSize: 9,
+                                      fontSize: 8.5,
                                       height: 1,
                                       fontWeight: pw.FontWeight.bold,
-                                      letterSpacing: 0.5,
+                                      letterSpacing: 0.75,
                                     ),
                                   ),
                                   pw.Text(
                                     m.noAntrianPoli,
                                     style: pw.TextStyle(
-                                      fontSize: 22,
+                                      fontSize: 31,
                                       fontWeight: pw.FontWeight.bold,
                                       height: 1,
                                     ),
@@ -1423,8 +1389,8 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                             ),
                             pw.SizedBox(width: 3),
                             pw.SizedBox(
-                              width: 42,
-                              height: 42,
+                              width: 52,
+                              height: 52,
                               child: pw.BarcodeWidget(
                                 barcode: pw.Barcode.qrCode(),
                                 data: qrData,
@@ -1450,13 +1416,13 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                       ),
                       padding: const pw.EdgeInsets.symmetric(
                         horizontal: 2,
-                        vertical: 1,
+                        vertical: 2,
                       ),
                       child: pw.Center(
                         child: pw.Text(
                           'FORMULIR KENDALI TINDAKAN RAWAT JALAN',
                           style: pw.TextStyle(
-                            fontSize: 8,
+                            fontSize: 7.5,
                             height: 1,
                             fontWeight: pw.FontWeight.bold,
                           ),
@@ -1490,7 +1456,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
               children: [
                 pw.Text(
                   'Generated: $date $time',
-                  style: const pw.TextStyle(fontSize: 7),
+                  style: const pw.TextStyle(fontSize: 6, height: 1),
                 ),
               ],
             ),
@@ -1671,13 +1637,13 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                       ),
                       padding: const pw.EdgeInsets.symmetric(
                         horizontal: 2,
-                        vertical: 1,
+                        vertical: 2,
                       ),
                       child: pw.Center(
                         child: pw.Text(
                           'FORMULIR KENDALI TINDAKAN RAWAT JALAN',
                           style: pw.TextStyle(
-                            fontSize: 8,
+                            fontSize: 7.5,
                             height: 1,
                             fontWeight: pw.FontWeight.bold,
                           ),
@@ -1711,7 +1677,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
               children: [
                 pw.Text(
                   'Generated: $date $time',
-                  style: const pw.TextStyle(fontSize: 7),
+                  style: const pw.TextStyle(fontSize: 6, height: 1),
                 ),
               ],
             ),
