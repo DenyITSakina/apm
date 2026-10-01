@@ -903,6 +903,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
         build: (context) => _buildPoliTicket(
           apmPoliModel,
           qrData,
+          jenisAntrian,
           _formatDate(now),
           _formatTime(now),
           logoBytes,
@@ -1322,10 +1323,15 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
   pw.Widget _buildPoliTicket(
     ApmAntrianPoliModel m,
     String qrData,
+    String jenisAntrian,
     String date,
     String time,
     Uint8List logoBytes,
   ) {
+    final isBpjs =
+        jenisAntrian.toLowerCase() == 'bpjs' || jenisAntrian.trim() == '2';
+    final labelPasien = isBpjs ? 'BPJS' : 'UMUM';
+
     return pw.Container(
       width: 200 * PdfPageFormat.mm,
       padding: const pw.EdgeInsets.all(2),
@@ -1351,7 +1357,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                         child: pw.Column(
                           crossAxisAlignment: pw.CrossAxisAlignment.start,
                           children: [
-                            _buildCardInfoRow('RM', m.rm),
+                            _buildCardInfoRow('RM', '${m.rm} / $labelPasien'),
                             _buildCardInfoRow(
                               'Nama',
                               formatNama(m.nama.toUpperCase()),
