@@ -314,16 +314,16 @@ class _DashboardApmState extends State<DashboardApm>
 
   Widget _buildServiceGrid({required bool isWide}) {
     final cards = [
-      _ServiceConfig(
-        title: 'Cek-in BPJS',
-        subtitle: 'Peserta BPJS Kesehatan',
-        image: 'assets/images/bpjs_logo.png',
-        icon: Icons.health_and_safety_rounded,
-        gradient: AppGradients.bpjs,
-        color: AppColors.bpjs,
-        steps: 'Pindai kartu BPJS / NIK',
-        onTap: () => _pilihLayanan(bpjs: true),
-      ),
+      // _ServiceConfig(
+      //   title: 'Cek-in BPJS',
+      //   subtitle: 'Peserta BPJS Kesehatan',
+      //   image: 'assets/images/bpjs_logo.png',
+      //   icon: Icons.health_and_safety_rounded,
+      //   gradient: AppGradients.bpjs,
+      //   color: AppColors.bpjs,
+      //   steps: 'Pindai kartu BPJS / NIK',
+      //   onTap: () => _pilihLayanan(bpjs: true),
+      // ),
       _ServiceConfig(
         title: 'Cek-in Umum',
         subtitle: 'Pasien umum / non-BPJS',
@@ -403,7 +403,7 @@ class _DashboardApmState extends State<DashboardApm>
             const _StepRow(
               number: '1',
               title: 'Pilih layanan',
-              description: 'Cek-in BPJS atau  cek-in umum,',
+              description: 'Cek-in umum,',
             ),
             const _StepRow(
               number: '2',
