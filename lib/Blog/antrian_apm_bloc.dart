@@ -896,7 +896,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     pdf.addPage(
       pw.Page(
         pageFormat: const PdfPageFormat(
-          210 * PdfPageFormat.mm,
+          160 * PdfPageFormat.mm,
           double.infinity,
           marginAll: 2 * PdfPageFormat.mm,
         ),
@@ -1117,7 +1117,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
 
   /// Lebar blok form dikunci agar kolom "Prosedur" tidak melar mengisi
   /// seluruh sisa ruang di tiket landscape.
-  static const _formBlockWidth = 250.0;
+  static const _formBlockWidth = 300.0;
 
   static const _cellHeight = 9.0;
   static const _cellHeightLabel = 11.0;
