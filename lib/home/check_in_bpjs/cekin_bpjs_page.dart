@@ -243,7 +243,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      pushBackSwipePage(
+      pushPage(
         context: context,
         page: BlocProvider.value(
           value: context.read<AntrianApmBloc>(),

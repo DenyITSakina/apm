@@ -53,7 +53,7 @@ class _DashboardApmState extends State<DashboardApm>
   }
 
   void _bukaBooking(String jenis) {
-    pushBackSwipePage(
+    pushPage(
       context: context,
       page: BlocProvider(
         create: (_) => BookingBloc(),
@@ -79,7 +79,7 @@ class _DashboardApmState extends State<DashboardApm>
       cancelLabel: 'BATAL',
       onCancel: () {},
       onConfirm: () {
-        pushBackSwipePage(
+        pushPage(
           context: context,
           page: BlocProvider(
             create: (_) => AntrianApmBloc(),

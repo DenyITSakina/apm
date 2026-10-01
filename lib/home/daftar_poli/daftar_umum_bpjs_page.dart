@@ -194,7 +194,7 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        pushBackSwipePage(
+        pushPage(
           context: context,
           page: DaftarUmumBpjsDaftar(data: state.data),
         );

@@ -212,7 +212,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      pushBackSwipePage(
+      pushPage(
         context: context,
         page: BlocProvider.value(
           value: context.read<AntrianApmBloc>(),

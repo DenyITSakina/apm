@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:full_swipe_back_gesture/full_swipe_back_gesture.dart';
 
-/// Helper untuk membuat route yang mendukung full swipe back.
-/// Digunakan supaya semua page yang dipush akan punya gesture back.
-void pushBackSwipePage<T>({
+/// Helper untuk push halaman tanpa gesture full swipe back.
+void pushPage<T>({
   required BuildContext context,
   required Widget page,
 }) {
-  Navigator.of(context).push(BackSwipePageRoute<T>(builder: (_) => page));
+  Navigator.of(context).push(MaterialPageRoute<T>(builder: (_) => page));
 }
 
 /// Kembali ke halaman paling atas (dashboard) dan membersihkan seluruh stack
