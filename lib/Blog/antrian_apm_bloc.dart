@@ -1152,18 +1152,6 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
               textAlign: pw.TextAlign.center,
               fontWeight: pw.FontWeight.bold,
             ),
-            _buildCardTableCell(
-              'Paraf',
-              height: _cellHeightLabel,
-              textAlign: pw.TextAlign.center,
-              fontWeight: pw.FontWeight.bold,
-            ),
-            _buildCardTableCell(
-              'Keterangaan',
-              height: _cellHeightLabel,
-              textAlign: pw.TextAlign.center,
-              fontWeight: pw.FontWeight.bold,
-            ),
           ],
         ),
         pw.TableRow(
