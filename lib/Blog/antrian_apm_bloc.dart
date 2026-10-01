@@ -1494,9 +1494,13 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
             child: pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.end,
               children: [
-                pw.Text(
-                  'Generated: $date $time',
-                  style: const pw.TextStyle(fontSize: 7),
+                pw.SizedBox(
+                  width: _formBlockWidth,
+                  child: pw.Text(
+                    'Generated: $date $time',
+                    style: const pw.TextStyle(fontSize: 7),
+                    textAlign: pw.TextAlign.right,
+                  ),
                 ),
               ],
             ),
