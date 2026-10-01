@@ -1115,6 +1115,10 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     );
   }
 
+  /// Lebar blok form dikunci agar kolom "Prosedur" tidak melar mengisi
+  /// seluruh sisa ruang di tiket landscape.
+  static const _formBlockWidth = 250.0;
+
   static const _cellHeight = 9.0;
   static const _cellHeightLabel = 11.0;
 
@@ -1122,9 +1126,9 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     return pw.Table(
       border: pw.TableBorder.all(width: 1),
       columnWidths: const {
-        0: pw.FixedColumnWidth(20),
-        1: pw.FixedColumnWidth(20),
-        2: pw.FlexColumnWidth(0.6),
+        0: pw.FixedColumnWidth(22),
+        1: pw.FixedColumnWidth(22),
+        2: pw.FlexColumnWidth(1),
       },
       children: [
         pw.TableRow(
@@ -1444,6 +1448,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Container(
+                      width: _formBlockWidth,
                       decoration: pw.BoxDecoration(
                         border: pw.Border.all(width: 1.5),
                         color: PdfColors.grey300,
@@ -1465,6 +1470,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                       ),
                     ),
                     pw.Container(
+                      width: _formBlockWidth,
                       decoration: pw.BoxDecoration(
                         border: pw.Border(
                           left: pw.BorderSide(width: 1.5),
@@ -1665,6 +1671,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
                     pw.Container(
+                      width: _formBlockWidth,
                       decoration: pw.BoxDecoration(
                         border: pw.Border.all(width: 1.5),
                         color: PdfColors.grey300,
@@ -1686,6 +1693,7 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
                       ),
                     ),
                     pw.Container(
+                      width: _formBlockWidth,
                       decoration: pw.BoxDecoration(
                         border: pw.Border(
                           left: pw.BorderSide(width: 1.5),
