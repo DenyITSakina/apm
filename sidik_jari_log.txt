@@ -29,3 +29,25 @@
 [2026-09-30T18:19:54.794065] Otomasi UI selesai (5669 ms)
 [2026-09-30T18:19:54.900525] After.exe tidak berjalan
 [2026-09-30T18:19:54.919535] After.exe menutup diri saat otomasi (After.ini WSURL kosong (login tetap dicoba)), lanjut sebagai selesai
+[2026-10-03T13:39:21.375780] Mulai proses | nomor=0002****0943 | app=D:\Sakina\apm
+[2026-10-03T13:39:21.403788] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-10-03T13:39:21.705799] Ambil akun VClaim (235 ms)
+[2026-10-03T13:39:21.736939] Login otomatis memakai user=ci*******a
+[2026-10-03T13:39:21.942351] After.exe tidak berjalan
+[2026-10-03T13:39:21.975351] After.exe dijalankan (pid=21412), menunggu proses muncul
+[2026-10-03T13:39:22.105352] After.exe tidak berjalan
+[2026-10-03T13:39:22.540167] After.exe tidak berjalan
+[2026-10-03T13:39:29.612142] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=APP_CLOSED_DURING_LOGIN
+[2026-10-03T13:39:29.638143] Otomasi UI selesai (6648 ms)
+[2026-10-03T13:39:29.797142] After.exe tidak berjalan
+[2026-10-03T13:39:29.829140] After.exe menutup diri saat otomasi (After.ini WSURL kosong (login tetap dicoba)), lanjut sebagai selesai
+[2026-10-03T13:50:47.928467] Mulai proses | nomor=0002****0125 | app=D:\Sakina\apm
+[2026-10-03T13:50:47.986215] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-10-03T13:50:48.289906] Ambil akun VClaim (255 ms)
+[2026-10-03T13:50:48.334979] Login otomatis memakai user=ci*******a
+[2026-10-03T13:50:48.650417] After.exe tidak berjalan
+[2026-10-03T13:50:48.682416] After.exe dijalankan (pid=11424), menunggu proses muncul
+[2026-10-03T13:50:55.130768] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=APP_CLOSED_DURING_LOGIN
+[2026-10-03T13:50:55.152777] Otomasi UI selesai (6355 ms)
+[2026-10-03T13:50:55.296776] After.exe tidak berjalan
+[2026-10-03T13:50:55.318775] After.exe menutup diri saat otomasi (After.ini WSURL kosong (login tetap dicoba)), lanjut sebagai selesai

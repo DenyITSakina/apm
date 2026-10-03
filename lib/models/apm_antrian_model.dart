@@ -21,6 +21,26 @@ class ApmAntrianModel {
   final int statusBooking;
   final int pasienBaru;
 
+  /// Data peserta BPJS dari blok `data.bpjs` endpoint validasi.
+  final bool punyaDataBpjs;
+  final bool bpjsAktif;
+  final String bpjsStatusPeserta;
+  final String bpjsStatusKode;
+  final String bpjsHakKelas;
+  final String bpjsJenisPeserta;
+  final String bpjsNoKartu;
+  final String bpjsNik;
+  final String bpjsTglSep;
+
+  /// Rujukan BPJS terbaru (dipakai otomatis sebagai `diag_awal` SEP).
+  final bool adaRujukan;
+  final String rujukanKode;
+  final String rujukanNama;
+  final String rujukanNoKunjungan;
+  final String rujukanTglKunjungan;
+  final String rujukanFaskesNama;
+  final String rujukanFaskesKode;
+
   const ApmAntrianModel({
     this.id = '',
     this.rm = '',
@@ -43,10 +63,27 @@ class ApmAntrianModel {
     this.tglBooking = '',
     this.statusBooking = 0,
     this.pasienBaru = 0,
+    this.punyaDataBpjs = false,
+    this.bpjsAktif = false,
+    this.bpjsStatusPeserta = '',
+    this.bpjsStatusKode = '',
+    this.bpjsHakKelas = '',
+    this.bpjsJenisPeserta = '',
+    this.bpjsNoKartu = '',
+    this.bpjsNik = '',
+    this.bpjsTglSep = '',
+    this.adaRujukan = false,
+    this.rujukanKode = '',
+    this.rujukanNama = '',
+    this.rujukanNoKunjungan = '',
+    this.rujukanTglKunjungan = '',
+    this.rujukanFaskesNama = '',
+    this.rujukanFaskesKode = '',
   });
 
   factory ApmAntrianModel.fromJson(Map<String, dynamic> json) {
     final data = _extractData(json);
+    final bpjs = _parseBpjs(json);
 
     return ApmAntrianModel(
       id: _toString(data, 'id'),
@@ -72,7 +109,86 @@ class ApmAntrianModel {
       tglBooking: _toString(data, 'tgl_booking') ?? '',
       statusBooking: _toInt(data, 'status_booking') ?? 0,
       pasienBaru: _toInt(data, 'pasien_baru') ?? 0,
+      punyaDataBpjs: bpjs.punyaDataBpjs,
+      bpjsAktif: bpjs.aktif,
+      bpjsStatusPeserta: bpjs.statusPeserta,
+      bpjsStatusKode: bpjs.statusKode,
+      bpjsHakKelas: bpjs.hakKelas,
+      bpjsJenisPeserta: bpjs.jenisPeserta,
+      bpjsNoKartu: bpjs.noKartu,
+      bpjsNik: bpjs.nik,
+      bpjsTglSep: bpjs.tglSep,
+      adaRujukan: bpjs.adaRujukan,
+      rujukanKode: bpjs.rujukanKode,
+      rujukanNama: bpjs.rujukanNama,
+      rujukanNoKunjungan: bpjs.rujukanNoKunjungan,
+      rujukanTglKunjungan: bpjs.rujukanTglKunjungan,
+      rujukanFaskesNama: bpjs.rujukanFaskesNama,
+      rujukanFaskesKode: bpjs.rujukanFaskesKode,
     );
+  }
+
+  /// Blok `bpjs` bersebelahan dengan `data` pada response validasi.
+  static _BpjsInfo _parseBpjs(Map<String, dynamic> json) {
+    final bpjs = _asMap(_asMap(json['data'])['bpjs']);
+    if (bpjs.isEmpty) {
+      return const _BpjsInfo();
+    }
+
+    final rujukan = _rujukanTerbaru(_asMap(bpjs['rujukan']));
+    final diagnosa = _asMap(rujukan['diagnosa']);
+    final faskes = _asMap(rujukan['provPerujuk']);
+
+    return _BpjsInfo(
+      punyaDataBpjs: true,
+      aktif: _toBool(bpjs['aktif']),
+      statusPeserta: _toString(bpjs, 'status_peserta'),
+      statusKode: _toString(bpjs, 'status_kode'),
+      hakKelas: _toString(bpjs, 'hak_kelas'),
+      jenisPeserta: _toString(bpjs, 'jenis_peserta'),
+      noKartu: _toString(bpjs, 'no_kartu'),
+      nik: _toString(bpjs, 'nik'),
+      tglSep: _toString(bpjs, 'tgl_sep'),
+      adaRujukan: rujukan.isNotEmpty,
+      rujukanKode: _toString(diagnosa, 'kode'),
+      rujukanNama: _toString(diagnosa, 'nama'),
+      rujukanNoKunjungan: _toString(rujukan, 'noKunjungan'),
+      rujukanTglKunjungan: _toString(rujukan, 'tglKunjungan'),
+      rujukanFaskesNama: _toString(faskes, 'nama'),
+      rujukanFaskesKode: _toString(faskes, 'kode'),
+    );
+  }
+
+  /// Rujukan dengan `tglKunjungan` terbaru, sama seperti kolom `rujukan` backend.
+  static Map<String, dynamic> _rujukanTerbaru(Map<String, dynamic> wrapper) {
+    var daftar = wrapper['data'];
+    if (daftar is Map) {
+      daftar = daftar['rujukan'];
+    }
+    if (daftar is! List || daftar.isEmpty) {
+      return <String, dynamic>{};
+    }
+
+    final items = daftar.map(_asMap).where((item) => item.isNotEmpty).toList()
+      ..sort(
+        (a, b) => (b['tglKunjungan']?.toString() ?? '').compareTo(
+          a['tglKunjungan']?.toString() ?? '',
+        ),
+      );
+
+    return items.first;
+  }
+
+  static Map<String, dynamic> _asMap(dynamic value) {
+    if (value is Map<String, dynamic>) return value;
+    if (value is Map) return value.cast<String, dynamic>();
+    return <String, dynamic>{};
+  }
+
+  static bool _toBool(dynamic value) {
+    if (value is bool) return value;
+    final text = value?.toString().toLowerCase().trim();
+    return text == 'true' || text == '1' || text == 'yes';
   }
 
   static Map<String, dynamic> _extractData(Map<String, dynamic> json) {
@@ -100,6 +216,26 @@ class ApmAntrianModel {
   bool get isValid => rm.isNotEmpty || id.isNotEmpty;
   String get statusText => _getStatusText();
 
+  /// Diagnosis awal SEP diambil otomatis dari diagnosa rujukan BPJS terbaru.
+  /// Backend menolak pembuatan SEP bila nilai ini kosong.
+  String get diagAwal => rujukanKode;
+
+  /// Peserta BPJS baru bisa proceeding ke poli bila aktif dan punya rujukan.
+  bool get bpjsSiapSep =>
+      !punyaDataBpjs || (bpjsAktif && adaRujukan && rujukanKode.isNotEmpty);
+
+  String get bpjsStatusText {
+    if (!punyaDataBpjs) return '-';
+    if (!bpjsAktif) {
+      return bpjsStatusPeserta.isNotEmpty
+          ? bpjsStatusPeserta.toUpperCase()
+          : 'TIDAK AKTIF';
+    }
+    return bpjsStatusPeserta.isNotEmpty
+        ? bpjsStatusPeserta.toUpperCase()
+        : 'AKTIF';
+  }
+
   String _getStatusText() {
     switch (statusBooking) {
       case 0:
@@ -125,4 +261,43 @@ class ApmAntrianModel {
   String toString() {
     return 'ApmAntrianModel(id: $id, rm: $rm, pasien: $pasien, poli: $poli)';
   }
+}
+
+/// Hasil parsing blok `data.bpjs` beserta rujukan terbaru.
+class _BpjsInfo {
+  final bool punyaDataBpjs;
+  final bool aktif;
+  final String statusPeserta;
+  final String statusKode;
+  final String hakKelas;
+  final String jenisPeserta;
+  final String noKartu;
+  final String nik;
+  final String tglSep;
+  final bool adaRujukan;
+  final String rujukanKode;
+  final String rujukanNama;
+  final String rujukanNoKunjungan;
+  final String rujukanTglKunjungan;
+  final String rujukanFaskesNama;
+  final String rujukanFaskesKode;
+
+  const _BpjsInfo({
+    this.punyaDataBpjs = false,
+    this.aktif = false,
+    this.statusPeserta = '',
+    this.statusKode = '',
+    this.hakKelas = '',
+    this.jenisPeserta = '',
+    this.noKartu = '',
+    this.nik = '',
+    this.tglSep = '',
+    this.adaRujukan = false,
+    this.rujukanKode = '',
+    this.rujukanNama = '',
+    this.rujukanNoKunjungan = '',
+    this.rujukanTglKunjungan = '',
+    this.rujukanFaskesNama = '',
+    this.rujukanFaskesKode = '',
+  });
 }

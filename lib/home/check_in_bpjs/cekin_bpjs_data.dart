@@ -52,6 +52,10 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
 
   bool get isPasienBaru => data.pasienBaru == 1;
 
+  /// Peserta BPJS tanpa rujukan tidak bisa mendapat SEP, jadi tombol
+  /// LANJUT KE POLI dinonaktifkan sampai syarat terpenuhi.
+  bool get lanjutKePoliBisa => data.bpjsSiapSep;
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AntrianApmBloc, AntrianApmState>(
@@ -98,6 +102,7 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
                                 isPasienBaru: isPasienBaru,
                                 poliBusy: state is AntrianApmLoading,
                                 loketBusy: state is AntrianApmPrinting,
+                                poliEnabled: lanjutKePoliBisa,
                                 onPoli: _handlePoli,
                                 onLoket: _handleLoket,
                                 dense: dense,
@@ -239,6 +244,74 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
             ),
           ],
         ),
+        if (data.punyaDataBpjs) ...[
+          PatientDataSection(
+            title: 'Status BPJS',
+            icon: Icons.health_and_safety_outlined,
+            rows: [
+              AppDataRow(
+                icon: Icons.verified_user_rounded,
+                label: 'Status Peserta',
+                value: data.bpjsStatusText,
+                emphasized: true,
+                dense: dense,
+              ),
+              AppDataRow(
+                icon: Icons.badge_rounded,
+                label: 'No. Kartu',
+                value: data.bpjsNoKartu.isNotEmpty
+                    ? data.bpjsNoKartu
+                    : data.noPeserta,
+                dense: dense,
+              ),
+              AppDataRow(
+                icon: Icons.workspace_premium_rounded,
+                label: 'Hak Kelas',
+                value: data.bpjsHakKelas,
+                dense: dense,
+              ),
+              AppDataRow(
+                icon: Icons.groups_rounded,
+                label: 'Jenis Peserta',
+                value: data.bpjsJenisPeserta,
+                dense: dense,
+              ),
+            ],
+          ),
+          PatientDataSection(
+            title: 'Rujukan',
+            icon: Icons.assignment_rounded,
+            rows: [
+              AppDataRow(
+                icon: Icons.medical_information_rounded,
+                label: 'Diagnosa',
+                value: data.rujukanKode.isNotEmpty
+                    ? '${data.rujukanKode} - ${data.rujukanNama}'
+                    : 'Tidak ada rujukan',
+                emphasized: true,
+                dense: dense,
+              ),
+              AppDataRow(
+                icon: Icons.local_hospital_outlined,
+                label: 'Faskes Perujuk',
+                value: data.rujukanFaskesNama,
+                dense: dense,
+              ),
+              AppDataRow(
+                icon: Icons.confirmation_number_rounded,
+                label: 'No. Kunjungan',
+                value: data.rujukanNoKunjungan,
+                dense: dense,
+              ),
+              AppDataRow(
+                icon: Icons.event_rounded,
+                label: 'Tgl Kunjungan',
+                value: data.rujukanTglKunjungan,
+                dense: dense,
+              ),
+            ],
+          ),
+        ],
       ],
     );
   }
@@ -248,10 +321,36 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
 
     if (state is AntrianApmPrinted || state is AntrianApmPrinting) {
       sedangProses = false;
-      final message = state is AntrianApmPrinted
-          ? 'Sukses: ${state.message}'
-          : 'Check-in berhasil, silakan lanjutkan.';
-      showSuccessDialog(context, message);
+
+      if (state is AntrianApmPrinting) {
+        showSuccessDialog(context, 'Check-in berhasil, silakan lanjutkan.');
+        return;
+      }
+
+      final printed = state as AntrianApmPrinted;
+      final poli = printed.poliData;
+
+      if (poli != null && poli.sepSuccess && poli.noSep.isNotEmpty) {
+        showSuccessDialog(
+          context,
+          'SEP berhasil dibuat.\nNomor SEP: ${poli.noSep}\n'
+          'Poli: ${poli.sepPoli.isNotEmpty ? poli.sepPoli : poli.namaPoli}',
+          title: 'SEP Berhasil Terbit',
+        );
+        return;
+      }
+
+      if (poli != null && !poli.sepSuccess) {
+        showSuccessDialog(
+          context,
+          'Check-in ke poli berhasil, tetapi SEP belum berhasil dibuat.\n'
+          'Pesan BPJS: ${poli.sepMessage.isNotEmpty ? poli.sepMessage : 'tidak diketahui'}\n'
+          'Mohon laporkan ke petugas loket untuk penerbitan SEP manual.',
+        );
+        return;
+      }
+
+      showSuccessDialog(context, 'Sukses: ${printed.message}');
       return;
     }
 
@@ -272,6 +371,18 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
 
   Future<void> _handlePoli() async {
     if (sedangProses) return;
+
+    if (!lanjutKePoliBisa) {
+      TopToast.warning(
+        context,
+        !data.bpjsAktif
+            ? 'Peserta BPJS tidak aktif sehingga SEP tidak dapat dibuat.'
+            : 'Peserta belum memiliki rujukan BPJS sehingga SEP hanya dapat '
+                  'diterbitkan melalui poli IGD. Hubungi petugas loket.',
+      );
+      return;
+    }
+
     sedangProses = true;
 
     final nomor = data.noPeserta.trim();
@@ -326,6 +437,7 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
           LanjutKePoliEvent(
             noRm: data.rm,
             jenisAntrian: widget.jenisPasien.toLowerCase(),
+            diagAwal: data.diagAwal,
           ),
         );
       },

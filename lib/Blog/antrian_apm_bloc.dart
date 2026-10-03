@@ -82,16 +82,20 @@ class LanjutKePoliEvent extends AntrianApmEvent {
   final String? noPeserta;
   final String jenisAntrian;
 
+  /// Kode ICD-10 untuk t_sep.diagAwal. Wajib pada alur BPJS.
+  final String diagAwal;
+
   const LanjutKePoliEvent({
     this.noBoking,
     this.noRm,
     this.noKtp,
     this.noPeserta,
     required this.jenisAntrian,
+    this.diagAwal = '',
   });
 
   @override
-  List<Object> get props => [jenisAntrian];
+  List<Object> get props => [jenisAntrian, diagAwal];
 }
 
 class LanjutKeLoketEvent extends AntrianApmEvent {
@@ -190,10 +194,19 @@ class AntrianApmPrinted extends AntrianApmState {
   final String message;
   final String noAntrian;
 
-  const AntrianApmPrinted(this.message, {this.noAntrian = ''});
+  /// Terisi pada alur poli BPJS agar halaman bisa menampilkan nomor SEP
+  /// atau pesan kegagalan SEP. Null untuk loket, pendaftaran, dan alur umum.
+  final ApmAntrianPoliModel? poliData;
+
+  const AntrianApmPrinted(this.message, {this.noAntrian = '', this.poliData});
 
   @override
-  List<Object> get props => [message, noAntrian];
+  List<Object> get props => [
+    message,
+    noAntrian,
+    poliData?.noSep ?? '',
+    poliData?.sepMessage ?? '',
+  ];
 }
 
 class AntrianApmError extends AntrianApmState {
@@ -578,7 +591,13 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
 
       final url = '${ApiConfig.antrianApmPoli}/${event.jenisAntrian}';
 
-      final resp = await _requestPost(url, {'no': no});
+      final body = <String, dynamic>{'no': no};
+      final diagAwal = event.diagAwal.trim();
+      if (diagAwal.isNotEmpty) {
+        body['diag_awal'] = diagAwal;
+      }
+
+      final resp = await _requestPost(url, body);
 
       if (resp['code'] != 200 || resp['data'] == null) {
         emit(AntrianApmError(resp['message'] ?? 'Data Poli tidak ditemukan'));
@@ -597,7 +616,9 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
         printColor('Gagal mencetak tiket Poli: $e', textColor: TextColor.red);
       }
 
-      emit(AntrianApmPrinted('Tiket POLI berhasil dicetak'));
+      emit(
+        AntrianApmPrinted('Tiket POLI berhasil dicetak', poliData: apmPoliData),
+      );
 
       emit(AntrianApmLoaded(poliData));
     } catch (e, st) {

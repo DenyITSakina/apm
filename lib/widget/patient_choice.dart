@@ -280,6 +280,7 @@ class PatientChoiceActions extends StatelessWidget {
     required this.onLoket,
     this.poliBusy = false,
     this.loketBusy = false,
+    this.poliEnabled = true,
     this.poliTitle = 'LANJUT KE POLI',
     this.loketTitle = 'PINDAH KE LOKET',
     this.poliCaption = 'Konsultasi dokter, tunggu nomor dipanggil di poli',
@@ -293,6 +294,10 @@ class PatientChoiceActions extends StatelessWidget {
   final VoidCallback onLoket;
   final bool poliBusy;
   final bool loketBusy;
+
+  /// Nonaktifkan tombol poli bila prasyarat belum terpenuhi,
+  /// mis. peserta BPJS tanpa rujukan sehingga SEP tidak bisa dibuat.
+  final bool poliEnabled;
   final String poliTitle;
   final String loketTitle;
   final String poliCaption;
@@ -340,8 +345,9 @@ class PatientChoiceActions extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: (keLoket ? AppColors.warningSoft : AppColors.accentSoft)
-                      .withValues(alpha: 0.7),
+                  color:
+                      (keLoket ? AppColors.warningSoft : AppColors.accentSoft)
+                          .withValues(alpha: 0.7),
                   borderRadius: BorderRadius.circular(AppRadius.md),
                   border: Border.all(
                     color: (keLoket ? AppColors.warning : AppColors.accentDark)
@@ -412,6 +418,7 @@ class PatientChoiceActions extends StatelessWidget {
                     : Icons.arrow_forward_rounded,
                 caption: keLoket ? loketCaption : poliCaption,
                 onPressed: keLoket ? onLoket : onPoli,
+                enabled: keLoket || poliEnabled,
                 loading: keLoket ? loketBusy : poliBusy,
                 height: dense ? 62 : 78,
                 fontSize: dense ? 15.5 : 17,
@@ -426,14 +433,28 @@ class PatientChoiceActions extends StatelessWidget {
             message: keLoket
                 ? 'Karena berstatus pasien baru, Anda diarahkan ke loket Front '
                       'Office untuk registrasi awal.'
+                : !poliEnabled
+                ? 'Check-in ke poli belum bisa dilanjutkan karena data BPJS '
+                      'belum memenuhi syarat pembuatan SEP.'
                 : 'Karena berstatus pasien lama, Anda dapat langsung menuju '
                       'poliklinik tujuan.',
-            icon: Icons.info_outline_rounded,
-            color: keLoket ? AppColors.warning : AppColors.accentDark,
-            background: keLoket ? AppColors.warningSoft : AppColors.accentSoft,
-            points: const [
-              'Simpan nomor antrean atau kode booking Anda.',
-              'Tunjukkan ke petugas bila diminta.',
+            icon: keLoket || !poliEnabled
+                ? Icons.warning_amber_rounded
+                : Icons.info_outline_rounded,
+            color: keLoket || !poliEnabled
+                ? AppColors.warning
+                : AppColors.accentDark,
+            background: keLoket || !poliEnabled
+                ? AppColors.warningSoft
+                : AppColors.accentSoft,
+            points: [
+              if (keLoket || !poliEnabled) ...[
+                'Peserta BPJS wajib berstatus aktif dan memiliki rujukan.',
+                'Silakan hubungi petugas loket atau petugas BPJS.',
+              ] else ...[
+                'Simpan nomor antrean atau kode booking Anda.',
+                'Tunjukkan ke petugas bila diminta.',
+              ],
             ],
           ),
         ],

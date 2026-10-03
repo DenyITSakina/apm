@@ -239,6 +239,22 @@ class _CekinBpjsState extends State<CekinBpjs> {
       jamPraktik: state.apmData.jamPraktik,
       statusBooking: state.apmData.statusBooking,
       pasienBaru: state.apmData.pasienBaru,
+      punyaDataBpjs: state.apmData.punyaDataBpjs,
+      bpjsAktif: state.apmData.bpjsAktif,
+      bpjsStatusPeserta: state.apmData.bpjsStatusPeserta,
+      bpjsStatusKode: state.apmData.bpjsStatusKode,
+      bpjsHakKelas: state.apmData.bpjsHakKelas,
+      bpjsJenisPeserta: state.apmData.bpjsJenisPeserta,
+      bpjsNoKartu: state.apmData.bpjsNoKartu,
+      bpjsNik: state.apmData.bpjsNik,
+      bpjsTglSep: state.apmData.bpjsTglSep,
+      adaRujukan: state.apmData.adaRujukan,
+      rujukanKode: state.apmData.rujukanKode,
+      rujukanNama: state.apmData.rujukanNama,
+      rujukanNoKunjungan: state.apmData.rujukanNoKunjungan,
+      rujukanTglKunjungan: state.apmData.rujukanTglKunjungan,
+      rujukanFaskesNama: state.apmData.rujukanFaskesNama,
+      rujukanFaskesKode: state.apmData.rujukanFaskesKode,
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
