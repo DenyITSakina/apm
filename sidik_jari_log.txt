@@ -51,3 +51,24 @@
 [2026-10-03T13:50:55.152777] Otomasi UI selesai (6355 ms)
 [2026-10-03T13:50:55.296776] After.exe tidak berjalan
 [2026-10-03T13:50:55.318775] After.exe menutup diri saat otomasi (After.ini WSURL kosong (login tetap dicoba)), lanjut sebagai selesai
+[2026-10-03T13:57:40.281959] Mulai proses | nomor=0002****0125 | app=D:\Sakina\apm
+[2026-10-03T13:57:40.311033] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-10-03T13:57:40.646568] Ambil akun VClaim (304 ms)
+[2026-10-03T13:57:40.669581] Login otomatis memakai user=ci*******a
+[2026-10-03T13:57:40.870230] After.exe tidak berjalan
+[2026-10-03T13:57:40.906232] After.exe dijalankan (pid=27580), menunggu proses muncul
+[2026-10-03T13:57:41.017176] After.exe tidak berjalan
+[2026-10-03T13:57:47.017306] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=APP_CLOSED_DURING_LOGIN
+[2026-10-03T13:57:47.038307] Otomasi UI selesai (5585 ms)
+[2026-10-03T13:57:47.149306] After.exe tidak berjalan
+[2026-10-03T13:57:47.170305] After.exe menutup diri saat otomasi (After.ini WSURL kosong (login tetap dicoba)), lanjut sebagai selesai
+[2026-10-03T13:59:54.357994] Mulai proses | nomor=0002****0125 | app=D:\Sakina\apm
+[2026-10-03T13:59:54.383993] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-10-03T13:59:54.636482] Ambil akun VClaim (222 ms)
+[2026-10-03T13:59:54.659480] Login otomatis memakai user=ci*******a
+[2026-10-03T13:59:54.851355] After.exe tidak berjalan
+[2026-10-03T13:59:54.873357] After.exe dijalankan (pid=27608), menunggu proses muncul
+[2026-10-03T14:00:01.472276] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=APP_CLOSED_DURING_LOGIN
+[2026-10-03T14:00:01.494275] Otomasi UI selesai (6469 ms)
+[2026-10-03T14:00:01.628149] After.exe tidak berjalan
+[2026-10-03T14:00:01.643148] After.exe menutup diri saat otomasi (After.ini WSURL kosong (login tetap dicoba)), lanjut sebagai selesai

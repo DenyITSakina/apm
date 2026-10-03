@@ -4,8 +4,6 @@ import 'package:apm/theme/app_typography.dart';
 import 'package:apm/widget/app_button.dart';
 import 'package:flutter/material.dart';
 
-/// Dialog sukses yang selalu mengembalikan pengguna ke halaman utama kiosk
-/// sehingga alur bisa diulang tanpa perlu restart aplikasi.
 Future<void> showSuccessDialog(
   BuildContext context,
   String message, {
@@ -73,17 +71,19 @@ Future<void> showSuccessDialog(
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
                             color: AppColors.textPrimary,
+                            decoration: TextDecoration.none,
                           ),
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         Text(
                           message,
                           textAlign: TextAlign.center,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontFamily: AppText.family,
                             fontSize: 15,
                             height: 1.55,
                             color: AppColors.textSecondary,
+                            decoration: TextDecoration.none,
                           ),
                         ),
                         const SizedBox(height: AppSpacing.lg),
@@ -101,7 +101,7 @@ Future<void> showSuccessDialog(
                                 size: 18,
                               ),
                               const SizedBox(width: 10),
-                              const Expanded(
+                              Expanded(
                                 child: Text(
                                   'Silakan lanjutkan ke poli atau loket sesuai '
                                   'petunjuk petugas.',
@@ -110,6 +110,7 @@ Future<void> showSuccessDialog(
                                     fontSize: 13,
                                     height: 1.45,
                                     color: AppColors.textSecondary,
+                                    decoration: TextDecoration.none,
                                   ),
                                 ),
                               ),
