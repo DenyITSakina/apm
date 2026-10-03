@@ -137,3 +137,13 @@ class AppSpacing {
   static const double xl = 32;
   static const double xxl = 44;
 }
+
+/// Informasi versi aplikasi, disinkronkan dengan `version:` di pubspec.yaml.
+class AppInfo {
+  const AppInfo._();
+
+  static const String appName = 'APM RSU Sakina Idaman';
+  static const String version = '1.0.0';
+
+  static String get label => 'v$version';
+}

@@ -257,7 +257,7 @@ class _DashboardApmState extends State<DashboardApm>
                               color: Colors.white,
                             ),
                             const SizedBox(width: 8),
-                            Flexible(
+Flexible(
                               child: Text(
                                 'ANJUNGAN PENDAFTARAN MANDIRI',
                                 maxLines: 1,
@@ -272,6 +272,19 @@ class _DashboardApmState extends State<DashboardApm>
                               ),
                             ),
                           ],
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        '${AppInfo.appName} ${AppInfo.label}',
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: AppText.family,
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white.withValues(alpha: 0.7),
                         ),
                       ),
                     ],

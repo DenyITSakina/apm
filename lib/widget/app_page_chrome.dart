@@ -339,6 +339,17 @@ class AppPageFooter extends StatelessWidget {
               ),
             ),
           ),
+          Container(width: 1, height: 14, color: Colors.white24),
+          const SizedBox(width: 12),
+          Text(
+            AppInfo.label,
+            style: const TextStyle(
+              fontFamily: AppText.family,
+              fontSize: 11.5,
+              fontWeight: FontWeight.w600,
+              color: Colors.white70,
+            ),
+          ),
           if (showClock && !compact) ...[
             const SizedBox(width: 12),
             Container(width: 1, height: 14, color: Colors.white24),
