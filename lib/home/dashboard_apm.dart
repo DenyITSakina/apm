@@ -134,6 +134,21 @@ class _DashboardApmState extends State<DashboardApm>
                           )
                         else
                           _buildHelpChips(),
+                        const SizedBox(height: AppSpacing.xs),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            '${AppInfo.appName} ${AppInfo.label}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: AppText.family,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -257,7 +272,7 @@ class _DashboardApmState extends State<DashboardApm>
                               color: Colors.white,
                             ),
                             const SizedBox(width: 8),
-Flexible(
+                            Flexible(
                               child: Text(
                                 'ANJUNGAN PENDAFTARAN MANDIRI',
                                 maxLines: 1,
@@ -272,19 +287,6 @@ Flexible(
                               ),
                             ),
                           ],
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        '${AppInfo.appName} ${AppInfo.label}',
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontFamily: AppText.family,
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white.withValues(alpha: 0.7),
                         ),
                       ),
                     ],
@@ -334,7 +336,7 @@ Flexible(
         icon: Icons.health_and_safety_rounded,
         gradient: AppGradients.bpjs,
         color: AppColors.bpjs,
-        steps: 'Pindai kartu BPJS / NIK',
+        steps: 'Pindai kartu BPJS / NIK / No RM',
         onTap: () => _pilihLayanan(bpjs: true),
       ),
       _ServiceConfig(
