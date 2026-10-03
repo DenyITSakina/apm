@@ -47,89 +47,91 @@ Future<void> showSuccessDialog(
                       ),
                     ],
                   ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(18),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: AppGradients.brand,
-                          boxShadow: AppShadow.glow(AppColors.primary),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(18),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            gradient: AppGradients.brand,
+                            boxShadow: AppShadow.glow(AppColors.primary),
+                          ),
+                          child: const Icon(
+                            Icons.check_rounded,
+                            color: Colors.white,
+                            size: 44,
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.check_rounded,
-                          color: Colors.white,
-                          size: 44,
+                        const SizedBox(height: AppSpacing.md),
+                        Text(
+                          title,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: AppText.family,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      Text(
-                        title,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: AppText.family,
-                          fontSize: 24,
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(
+                          message,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontFamily: AppText.family,
+                            fontSize: 15,
+                            height: 1.55,
+                            color: AppColors.textSecondary,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        message,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontFamily: AppText.family,
-                          fontSize: 15,
-                          height: 1.55,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      Container(
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: AppColors.accentSoft,
-                          borderRadius: BorderRadius.circular(AppRadius.md),
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.info_rounded,
-                              color: AppColors.accentDark,
-                              size: 18,
-                            ),
-                            const SizedBox(width: 10),
-                            const Expanded(
-                              child: Text(
-                                'Silakan lanjutkan ke poli atau loket sesuai '
-                                'petunjuk petugas.',
-                                style: TextStyle(
-                                  fontFamily: AppText.family,
-                                  fontSize: 13,
-                                  height: 1.45,
-                                  color: AppColors.textSecondary,
+                        const SizedBox(height: AppSpacing.lg),
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: AppColors.accentSoft,
+                            borderRadius: BorderRadius.circular(AppRadius.md),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.info_rounded,
+                                color: AppColors.accentDark,
+                                size: 18,
+                              ),
+                              const SizedBox(width: 10),
+                              const Expanded(
+                                child: Text(
+                                  'Silakan lanjutkan ke poli atau loket sesuai '
+                                  'petunjuk petugas.',
+                                  style: TextStyle(
+                                    fontFamily: AppText.family,
+                                    fontSize: 13,
+                                    height: 1.45,
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      AppGradientButton(
-                        label: actionLabel,
-                        icon: Icons.home_rounded,
-                        height: 56,
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                          if (onClose != null) {
-                            onClose();
-                          } else {
-                            popToRoot(context);
-                          }
-                        },
-                      ),
-                    ],
+                        const SizedBox(height: AppSpacing.lg),
+                        AppGradientButton(
+                          label: actionLabel,
+                          icon: Icons.home_rounded,
+                          height: 56,
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            if (onClose != null) {
+                              onClose();
+                            } else {
+                              popToRoot(context);
+                            }
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
