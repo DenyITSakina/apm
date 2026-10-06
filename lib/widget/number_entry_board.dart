@@ -466,8 +466,8 @@ class NumberKeypad extends StatelessWidget {
     this.accent = AppColors.primary,
   });
 
-  static const double maxButtonSize = 96;
-  static const double minButtonSize = 28;
+  static const double maxButtonSize = 104;
+  static const double minButtonSize = 48;
 
   final ValueChanged<String> onDigit;
   final VoidCallback onBackspace;
@@ -530,12 +530,11 @@ class NumberKeypad extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: fill
-            ? CrossAxisAlignment.stretch
-            : CrossAxisAlignment.center,
+        crossAxisAlignment:
+            fill ? CrossAxisAlignment.stretch : CrossAxisAlignment.center,
         children: [
           for (var i = 0; i < keys.length; i++) ...[
-            if (i > 0) const SizedBox(width: 8),
+            if (i > 0) const SizedBox(width: 10),
             SizedBox(
               width: size,
               height: fill ? null : size,
@@ -547,53 +546,72 @@ class NumberKeypad extends StatelessWidget {
     );
   }
 
-  Widget _buildKey(String key, double fontSize) {
+  static Color _keyBackground(String key, Color accent) {
     switch (key) {
       case 'backspace':
-        return _KeyButton(
-          key: const ValueKey('keypad-backspace'),
-          onTap: onBackspace,
-          background: AppColors.surfaceMuted,
-          border: AppColors.border,
-          child: Icon(
-            Icons.backspace_rounded,
-            size: fontSize * 0.9,
-            color: AppColors.textSecondary,
-          ),
-        );
+        return AppColors.surfaceMuted;
       case 'clear':
-        return _KeyButton(
-          key: const ValueKey('keypad-clear'),
-          onTap: onClear,
-          background: AppColors.dangerSoft,
-          border: AppColors.danger.withValues(alpha: 0.25),
-          child: Text(
-            'C',
-            style: TextStyle(
-              fontFamily: AppText.family,
-              fontSize: fontSize,
-              fontWeight: FontWeight.w800,
-              color: AppColors.danger,
-            ),
+        return AppColors.dangerSoft;
+      default:
+        return AppColors.surfaceMuted;
+    }
+  }
+
+  static Color _keyBorder(String key, Color accent) {
+    switch (key) {
+      case 'clear':
+        return AppColors.danger.withValues(alpha: 0.35);
+      default:
+        return AppColors.border;
+    }
+  }
+
+  Widget _buildKey(String key, double fontSize) {
+    late final VoidCallback onTap;
+    Widget child;
+    switch (key) {
+      case 'backspace':
+        onTap = onBackspace;
+        child = Icon(
+          Icons.backspace_rounded,
+          size: fontSize * 0.9,
+          color: AppColors.textSecondary,
+        );
+        break;
+      case 'clear':
+        onTap = onClear;
+        child = Text(
+          'C',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: AppText.family,
+            fontSize: fontSize,
+            fontWeight: FontWeight.w800,
+            color: AppColors.danger,
           ),
         );
+        break;
       default:
-        return _KeyButton(
-          key: ValueKey('keypad-$key'),
-          onTap: () => onDigit(key),
-          background: AppColors.surface,
-          border: AppColors.border,
-          child: Text(
-            key,
-            style: TextStyle(
-              fontFamily: AppText.family,
-              fontSize: fontSize,
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
+        onTap = () => onDigit(key);
+        child = Text(
+          key,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: AppText.family,
+            fontSize: fontSize,
+            fontWeight: FontWeight.w700,
+            color: AppColors.textPrimary,
           ),
         );
     }
+
+    return _KeyButton(
+      key: ValueKey('keypad-$key'),
+      onTap: onTap,
+      background: _keyBackground(key, accent),
+      border: _keyBorder(key, accent),
+      child: child,
+    );
   }
 }
 
