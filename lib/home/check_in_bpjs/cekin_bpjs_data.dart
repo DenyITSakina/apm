@@ -367,12 +367,16 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
 
     if (state is AntrianApmError) {
       sedangProses = false;
+      AppLog.instance.write(
+        'ERROR | rm=${AppLog.maskNomor(data.rm)} | ${state.pesan}',
+      );
       TopToast.error(context, state.pesan);
       return;
     }
 
     if (state is AntrianApmBlocked) {
       sedangProses = false;
+      AppLog.instance.write('BLOCKED | rm=${AppLog.maskNomor(data.rm)} | ${state.message}');
       TopToast.warning(context, state.message);
       Future.delayed(const Duration(milliseconds: 900), () {
         if (mounted) Navigator.pop(context);
@@ -421,6 +425,7 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
         'nomor': nomor,
       }, tampilkanToast: false);
     } catch (e) {
+      AppLog.instance.write('Sidik jari exception | error=$e');
       debugPrint('Gagal proses sidik jari: $e');
     }
     tutupDialog();
