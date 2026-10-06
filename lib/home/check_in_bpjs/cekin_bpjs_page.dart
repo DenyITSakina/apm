@@ -1,5 +1,6 @@
 import 'package:apm/blog/antrian_apm_bloc.dart';
 import 'package:apm/dialog/top_toast.dart';
+import 'package:apm/func/app_log.dart';
 import 'package:apm/func/navigation_helpers.dart';
 import 'package:apm/home/check_in_bpjs/cekin_bpjs_data.dart';
 import 'package:apm/models/apm_antrian_model.dart';
@@ -89,6 +90,9 @@ class _CekinBpjsState extends State<CekinBpjs> {
 
     HapticFeedback.mediumImpact();
     setState(() => isProcessing = true);
+    AppLog.instance.write(
+      'Mulai validasi | nomor=${AppLog.maskNomor(nomor)} | jenis=${widget.selectType}',
+    );
     context.read<AntrianApmBloc>().add(
       ValidateAntrianEvent(
         noAntrian: nomor,

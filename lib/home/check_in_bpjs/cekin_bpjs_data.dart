@@ -2,6 +2,7 @@ import 'package:apm/blog/antrian_apm_bloc.dart';
 import 'package:apm/dialog/konfirmasi.dart';
 import 'package:apm/dialog/sukses.dart';
 import 'package:apm/dialog/top_toast.dart';
+import 'package:apm/func/app_log.dart';
 import 'package:apm/func/navigation_helpers.dart';
 import 'package:apm/func/open_aplikasi_bpjsDaftar.dart';
 import 'package:apm/models/apm_antrian_model.dart';
@@ -323,6 +324,8 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
       sedangProses = false;
 
       if (state is AntrianApmPrinting) {
+        AppLog.instance
+            .write('Check-in BPJS | poli dimulai | rm=${AppLog.maskNomor(data.rm)}');
         showSuccessDialog(context, 'Check-in berhasil, silakan lanjutkan.');
         return;
       }
@@ -331,6 +334,10 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
       final poli = printed.poliData;
 
       if (poli != null && poli.sepSuccess && poli.noSep.isNotEmpty) {
+        AppLog.instance.write(
+          'SEP berhasil | rm=${AppLog.maskNomor(data.rm)} | '
+          'noSep=${poli.noSep} | poli=${poli.sepPoli.isNotEmpty ? poli.sepPoli : poli.namaPoli}',
+        );
         showSuccessDialog(
           context,
           'SEP berhasil dibuat.\nNomor SEP: ${poli.noSep}\n'
@@ -341,6 +348,10 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
       }
 
       if (poli != null && !poli.sepSuccess) {
+        AppLog.instance.write(
+          'SEP gagal | rm=${AppLog.maskNomor(data.rm)} | '
+          'message=${poli.sepMessage.isNotEmpty ? poli.sepMessage : "tidak diketahui"}',
+        );
         showSuccessDialog(
           context,
           'Check-in ke poli berhasil, tetapi SEP belum berhasil dibuat.\n'
@@ -397,7 +408,13 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
       return;
     }
 
-    final tutupDialog = showSidikJariProgress(context);
+       AppLog.instance.write('Log file: ${AppLog.instance.logPath}');
+       AppLog.instance.write(
+        'Mulai proses ke poli | rm=${AppLog.maskNomor(data.rm)} | '
+        'pasienBaru=${data.pasienBaru} | bpjsAktif=${data.bpjsAktif} | '
+        'adaRujukan=${data.adaRujukan}',
+      );
+      final tutupDialog = showSidikJariProgress(context);
     var sukses = false;
     try {
       sukses = await openExeFromMap(context, {
@@ -410,7 +427,11 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
 
     if (!mounted) return;
 
-    // After.exe yang menutup dirinya sendiri (popup error, versi kadaluarsa,
+      AppLog.instance.write(
+        'Sidik jari selesai | sukses=$sukses | ditutupOtomatis=$lastSidikJariDitutupOtomatis | reason=${lastSidikJariReason}',
+      );
+
+      // After.exe yang menutup dirinya sendiri (popup error, versi kadaluarsa,
     // dll) tetap diteruskan ke dialog konfirmasi, tidak dianggap gagal.
     if (sukses != true && !lastSidikJariDitutupOtomatis) {
       sedangProses = false;
@@ -433,6 +454,10 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
       onConfirm: () {
         if (!mounted) return;
         HapticFeedback.mediumImpact();
+        AppLog.instance.write(
+          'Lanjut ke poli | rm=${AppLog.maskNomor(data.rm)} | '
+          'diagnosaAwal=${data.diagAwal}',
+        );
         context.read<AntrianApmBloc>().add(
           LanjutKePoliEvent(
             noRm: data.rm,
@@ -465,6 +490,10 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
       ],
       onConfirm: () {
         if (!mounted) return;
+        HapticFeedback.mediumImpact();
+        AppLog.instance.write(
+          'Lanjut ke loket | rm=${AppLog.maskNomor(data.rm)} | noBooking=${data.noBooking}',
+        );
         context.read<AntrianApmBloc>().add(
           LanjutKeLoketEvent(
             apmData: data,
