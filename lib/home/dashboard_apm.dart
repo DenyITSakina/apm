@@ -418,7 +418,7 @@ class _DashboardApmState extends State<DashboardApm>
             const _StepRow(
               number: '1',
               title: 'Pilih layanan',
-              description: 'Cek-in umum,',
+              description: 'Cek-In Umum, Cek In BPJS.',
             ),
             const _StepRow(
               number: '2',

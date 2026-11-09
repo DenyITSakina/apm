@@ -8,6 +8,7 @@ import 'package:apm/func/open_aplikasi_bpjsDaftar.dart';
 import 'package:apm/models/apm_antrian_model.dart';
 import 'package:apm/theme/Style/format_tgl.dart';
 import 'package:apm/theme/app_tokens.dart';
+import 'package:apm/theme/app_typography.dart';
 import 'package:apm/theme/format_text.dart';
 import 'package:apm/widget/app_card.dart';
 import 'package:apm/widget/app_page_chrome.dart';
@@ -150,172 +151,185 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
   }
 
   Widget _buildPatientCard({int columns = 1, bool dense = false}) {
-    return PatientDataCard(
-      data: data,
-      title: 'DATA PASIEN BPJS',
-      gradient: AppGradients.bpjs,
-      columns: columns,
-      dense: dense,
-      status: AppChip(
-        label: isPasienBaru ? 'PASIEN BARU' : 'PASIEN LAMA',
-        icon: isPasienBaru
-            ? Icons.person_add_alt_1_rounded
-            : Icons.person_rounded,
-        color: Colors.white,
-        background: Colors.white24,
-      ),
-      sections: [
-        PatientDataSection(
-          title: 'Identitas',
-          icon: Icons.badge_outlined,
-          rows: [
-            AppDataRow(
-              icon: Icons.person_rounded,
-              label: 'Nama Pasien',
-              value: formatNama(data.pasien),
-              emphasized: true,
+    return BlocBuilder<AntrianApmBloc, AntrianApmState>(
+      buildWhen: (p, c) => c is AntrianApmLoading || p is AntrianApmLoading,
+      builder: (context, state) {
+        final loadingMsg = state is AntrianApmLoading ? state.message : '';
+        return Stack(
+          children: [
+            PatientDataCard(
+              data: data,
+              title: 'DATA PASIEN BPJS',
+              gradient: AppGradients.bpjs,
+              columns: columns,
               dense: dense,
+              status: AppChip(
+                label: isPasienBaru ? 'PASIEN BARU' : 'PASIEN LAMA',
+                icon: isPasienBaru
+                    ? Icons.person_add_alt_1_rounded
+                    : Icons.person_rounded,
+                color: Colors.white,
+                background: Colors.white24,
+              ),
+              sections: _patientSections(dense),
             ),
-            AppDataRow(
-              icon: Icons.cake_rounded,
-              label: 'Tanggal Lahir',
-              value: formatTglBlnTahun(data.tglLahir),
-              dense: dense,
-            ),
-            AppDataRow(
-              icon: Icons.fingerprint_rounded,
-              label: 'No. NIK',
-              value: data.noIdentitas,
-              dense: dense,
-            ),
-            AppDataRow(
-              icon: Icons.home_rounded,
-              label: 'Alamat',
-              value: formatNama(data.alamatDomisili),
-              dense: dense,
-            ),
+            if (loadingMsg.isNotEmpty) _SepLoadingOverlay(message: loadingMsg),
           ],
-        ),
-        PatientDataSection(
-          title: 'Pendaftaran',
-          icon: Icons.confirmation_number_outlined,
-          rows: [
-            AppDataRow(
-              icon: Icons.badge_rounded,
-              label: 'No. BPJS',
-              value: data.noPeserta,
-              emphasized: true,
-              dense: dense,
-            ),
-            AppDataRow(
-              icon: Icons.confirmation_number_rounded,
-              label: 'Nomor RM',
-              value: data.rm,
-              dense: dense,
-            ),
-            AppDataRow(
-              icon: Icons.book_online_rounded,
-              label: 'No. Booking',
-              value: data.noBooking,
-              dense: dense,
-            ),
-          ],
-        ),
-        PatientDataSection(
-          title: 'Kunjungan',
-          icon: Icons.local_hospital_outlined,
-          rows: [
-            AppDataRow(
-              icon: Icons.local_hospital_rounded,
-              label: 'Nama Poli',
-              value: data.namaPoli.isNotEmpty ? data.namaPoli : data.poli,
-              dense: dense,
-            ),
-            AppDataRow(
-              icon: Icons.medical_services_rounded,
-              label: 'Nama Dokter',
-              value: data.namaDokter,
-              dense: dense,
-            ),
-            AppDataRow(
-              icon: Icons.schedule_rounded,
-              label: 'Jam Praktik',
-              value: data.jamPraktik,
-              dense: dense,
-            ),
-          ],
-        ),
-        if (data.punyaDataBpjs) ...[
-          PatientDataSection(
-            title: 'Status BPJS',
-            icon: Icons.health_and_safety_outlined,
-            rows: [
-              AppDataRow(
-                icon: Icons.verified_user_rounded,
-                label: 'Status Peserta',
-                value: data.bpjsStatusText,
-                emphasized: true,
-                dense: dense,
-              ),
-              AppDataRow(
-                icon: Icons.badge_rounded,
-                label: 'No. Kartu',
-                value: data.bpjsNoKartu.isNotEmpty
-                    ? data.bpjsNoKartu
-                    : data.noPeserta,
-                dense: dense,
-              ),
-              AppDataRow(
-                icon: Icons.workspace_premium_rounded,
-                label: 'Hak Kelas',
-                value: data.bpjsHakKelas,
-                dense: dense,
-              ),
-              AppDataRow(
-                icon: Icons.groups_rounded,
-                label: 'Jenis Peserta',
-                value: data.bpjsJenisPeserta,
-                dense: dense,
-              ),
-            ],
-          ),
-          PatientDataSection(
-            title: 'Rujukan',
-            icon: Icons.assignment_rounded,
-            rows: [
-              AppDataRow(
-                icon: Icons.medical_information_rounded,
-                label: 'Diagnosa',
-                value: data.rujukanKode.isNotEmpty
-                    ? '${data.rujukanKode} - ${data.rujukanNama}'
-                    : 'Tidak ada rujukan',
-                emphasized: true,
-                dense: dense,
-              ),
-              AppDataRow(
-                icon: Icons.local_hospital_outlined,
-                label: 'Faskes Perujuk',
-                value: data.rujukanFaskesNama,
-                dense: dense,
-              ),
-              AppDataRow(
-                icon: Icons.confirmation_number_rounded,
-                label: 'No. Kunjungan',
-                value: data.rujukanNoKunjungan,
-                dense: dense,
-              ),
-              AppDataRow(
-                icon: Icons.event_rounded,
-                label: 'Tgl Kunjungan',
-                value: data.rujukanTglKunjungan,
-                dense: dense,
-              ),
-            ],
-          ),
-        ],
-      ],
+        );
+      },
     );
   }
+
+  List<PatientDataSection> _patientSections(bool dense) => [
+    PatientDataSection(
+      title: 'Identitas',
+      icon: Icons.badge_outlined,
+      rows: [
+        AppDataRow(
+          icon: Icons.person_rounded,
+          label: 'Nama Pasien',
+          value: formatNama(data.pasien),
+          emphasized: true,
+          dense: dense,
+        ),
+        AppDataRow(
+          icon: Icons.cake_rounded,
+          label: 'Tanggal Lahir',
+          value: formatTglBlnTahun(data.tglLahir),
+          dense: dense,
+        ),
+        AppDataRow(
+          icon: Icons.fingerprint_rounded,
+          label: 'No. NIK',
+          value: data.noIdentitas,
+          dense: dense,
+        ),
+        AppDataRow(
+          icon: Icons.home_rounded,
+          label: 'Alamat',
+          value: formatNama(data.alamatDomisili),
+          dense: dense,
+        ),
+      ],
+    ),
+    PatientDataSection(
+      title: 'Pendaftaran',
+      icon: Icons.confirmation_number_outlined,
+      rows: [
+        AppDataRow(
+          icon: Icons.badge_rounded,
+          label: 'No. BPJS',
+          value: data.noPeserta,
+          emphasized: true,
+          dense: dense,
+        ),
+        AppDataRow(
+          icon: Icons.confirmation_number_rounded,
+          label: 'Nomor RM',
+          value: data.rm,
+          dense: dense,
+        ),
+        AppDataRow(
+          icon: Icons.book_online_rounded,
+          label: 'No. Booking',
+          value: data.noBooking,
+          dense: dense,
+        ),
+      ],
+    ),
+    PatientDataSection(
+      title: 'Kunjungan',
+      icon: Icons.local_hospital_outlined,
+      rows: [
+        AppDataRow(
+          icon: Icons.local_hospital_rounded,
+          label: 'Nama Poli',
+          value: data.namaPoli.isNotEmpty ? data.namaPoli : data.poli,
+          dense: dense,
+        ),
+        AppDataRow(
+          icon: Icons.medical_services_rounded,
+          label: 'Nama Dokter',
+          value: data.namaDokter,
+          dense: dense,
+        ),
+        AppDataRow(
+          icon: Icons.schedule_rounded,
+          label: 'Jam Praktik',
+          value: data.jamPraktik,
+          dense: dense,
+        ),
+      ],
+    ),
+    if (data.punyaDataBpjs) ...[
+      PatientDataSection(
+        title: 'Status BPJS',
+        icon: Icons.health_and_safety_outlined,
+        rows: [
+          AppDataRow(
+            icon: Icons.verified_user_rounded,
+            label: 'Status Peserta',
+            value: data.bpjsStatusText,
+            emphasized: true,
+            dense: dense,
+          ),
+          AppDataRow(
+            icon: Icons.badge_rounded,
+            label: 'No. Kartu',
+            value: data.bpjsNoKartu.isNotEmpty
+                ? data.bpjsNoKartu
+                : data.noPeserta,
+            dense: dense,
+          ),
+          AppDataRow(
+            icon: Icons.workspace_premium_rounded,
+            label: 'Hak Kelas',
+            value: data.bpjsHakKelas,
+            dense: dense,
+          ),
+          AppDataRow(
+            icon: Icons.groups_rounded,
+            label: 'Jenis Peserta',
+            value: data.bpjsJenisPeserta,
+            dense: dense,
+          ),
+        ],
+      ),
+      PatientDataSection(
+        title: 'Rujukan',
+        icon: Icons.assignment_rounded,
+        rows: [
+          AppDataRow(
+            icon: Icons.medical_information_rounded,
+            label: 'Diagnosa',
+            value: data.rujukanKode.isNotEmpty
+                ? '${data.rujukanKode} - ${data.rujukanNama}'
+                : 'Tidak ada rujukan',
+            emphasized: true,
+            dense: dense,
+          ),
+          AppDataRow(
+            icon: Icons.local_hospital_outlined,
+            label: 'Faskes Perujuk',
+            value: data.rujukanFaskesNama,
+            dense: dense,
+          ),
+          AppDataRow(
+            icon: Icons.confirmation_number_rounded,
+            label: 'No. Kunjungan',
+            value: data.rujukanNoKunjungan,
+            dense: dense,
+          ),
+          AppDataRow(
+            icon: Icons.event_rounded,
+            label: 'Tgl Kunjungan',
+            value: data.rujukanTglKunjungan,
+            dense: dense,
+          ),
+        ],
+      ),
+    ],
+  ];
 
   void _handleState(BuildContext context, AntrianApmState state) {
     if (!mounted) return;
@@ -324,9 +338,14 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
       sedangProses = false;
 
       if (state is AntrianApmPrinting) {
-        AppLog.instance
-            .write('Check-in BPJS | poli dimulai | rm=${AppLog.maskNomor(data.rm)}');
-        showSuccessDialog(context, 'Check-in berhasil, silakan lanjutkan.');
+        AppLog.instance.write(
+          'Check-in BPJS | poli dimulai | rm=${AppLog.maskNomor(data.rm)}',
+        );
+        showSuccessDialog(
+          context,
+          'Check-in berhasil, silakan lanjutkan.',
+          autoCloseAfter: const Duration(seconds: 7),
+        );
         return;
       }
 
@@ -340,9 +359,10 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
         );
         showSuccessDialog(
           context,
-          'SEP berhasil dibuat.\nNomor SEP: ${poli.noSep}\n'
+          'Berhasil: SEP berhasil dibuat.\nNomor SEP: ${poli.noSep}\n'
           'Poli: ${poli.sepPoli.isNotEmpty ? poli.sepPoli : poli.namaPoli}',
-          title: 'SEP Berhasil Terbit',
+          title: 'Berhasil',
+          autoCloseAfter: const Duration(seconds: 7),
         );
         return;
       }
@@ -354,29 +374,38 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
         );
         showSuccessDialog(
           context,
-          'Check-in ke poli berhasil, tetapi SEP belum berhasil dibuat.\n'
+          'Gagal: SEP tidak berhasil dibuat.\n'
           'Pesan BPJS: ${poli.sepMessage.isNotEmpty ? poli.sepMessage : 'tidak diketahui'}\n'
-          'Mohon laporkan ke petugas loket untuk penerbitan SEP manual.',
+          'Mohon laporkan ke petugas loket untuk penanganan lebih lanjut.',
+          title: 'Gagal',
+          autoCloseAfter: const Duration(seconds: 7),
         );
         return;
       }
 
-      showSuccessDialog(context, 'Sukses: ${printed.message}');
+      showSuccessDialog(
+        context,
+        'Berhasil: ${printed.message}',
+        title: 'Berhasil',
+        autoCloseAfter: const Duration(seconds: 7),
+      );
       return;
     }
 
     if (state is AntrianApmError) {
       sedangProses = false;
       AppLog.instance.write(
-        'ERROR | rm=${AppLog.maskNomor(data.rm)} | ${state.pesan}',
+        'Gagal | rm=${AppLog.maskNomor(data.rm)} | ${state.pesan}',
       );
-      TopToast.error(context, state.pesan);
+      showSuccessDialog(context, 'Gagal: ${state.pesan}', title: 'Gagal');
       return;
     }
 
     if (state is AntrianApmBlocked) {
       sedangProses = false;
-      AppLog.instance.write('BLOCKED | rm=${AppLog.maskNomor(data.rm)} | ${state.message}');
+      AppLog.instance.write(
+        'BLOCKED | rm=${AppLog.maskNomor(data.rm)} | ${state.message}',
+      );
       TopToast.warning(context, state.message);
       Future.delayed(const Duration(milliseconds: 900), () {
         if (mounted) Navigator.pop(context);
@@ -412,13 +441,15 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
       return;
     }
 
-       AppLog.instance.write('Log file: ${AppLog.instance.logPath}');
-       AppLog.instance.write(
-        'Mulai proses ke poli | rm=${AppLog.maskNomor(data.rm)} | '
-        'pasienBaru=${data.pasienBaru} | bpjsAktif=${data.bpjsAktif} | '
-        'adaRujukan=${data.adaRujukan}',
-      );
-      final tutupDialog = showSidikJariProgress(context);
+    AppLog.instance.write('Log file: ${AppLog.instance.logPath}');
+    AppLog.instance.write(
+      'Mulai proses ke poli | rm=${AppLog.maskNomor(data.rm)} | '
+      'pasienBaru=${data.pasienBaru} | bpjsAktif=${data.bpjsAktif} | '
+      'adaRujukan=${data.adaRujukan}',
+    );
+
+    // BPJS: klik poli -> langsung tampil sidik jari.
+    final tutupDialog = showSidikJariProgress(context);
     var sukses = false;
     try {
       sukses = await openExeFromMap(context, {
@@ -432,12 +463,12 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
 
     if (!mounted) return;
 
-      AppLog.instance.write(
-        'Sidik jari selesai | sukses=$sukses | ditutupOtomatis=$lastSidikJariDitutupOtomatis | reason=${lastSidikJariReason}',
-      );
+    AppLog.instance.write(
+      'Sidik jari selesai | sukses=$sukses | ditutupOtomatis=$lastSidikJariDitutupOtomatis | reason=${lastSidikJariReason}',
+    );
 
-      // After.exe yang menutup dirinya sendiri (popup error, versi kadaluarsa,
-    // dll) tetap diteruskan ke dialog konfirmasi, tidak dianggap gagal.
+    // After.exe yang menutup dirinya sendiri (popup error, versi kadaluarsa,
+    // dll) tetap diteruskan, tidak dianggap gagal.
     if (sukses != true && !lastSidikJariDitutupOtomatis) {
       sedangProses = false;
       debugPrint('Alasan gagal: $lastSidikJariReason');
@@ -450,31 +481,18 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
       return;
     }
 
-    ConfirmationDialog.show(
-      context,
-      title: 'Menuju Poli',
-      message: 'Anda yakin ingin melanjutkan ke pelayanan Poli?',
-      icon: Icons.local_hospital_rounded,
-      color: AppColors.accentDark,
-      onConfirm: () {
-        if (!mounted) return;
-        HapticFeedback.mediumImpact();
-        AppLog.instance.write(
-          'Lanjut ke poli | rm=${AppLog.maskNomor(data.rm)} | '
-          'diagnosaAwal=${data.diagAwal}',
-        );
-        context.read<AntrianApmBloc>().add(
-          LanjutKePoliEvent(
-            noRm: data.rm,
-            jenisAntrian: widget.jenisPasien.toLowerCase(),
-            diagAwal: data.diagAwal,
-          ),
-        );
-      },
-      onCancel: () {
-        sedangProses = false;
-        if (mounted) popToRoot(context);
-      },
+    // Setelah aplikasi sidik jari ditutup -> langsung proses pembuatan SEP (loading via bloc).
+    HapticFeedback.mediumImpact();
+    AppLog.instance.write(
+      'Lanjut ke poli (pembuatan SEP) | rm=${AppLog.maskNomor(data.rm)} | '
+      'diagnosaAwal=${data.diagAwal}',
+    );
+    context.read<AntrianApmBloc>().add(
+      LanjutKePoliEvent(
+        noRm: data.rm,
+        jenisAntrian: widget.jenisPasien.toLowerCase(),
+        diagAwal: data.diagAwal,
+      ),
     );
   }
 
@@ -508,6 +526,54 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
         );
       },
       onCancel: () => sedangProses = false,
+    );
+  }
+}
+
+class _SepLoadingOverlay extends StatelessWidget {
+  const _SepLoadingOverlay({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned.fill(
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.35),
+          borderRadius: BorderRadius.circular(AppRadius.lg),
+        ),
+        alignment: Alignment.center,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppRadius.md),
+            boxShadow: AppShadow.soft,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(
+                width: 36,
+                height: 36,
+                child: CircularProgressIndicator(strokeWidth: 3),
+              ),
+              const SizedBox(height: 14),
+              Text(
+                message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontFamily: AppText.family,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

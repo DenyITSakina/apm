@@ -168,7 +168,12 @@ class AntrianApmInitial extends AntrianApmState {
 }
 
 class AntrianApmLoading extends AntrianApmState {
-  const AntrianApmLoading();
+  final String message;
+
+  const AntrianApmLoading({this.message = ''});
+
+  @override
+  List<Object> get props => [message];
 }
 
 class AntrianApmValidated extends AntrianApmState {
@@ -580,7 +585,11 @@ class AntrianApmBloc extends Bloc<AntrianApmEvent, AntrianApmState> {
     LanjutKePoliEvent event,
     Emitter<AntrianApmState> emit,
   ) async {
-    emit(const AntrianApmLoading());
+    final isBpjs =
+        event.jenisAntrian.toLowerCase() == 'bpjs' || event.jenisAntrian == '2';
+    emit(AntrianApmLoading(
+      message: isBpjs ? 'Proses pembuatan SEP sedang berlangsung...' : '',
+    ));
 
     try {
       final no = event.noPeserta ?? event.noRm ?? event.noKtp ?? '';

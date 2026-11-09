@@ -10,8 +10,9 @@ Future<void> showSuccessDialog(
   String title = 'Berhasil',
   String actionLabel = 'SELESAI',
   VoidCallback? onClose,
+  Duration? autoCloseAfter,
 }) {
-  return showGeneralDialog(
+  final dialogFuture = showGeneralDialog(
     context: context,
     barrierDismissible: false,
     barrierLabel: title,
@@ -143,4 +144,19 @@ Future<void> showSuccessDialog(
     },
     transitionDuration: const Duration(milliseconds: 420),
   );
+
+  if (autoCloseAfter != null && context.mounted) {
+    Future.delayed(autoCloseAfter, () {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        if (onClose != null) {
+          onClose();
+        } else {
+          popToRoot(context);
+        }
+      }
+    });
+  }
+
+  return dialogFuture;
 }

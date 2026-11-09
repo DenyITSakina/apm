@@ -274,7 +274,7 @@ class CekinUmumDataPage extends StatelessWidget {
       final message = state is AntrianApmPrinted
           ? 'Sukses: ${state.message}'
           : 'Check-in berhasil, silakan lanjutkan.';
-      showSuccessDialog(context, message);
+      showSuccessDialog(context, message, autoCloseAfter: const Duration(seconds: 7));
       return;
     }
 
