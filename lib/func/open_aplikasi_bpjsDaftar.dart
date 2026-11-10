@@ -1042,60 +1042,53 @@ Future<void> Function() showSidikJariProgress(BuildContext context) {
     barrierLabel: "Memproses sidik jari",
     barrierColor: Colors.black.withOpacity(0.45),
     pageBuilder: (dialogContext, _, _) {
-      return Builder(
-        builder: (context) {
-          closer = () {
-            if (Navigator.of(context).canPop()) {
-              Navigator.of(context).pop();
-            }
-          };
-          return const SizedBox.shrink();
-        },
-      );
-    },
-    transitionBuilder: (context, anim, _, child) {
-      return Opacity(
-        opacity: anim.value,
-        child: Center(
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.8,
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.15),
-                  blurRadius: 20,
-                  offset: const Offset(0, 8),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                LoadingAnimationWidget.fourRotatingDots(
-                  color: const Color(0xFF0ABF68),
-                  size: 40,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  "Memproses Sidik Jari",
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  "Mohon takeover dan letakkan sidik jari pada reader.",
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
+      closer = () {
+        if (Navigator.of(dialogContext).canPop()) {
+          Navigator.of(dialogContext).pop();
+        }
+      };
+      return Center(
+        child: Container(
+          width: MediaQuery.of(dialogContext).size.width * 0.8,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.15),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              LoadingAnimationWidget.fourRotatingDots(
+                color: const Color(0xFF0ABF68),
+                size: 40,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                "Memproses Sidik Jari",
+                style: Theme.of(
+                  dialogContext,
+                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                "Mohon takeover dan letakkan sidik jari pada reader.",
+                textAlign: TextAlign.center,
+                style: Theme.of(dialogContext).textTheme.bodySmall,
+              ),
+            ],
           ),
         ),
       );
+    },
+    transitionBuilder: (context, anim, _, child) {
+      return Opacity(opacity: anim.value, child: child);
     },
     transitionDuration: const Duration(milliseconds: 200),
   );

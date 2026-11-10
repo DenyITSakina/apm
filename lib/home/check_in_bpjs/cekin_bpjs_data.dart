@@ -459,7 +459,6 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
       AppLog.instance.write('Sidik jari exception | error=$e');
       debugPrint('Gagal proses sidik jari: $e');
     }
-    tutupDialog();
 
     if (!mounted) return;
 
@@ -472,6 +471,7 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
     if (sukses != true && !lastSidikJariDitutupOtomatis) {
       sedangProses = false;
       debugPrint('Alasan gagal: $lastSidikJariReason');
+      tutupDialog();
       TopToast.error(
         context,
         lastSidikJariReason.isEmpty
@@ -494,6 +494,9 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
         diagAwal: data.diagAwal,
       ),
     );
+
+    // Tutup loading sidik jari setelah SEP loading mulai (via bloc)
+    tutupDialog();
   }
 
   void _handleLoket() {
