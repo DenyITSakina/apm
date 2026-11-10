@@ -33,3 +33,9 @@
 [2026-11-10T10:09:27.806971] Sidik jari selesai | sukses=true | ditutupOtomatis=true | reason=
 [2026-11-10T10:09:27.828970] Lanjut ke poli (pembuatan SEP) | rm=0017****0120 | diagnosaAwal=O48
 [2026-11-10T10:09:36.743974] SEP berhasil | rm=0017****0120 | noSep=0179R0131126V000005 | poli=INSTALASI GAWAT DARURAT
+[2026-11-10T15:24:41.015038] Mulai validasi | nomor=2026****0102 | jenis=bpjs
+[2026-11-10T15:24:49.391350] Log file: D:\Sakina\apm\bpjs_checkin_log.txt
+[2026-11-10T15:24:49.419] Mulai proses ke poli | rm=0017****0120 | pasienBaru=0 | bpjsAktif=true | adaRujukan=true
+[2026-11-10T15:24:54.857253] Sidik jari selesai | sukses=true | ditutupOtomatis=true | reason=
+[2026-11-10T15:24:54.878288] Lanjut ke poli (pembuatan SEP) | rm=0017****0120 | diagnosaAwal=O48
+[2026-11-10T15:25:09.221155] SEP berhasil | rm=0017****0120 | noSep=0179R0131126V000006 | poli=INSTALASI GAWAT DARURAT
