@@ -491,64 +491,151 @@ class _DiagonalStripePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final rect = Offset.zero & size;
 
-    final base = Paint()
+    canvas.save();
+    canvas.clipRect(rect);
+
+    // 1. Background gradient
+    final background = Paint()
       ..shader = LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [
+          AppColors.primary.withValues(alpha: 0.10),
+          Colors.white,
+          AppColors.primarySoft.withValues(alpha: 0.35),
+          AppColors.accent.withValues(alpha: 0.08),
+        ],
+        stops: const [0.0, 0.42, 0.78, 1.0],
+      ).createShader(rect);
+
+    canvas.drawRect(rect, background);
+
+    // 2. Diagonal stripes
+    const spacing = 145.0;
+    const bandWidth = 65.0;
+
+    final stripePaint = Paint()..style = PaintingStyle.fill;
+
+    for (
+      double x = -size.height - bandWidth;
+      x < size.width + size.height;
+      x += spacing
+    ) {
+      final index = (x / spacing).round();
+
+      final colors = index % 3 == 0
+          ? [
+              AppColors.primary.withValues(alpha: 0.0),
+              AppColors.primary.withValues(alpha: 0.045),
+              AppColors.accent.withValues(alpha: 0.025),
+              AppColors.primary.withValues(alpha: 0.0),
+            ]
+          : [
+              Colors.white.withValues(alpha: 0.0),
+              Colors.white.withValues(alpha: 0.45),
+              Colors.white.withValues(alpha: 0.0),
+            ];
+
+      stripePaint.shader = LinearGradient(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: [
-          Colors.white.withValues(alpha: 0.18),
-          Colors.white.withValues(alpha: 0.04),
-          Colors.white.withValues(alpha: 0.10),
-        ],
+        colors: colors,
       ).createShader(rect);
-    canvas.drawRect(rect, base);
 
-    final stripePaint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 18;
+      final path = Path()
+        ..moveTo(x, 0)
+        ..lineTo(x + bandWidth, 0)
+        ..lineTo(x + bandWidth + size.height, size.height)
+        ..lineTo(x + size.height, size.height)
+        ..close();
 
-    const spacing = 34.0;
-    final diagonal = size.width + size.height;
-    for (double x = -size.height; x < diagonal; x += spacing) {
-      final isAccent = ((x / spacing).round() % 4 == 0);
-      stripePaint.color = isAccent
-          ? AppColors.primary.withValues(alpha: 0.045)
-          : Colors.white.withValues(alpha: 0.055);
-      stripePaint.strokeWidth = isAccent ? 22 : 14;
-      canvas.drawLine(
-        Offset(x, 0),
-        Offset(x + size.height, size.height),
-        stripePaint,
-      );
+      canvas.drawPath(path, stripePaint);
     }
 
-    final thin = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1
-      ..color = Colors.white.withValues(alpha: 0.10);
-    for (double x = -size.height + spacing / 2; x < diagonal; x += spacing) {
-      canvas.drawLine(
-        Offset(x, 0),
-        Offset(x + size.height, size.height),
-        thin,
-      );
-    }
-
-    final vignette = Paint()
+    // 3. Soft glow
+    final glow = Paint()
       ..shader = RadialGradient(
-        center: Alignment.center,
-        radius: 0.95,
+        center: const Alignment(-0.65, -0.75),
+        radius: 1.15,
         colors: [
-          Colors.transparent,
+          Colors.white.withValues(alpha: 0.85),
           AppColors.primary.withValues(alpha: 0.035),
+          Colors.transparent,
         ],
-        stops: const [0.55, 1.0],
+        stops: const [0.0, 0.45, 1.0],
       ).createShader(rect);
-    canvas.drawRect(rect, vignette);
+
+    canvas.drawRect(rect, glow);
+
+    // 4. Watermark SAKINA
+    final fontSize = (size.width * 0.17).clamp(36.0, 150.0);
+
+    final textPainter = TextPainter(
+      text: TextSpan(
+        text: 'SAKINA',
+        style: TextStyle(
+          fontFamily: AppText.family,
+          fontSize: fontSize,
+          fontWeight: FontWeight.w900,
+          letterSpacing: fontSize * 0.055,
+          color: AppColors.primary.withValues(alpha: 0.065),
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+      textAlign: TextAlign.center,
+      maxLines: 1,
+    )..layout(maxWidth: size.width * 1.5);
+
+    canvas.save();
+
+    canvas.translate(size.width / 2, size.height / 2);
+    canvas.rotate(-0.12);
+
+    textPainter.paint(
+      canvas,
+      Offset(-textPainter.width / 2, -textPainter.height / 2),
+    );
+
+    canvas.restore();
+
+    // 5. Brand text kecil
+    final brandPainter = TextPainter(
+      text: TextSpan(
+        text: 'RSU SAKINA IDAMAN',
+        style: TextStyle(
+          fontFamily: AppText.family,
+          fontSize: (size.width * 0.018).clamp(9.0, 15.0),
+          fontWeight: FontWeight.w800,
+          letterSpacing: 3.0,
+          color: AppColors.primary.withValues(alpha: 0.12),
+        ),
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+
+    brandPainter.paint(
+      canvas,
+      Offset(
+        size.width - brandPainter.width - 24,
+        size.height - brandPainter.height - 20,
+      ),
+    );
+
+    // 6. Decorative glow bottom
+    final bottomGlow = Paint()
+      ..shader = RadialGradient(
+        center: const Alignment(0.85, 0.95),
+        radius: 0.8,
+        colors: [AppColors.primary.withValues(alpha: 0.07), Colors.transparent],
+      ).createShader(rect);
+
+    canvas.drawRect(rect, bottomGlow);
+
+    canvas.restore();
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _DiagonalStripePainter oldDelegate) => false;
 }
 
 class _GlowBubble extends StatelessWidget {
