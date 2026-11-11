@@ -150,7 +150,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
                             onSubmit: _submitData,
                             submitLabel: 'CARI DATA',
                             submitIcon: Icons.search_rounded,
-                            submitCaption: 'Cari data pasien',
+                            submitCaption: 'Periksa nomor lalu tekan Cari Data',
                             submitGradient: _isBpjs
                                 ? AppGradients.bpjs
                                 : AppGradients.umum,

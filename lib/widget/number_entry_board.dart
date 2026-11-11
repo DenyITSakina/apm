@@ -166,22 +166,30 @@ class _NumberEntryBoardState extends State<NumberEntryBoard> {
           );
         }
 
-        // Tombol aksi diletakkan di kanan atas, sejajar dengan display scanner,
-        // sehingga tidak berada di tengah dan mudah dijangkau ibu jari.
+        // Tombol aksi diletakkan di kanan, sejajar dan sama tinggi
+        // dengan display scanner agar rapi dan mudah dijangkau.
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: header),
-                const SizedBox(width: AppSpacing.md),
-                SizedBox(width: 280, child: submit),
-              ],
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(child: header),
+                  const SizedBox(width: AppSpacing.lg),
+                  SizedBox(width: 300, child: submit),
+                ],
+              ),
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.lg),
             Expanded(
-              child: Align(alignment: Alignment.topCenter, child: keypad),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 520),
+                  child: keypad,
+                ),
+              ),
             ),
             if (notice != null) ...[
               const SizedBox(height: AppSpacing.md),
@@ -218,6 +226,11 @@ class _SubmitBlock extends StatelessWidget {
   Widget build(BuildContext context) {
     final ready = enabled && !loading;
     final accent = _accentOf(gradient);
+    final helper = loading
+        ? 'Mohon tunggu, sedang memproses data...'
+        : ready
+        ? (caption ?? 'Periksa nomor lalu tekan tombol di atas')
+        : 'Isi atau pindai nomor terlebih dahulu';
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -225,7 +238,9 @@ class _SubmitBlock extends StatelessWidget {
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(AppRadius.lg),
         boxShadow: AppShadow.soft,
-        border: Border.all(color: ready ? accent : AppColors.border),
+        border: Border.all(
+          color: ready ? accent.withValues(alpha: 0.45) : AppColors.border,
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -233,31 +248,16 @@ class _SubmitBlock extends StatelessWidget {
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: accent.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(AppRadius.sm),
-                ),
-                child: Icon(
-                  Icons.arrow_forward_rounded,
-                  size: 16,
-                  color: accent,
-                ),
-              ),
+              Icon(Icons.touch_app_rounded, size: 16, color: accent),
               const SizedBox(width: 8),
-              Flexible(
-                child: Text(
-                  'LANGKAH BERIKUTNYA',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: AppText.family,
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: 1,
-                    color: accent,
-                  ),
+              Text(
+                'LANGKAH BERIKUTNYA',
+                style: TextStyle(
+                  fontFamily: AppText.family,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.8,
+                  color: accent,
                 ),
               ),
             ],
@@ -266,28 +266,23 @@ class _SubmitBlock extends StatelessWidget {
           AppGradientButton(
             label: label,
             icon: icon,
-            caption: caption,
             onPressed: onPressed,
             loading: loading,
             enabled: enabled,
             gradient: gradient,
-            height: 66,
+            height: 64,
             fontSize: 16,
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
           Text(
-            loading
-                ? 'Mohon tunggu, sedang memproses data...'
-                : ready
-                ? caption ?? 'Periksa nomor lalu tekan tombol di atas'
-                : 'Isi atau pindai nomor terlebih dahulu',
+            helper,
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontFamily: AppText.family,
-              fontSize: 11,
-              height: 1.3,
+              fontSize: 11.5,
+              height: 1.35,
               fontWeight: FontWeight.w600,
               color: AppColors.textMuted,
             ),
@@ -351,25 +346,36 @@ class _ScannerDisplay extends StatelessWidget {
                 ),
               ),
               if (hasText)
-                Text(
-                  '$digits/$maxLength',
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textMuted,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceMuted,
+                    borderRadius: BorderRadius.circular(AppRadius.pill),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Text(
+                    '$digits/$maxLength',
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textMuted,
+                    ),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.md),
           Stack(
             children: [
               AnimatedContainer(
                 duration: const Duration(milliseconds: 220),
                 width: double.infinity,
                 padding: EdgeInsets.symmetric(
-                  vertical: compact ? 12 : 20,
-                  horizontal: 18,
+                  vertical: compact ? 14 : 22,
+                  horizontal: 20,
                 ),
                 decoration: BoxDecoration(
                   color: AppColors.surfaceMuted,
@@ -466,7 +472,7 @@ class NumberKeypad extends StatelessWidget {
     this.accent = AppColors.primary,
   });
 
-  static const double maxButtonSize = 104;
+  static const double maxButtonSize = 128;
   static const double minButtonSize = 48;
 
   final ValueChanged<String> onDigit;
@@ -484,18 +490,19 @@ class NumberKeypad extends StatelessWidget {
         final innerHeight = constraints.maxHeight.isFinite
             ? constraints.maxHeight - 22
             : double.infinity;
+        final gap = (innerWidth * 0.03).clamp(10.0, 18.0);
 
-        final byWidth = (innerWidth - 16) / 3;
-        final byHeight = bounded ? innerHeight / 4 - 8 : byWidth;
+        final byWidth = (innerWidth - gap * 2) / 3;
+        final byHeight = bounded ? (innerHeight - gap * 3) / 4 : byWidth;
 
         final size = (byWidth < byHeight ? byWidth : byHeight).clamp(
           minButtonSize,
           maxButtonSize,
         );
-        final fontSize = (size * 0.38).clamp(18.0, 32.0);
+        final fontSize = (size * 0.36).clamp(18.0, 34.0);
 
         Widget row(List<String> keys) =>
-            _row(keys, size, fontSize, fill: bounded);
+            _row(keys, size, fontSize, gap, fill: bounded);
 
         final rows = [
           row(['1', '2', '3']),
@@ -523,18 +530,20 @@ class NumberKeypad extends StatelessWidget {
   Widget _row(
     List<String> keys,
     double size,
-    double fontSize, {
+    double fontSize,
+    double gap, {
     bool fill = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: gap / 2),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment:
-            fill ? CrossAxisAlignment.stretch : CrossAxisAlignment.center,
+        crossAxisAlignment: fill
+            ? CrossAxisAlignment.stretch
+            : CrossAxisAlignment.center,
         children: [
           for (var i = 0; i < keys.length; i++) ...[
-            if (i > 0) const SizedBox(width: 10),
+            if (i > 0) SizedBox(width: gap),
             SizedBox(
               width: size,
               height: fill ? null : size,

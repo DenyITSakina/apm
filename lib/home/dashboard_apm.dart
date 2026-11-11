@@ -102,54 +102,60 @@ class _DashboardApmState extends State<DashboardApm>
               final isWide = constraints.maxWidth >= 900;
               final pad = isWide ? AppSpacing.lg : AppSpacing.md;
 
-              return Padding(
-                padding: EdgeInsets.fromLTRB(
-                  pad,
-                  AppSpacing.md,
-                  pad,
-                  AppSpacing.md,
-                ),
+              return SingleChildScrollView(
                 child: Center(
                   child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: isWide ? 1200 : 720),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _buildBrand(isWide: isWide),
-                        const SizedBox(height: AppSpacing.md),
-                        _buildGreeting(),
-                        const SizedBox(height: AppSpacing.md),
-                        Expanded(child: _buildServiceGrid(isWide: isWide)),
-                        const SizedBox(height: AppSpacing.md),
-                        if (isWide)
-                          IntrinsicHeight(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Expanded(child: _buildStepsCard()),
-                                const SizedBox(width: AppSpacing.md),
-                                Expanded(child: _buildHelpCard()),
-                              ],
-                            ),
-                          )
-                        else
-                          _buildHelpChips(),
-                        const SizedBox(height: AppSpacing.xs),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            '${AppInfo.appName} ${AppInfo.label}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontFamily: AppText.family,
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textSecondary,
+                    constraints: BoxConstraints(
+                      maxWidth: isWide ? 1200 : 720,
+                      minHeight: constraints.maxHeight,
+                    ),
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(
+                        pad,
+                        AppSpacing.md,
+                        pad,
+                        AppSpacing.md,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _buildBrand(isWide: isWide),
+                          const SizedBox(height: AppSpacing.md),
+                          _buildGreeting(),
+                          const SizedBox(height: AppSpacing.lg),
+                          _buildServiceGrid(isWide: isWide),
+                          const SizedBox(height: AppSpacing.lg),
+                          if (isWide)
+                            IntrinsicHeight(
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Expanded(child: _buildStepsCard()),
+                                  const SizedBox(width: AppSpacing.md),
+                                  Expanded(child: _buildHelpCard()),
+                                ],
+                              ),
+                            )
+                          else
+                            _buildHelpChips(),
+                          const SizedBox(height: AppSpacing.md),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              '${AppInfo.appName} ${AppInfo.label}',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: AppText.family,
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w500,
+                                color: AppColors.textSecondary,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -192,7 +198,7 @@ class _DashboardApmState extends State<DashboardApm>
         clipBehavior: Clip.antiAlias,
         padding: EdgeInsets.symmetric(
           horizontal: isWide ? 28 : 18,
-          vertical: isWide ? 24 : 18,
+          vertical: isWide ? 22 : 16,
         ),
         decoration: BoxDecoration(
           gradient: AppGradients.brand,
@@ -248,13 +254,68 @@ class _DashboardApmState extends State<DashboardApm>
               children: [
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 11,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(AppRadius.pill),
+                          border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.24),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 7,
+                              height: 7,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFB7F7DA),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 7),
+                            Flexible(
+                              child: Text(
+                                'ANJUNGAN PENDAFTARAN MANDIRI',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontFamily: AppText.family,
+                                  fontSize: isWide ? 10 : 8.5,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.65,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: isWide ? 12 : 9),
+                      Text(
+                        'SELAMAT DATANG DI',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontFamily: AppText.family,
+                          fontSize: isWide ? 10 : 8.5,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: 1.25,
+                          color: Colors.white.withValues(alpha: 0.78),
+                        ),
+                      ),
+                      const SizedBox(height: 4),
                       // Nama rumah sakit
                       Text(
                         'RSU SAKINA IDAMAN',
-                        textAlign: TextAlign.center,
+                        textAlign: TextAlign.start,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: AppText.headerTitle(context).copyWith(
@@ -271,7 +332,7 @@ class _DashboardApmState extends State<DashboardApm>
                       // Slogan
                       Text(
                         '#pedulisesama  .  #sakinapilihanku',
-                        textAlign: TextAlign.center,
+                        textAlign: TextAlign.start,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -281,42 +342,6 @@ class _DashboardApmState extends State<DashboardApm>
                           fontWeight: FontWeight.w500,
                           letterSpacing: 0.3,
                           color: Colors.white.withValues(alpha: 0.85),
-                        ),
-                      ),
-
-                      SizedBox(height: isWide ? 18 : 13),
-
-                      // Badge anjungan
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: isWide ? 16 : 11,
-                          vertical: isWide ? 9 : 7,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(AppRadius.pill),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                'ANJUNGAN PENDAFTARAN MANDIRI',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontFamily: AppText.family,
-                                  fontSize: isWide ? 11.5 : 9,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: 0.6,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
                         ),
                       ),
                     ],
@@ -410,11 +435,8 @@ class _DashboardApmState extends State<DashboardApm>
       LayoutBuilder(
         builder: (context, constraints) {
           const gap = AppSpacing.md;
-          final columns = constraints.maxWidth >= 1000
-              ? 3
-              : constraints.maxWidth >= 620
-              ? 2
-              : 1;
+          final columns = constraints.maxWidth >= 620 ? 2 : 1;
+          final cardHeight = constraints.maxWidth >= 900 ? 210.0 : 260.0;
 
           final rows = <List<_ServiceConfig>>[];
           for (var i = 0; i < cards.length; i += columns) {
@@ -426,15 +448,14 @@ class _DashboardApmState extends State<DashboardApm>
             children: [
               for (var r = 0; r < rows.length; r++) ...[
                 if (r > 0) const SizedBox(height: gap),
-                Expanded(
+                SizedBox(
+                  height: cardHeight,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       for (var c = 0; c < rows[r].length; c++) ...[
                         if (c > 0) const SizedBox(width: gap),
-                        Expanded(
-                          child: _ServiceCard(config: rows[r][c], fill: true),
-                        ),
+                        Expanded(child: _ServiceCard(config: rows[r][c])),
                       ],
                     ],
                   ),
@@ -533,18 +554,18 @@ class _DashboardApmState extends State<DashboardApm>
         children: [
           for (final tip in tips)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.warningSoft,
+                color: AppColors.surface.withValues(alpha: 0.88),
                 borderRadius: BorderRadius.circular(AppRadius.pill),
                 border: Border.all(
-                  color: AppColors.warning.withValues(alpha: 0.25),
+                  color: AppColors.border.withValues(alpha: 0.9),
                 ),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(tip.$1, size: 13, color: AppColors.warning),
+                  Icon(tip.$1, size: 14, color: AppColors.primary),
                   const SizedBox(width: 6),
                   Text(
                     tip.$2,
@@ -588,10 +609,9 @@ class _ServiceConfig {
 }
 
 class _ServiceCard extends StatefulWidget {
-  const _ServiceCard({required this.config, this.fill = false});
+  const _ServiceCard({required this.config});
 
   final _ServiceConfig config;
-  final bool fill;
 
   @override
   State<_ServiceCard> createState() => _ServiceCardState();
@@ -623,33 +643,60 @@ class _ServiceCardState extends State<_ServiceCard> {
               borderRadius: BorderRadius.circular(AppRadius.xl),
               child: Ink(
                 decoration: BoxDecoration(
-                  gradient: config.gradient,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.circular(AppRadius.xl),
-                  boxShadow: AppShadow.glow(config.color),
+                  border: Border.all(
+                    color: config.color.withValues(alpha: 0.18),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: config.color.withValues(alpha: 0.1),
+                      blurRadius: 28,
+                      offset: const Offset(0, 12),
+                    ),
+                  ],
                 ),
                 child: Stack(
                   children: [
-                    Positioned(
-                      right: -18,
-                      top: -18,
-                      child: Icon(
-                        config.icon,
-                        size: 150,
-                        color: Colors.white.withValues(alpha: 0.1),
+                    Positioned.fill(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(AppRadius.xl),
+                        child: Stack(
+                          children: [
+                            Positioned(
+                              right: -42,
+                              top: -54,
+                              child: Container(
+                                width: 160,
+                                height: 160,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: config.color.withValues(alpha: 0.055),
+                                ),
+                              ),
+                            ),
+                            Positioned(
+                              left: 0,
+                              top: 0,
+                              bottom: 0,
+                              child: Container(width: 5, color: config.color),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        AppSpacing.md,
+                        AppSpacing.md,
+                        AppSpacing.md,
+                      ),
                       child: LayoutBuilder(
                         builder: (context, constraints) {
-                          final height = constraints.maxHeight;
-                          final tiny = height < 190;
-                          final horizontal = constraints.maxWidth >= 280;
-                          final logoSize = tiny
-                              ? 52.0
-                              : horizontal
-                              ? 72.0
-                              : 60.0;
+                          final horizontal = constraints.maxWidth >= 350;
+                          final logoSize = horizontal ? 68.0 : 60.0;
 
                           final info = Column(
                             crossAxisAlignment: horizontal
@@ -666,17 +713,13 @@ class _ServiceCardState extends State<_ServiceCard> {
                                     : TextAlign.center,
                                 style: TextStyle(
                                   fontFamily: AppText.family,
-                                  fontSize: tiny
-                                      ? 19
-                                      : horizontal
-                                      ? 23
-                                      : 20,
+                                  fontSize: horizontal ? 21 : 20,
                                   fontWeight: FontWeight.w800,
-                                  color: Colors.white,
+                                  color: AppColors.textPrimary,
                                   height: 1.2,
                                 ),
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 5),
                               Text(
                                 config.subtitle,
                                 maxLines: 1,
@@ -686,19 +729,19 @@ class _ServiceCardState extends State<_ServiceCard> {
                                     : TextAlign.center,
                                 style: TextStyle(
                                   fontFamily: AppText.family,
-                                  fontSize: tiny ? 12 : 13,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.w500,
-                                  color: Colors.white.withValues(alpha: 0.92),
+                                  color: AppColors.textSecondary,
                                 ),
                               ),
-                              SizedBox(height: tiny ? 6 : AppSpacing.sm),
+                              const SizedBox(height: AppSpacing.sm),
                               Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: tiny ? 5 : 7,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 7,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.2),
+                                  color: config.color.withValues(alpha: 0.09),
                                   borderRadius: BorderRadius.circular(
                                     AppRadius.pill,
                                   ),
@@ -706,10 +749,10 @@ class _ServiceCardState extends State<_ServiceCard> {
                                 child: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    const Icon(
+                                    Icon(
                                       Icons.qr_code_scanner_rounded,
-                                      size: 15,
-                                      color: Colors.white,
+                                      size: 14,
+                                      color: config.color,
                                     ),
                                     const SizedBox(width: 6),
                                     Flexible(
@@ -717,11 +760,11 @@ class _ServiceCardState extends State<_ServiceCard> {
                                         config.steps,
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontFamily: AppText.family,
-                                          fontSize: 12,
+                                          fontSize: 11.5,
                                           fontWeight: FontWeight.w600,
-                                          color: Colors.white,
+                                          color: config.color,
                                         ),
                                       ),
                                     ),
@@ -732,15 +775,20 @@ class _ServiceCardState extends State<_ServiceCard> {
                           );
 
                           final action = Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 18,
-                              vertical: tiny ? 8 : 11,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 11,
                             ),
                             decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(
-                                AppRadius.pill,
-                              ),
+                              gradient: config.gradient,
+                              borderRadius: BorderRadius.circular(AppRadius.md),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: config.color.withValues(alpha: 0.2),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -749,17 +797,17 @@ class _ServiceCardState extends State<_ServiceCard> {
                                   'MULAI',
                                   style: TextStyle(
                                     fontFamily: AppText.family,
-                                    fontSize: tiny ? 13 : 14,
+                                    fontSize: 13,
                                     fontWeight: FontWeight.w800,
                                     letterSpacing: 0.6,
-                                    color: config.color,
+                                    color: Colors.white,
                                   ),
                                 ),
                                 const SizedBox(width: 6),
                                 Icon(
                                   Icons.arrow_forward_rounded,
-                                  size: tiny ? 16 : 18,
-                                  color: config.color,
+                                  size: 17,
+                                  color: Colors.white,
                                 ),
                               ],
                             ),
@@ -775,17 +823,7 @@ class _ServiceCardState extends State<_ServiceCard> {
                                   size: logoSize,
                                 ),
                                 const SizedBox(width: AppSpacing.md),
-                                Expanded(
-                                  child: Center(
-                                    child: widget.fill
-                                        ? SingleChildScrollView(
-                                            physics:
-                                                const NeverScrollableScrollPhysics(),
-                                            child: info,
-                                          )
-                                        : info,
-                                  ),
-                                ),
+                                Expanded(child: Center(child: info)),
                                 const SizedBox(width: AppSpacing.md),
                                 action,
                               ],
@@ -793,21 +831,16 @@ class _ServiceCardState extends State<_ServiceCard> {
                           }
 
                           return Column(
-                            mainAxisSize: widget.fill
-                                ? MainAxisSize.max
-                                : MainAxisSize.min,
+                            mainAxisSize: MainAxisSize.max,
                             children: [
                               _LogoBadge(
                                 image: config.image,
                                 icon: config.icon,
                                 size: logoSize,
                               ),
-                              SizedBox(height: tiny ? 6 : AppSpacing.md),
-                              if (widget.fill)
-                                Expanded(child: Center(child: info))
-                              else
-                                info,
-                              SizedBox(height: tiny ? 6 : AppSpacing.md),
+                              const SizedBox(height: AppSpacing.sm),
+                              Expanded(child: Center(child: info)),
+                              const SizedBox(height: AppSpacing.sm),
                               action,
                             ],
                           );
@@ -835,10 +868,10 @@ class _BrandLogo extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      padding: const EdgeInsets.all(4),
+      padding: const EdgeInsets.all(5),
       decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
+        color: Colors.white.withValues(alpha: 0.95),
+        borderRadius: BorderRadius.circular(size * 0.3),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.15),
@@ -847,7 +880,8 @@ class _BrandLogo extends StatelessWidget {
           ),
         ],
       ),
-      child: ClipOval(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(size * 0.26),
         child: Image.asset(
           'assets/images/logo_sakina.png',
           fit: BoxFit.contain,
@@ -879,22 +913,36 @@ class _LogoBadge extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surface,
         shape: BoxShape.circle,
+        border: Border.all(
+          color: AppColors.border.withValues(alpha: 0.8),
+          width: 1,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 18,
+            offset: const Offset(0, 7),
           ),
         ],
       ),
-      padding: const EdgeInsets.all(6),
-      child: ClipOval(
-        child: Image.asset(
-          image,
-          fit: BoxFit.contain,
-          errorBuilder: (_, _, _) => Icon(icon, size: size * 0.5),
+      padding: const EdgeInsets.all(4),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: AppColors.primarySoft.withValues(alpha: 0.42),
+          shape: BoxShape.circle,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(5),
+          child: ClipOval(
+            child: Image.asset(
+              image,
+              fit: BoxFit.contain,
+              errorBuilder: (_, _, _) =>
+                  Icon(icon, size: size * 0.5, color: AppColors.primary),
+            ),
+          ),
         ),
       ),
     );
