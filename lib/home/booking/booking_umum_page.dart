@@ -176,349 +176,351 @@ class _BookingUmumPageState extends State<BookingUmumPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: BlocConsumer<BookingBloc, BookingState>(
-                listener: (context, state) {
-                  if (state.status == BookingStatus.error) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          state.errorMessage ?? "Terjadi kesalahan",
+      body: AppBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              Expanded(
+                child: BlocConsumer<BookingBloc, BookingState>(
+                  listener: (context, state) {
+                    if (state.status == BookingStatus.error) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                            state.errorMessage ?? "Terjadi kesalahan",
+                          ),
+                          backgroundColor: Colors.red,
                         ),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                    _refocusScanner();
-                  }
+                      );
+                      _refocusScanner();
+                    }
 
-                  if (state.status == BookingStatus.success &&
-                      state.bookingResult != null) {
-                    setState(() {
-                      _nikController.clear();
-                      _nohpController.clear();
-                    });
-                    _showSuccessDialog(context, state);
-                  }
-                },
+                    if (state.status == BookingStatus.success &&
+                        state.bookingResult != null) {
+                      setState(() {
+                        _nikController.clear();
+                        _nohpController.clear();
+                      });
+                      _showSuccessDialog(context, state);
+                    }
+                  },
 
-                builder: (context, state) {
-                  return Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        /// FORM
-                        Expanded(
-                          flex: 3,
-                          child: SingleChildScrollView(
-                            child: Form(
-                              key: _formKey,
-                              child: Column(
-                                children: [
-                                  SizedBox(
-                                    width: 0,
-                                    height: 0,
-                                    child: TextField(
+                  builder: (context, state) {
+                    return Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          /// FORM
+                          Expanded(
+                            flex: 3,
+                            child: SingleChildScrollView(
+                              child: Form(
+                                key: _formKey,
+                                child: Column(
+                                  children: [
+                                    SizedBox(
+                                      width: 0,
+                                      height: 0,
+                                      child: TextField(
+                                        controller: _nikController,
+                                        focusNode: _focusNode,
+                                        autofocus: true,
+                                        showCursor: false,
+                                        keyboardType: TextInputType.text,
+                                        decoration: const InputDecoration(
+                                          border: InputBorder.none,
+                                          isCollapsed: true,
+                                          contentPadding: EdgeInsets.zero,
+                                        ),
+                                        style: const TextStyle(
+                                          color: Colors.transparent,
+                                          fontSize: 1,
+                                        ),
+                                        cursorColor: Colors.transparent,
+                                        onSubmitted: (value) {},
+                                        enableInteractiveSelection: false,
+                                        enableIMEPersonalizedLearning: false,
+                                      ),
+                                    ),
+                                    TextFormField(
                                       controller: _nikController,
-                                      focusNode: _focusNode,
-                                      autofocus: true,
-                                      showCursor: false,
-                                      keyboardType: TextInputType.text,
-                                      decoration: const InputDecoration(
-                                        border: InputBorder.none,
-                                        isCollapsed: true,
-                                        contentPadding: EdgeInsets.zero,
+                                      readOnly: true,
+                                      onTap: () {
+                                        _activeController = _nikController;
+                                        setState(() {});
+                                      },
+                                      decoration: InputDecoration(
+                                        labelText: 'NIK',
+                                        hintText: 'Masukkan NIK (16 digit)',
+                                        border: const OutlineInputBorder(),
+                                        suffixIcon:
+                                            _activeController == _nikController
+                                            ? const Icon(Icons.keyboard)
+                                            : null,
                                       ),
-                                      style: const TextStyle(
-                                        color: Colors.transparent,
-                                        fontSize: 1,
+                                      maxLength: 16,
+                                      validator: (v) {
+                                        if (v == null || v.isEmpty) {
+                                          return 'NIK wajib';
+                                        }
+                                        if (v.length != 16) {
+                                          return 'NIK harus 16 digit';
+                                        }
+                                        if (!RegExp(r'^[0-9]+$').hasMatch(v)) {
+                                          return 'NIK harus berupa angka';
+                                        }
+                                        return null;
+                                      },
+                                    ),
+                                    const SizedBox(height: 16),
+
+                                    TextFormField(
+                                      controller: _nohpController,
+                                      readOnly: true,
+                                      onTap: () {
+                                        _activeController = _nohpController;
+                                        setState(() {});
+                                      },
+                                      decoration: InputDecoration(
+                                        labelText: 'No HP',
+                                        hintText: 'Masukkan No HP',
+                                        border: const OutlineInputBorder(),
+                                        suffixIcon:
+                                            _activeController == _nohpController
+                                            ? const Icon(Icons.keyboard)
+                                            : null,
                                       ),
-                                      cursorColor: Colors.transparent,
-                                      onSubmitted: (value) {},
-                                      enableInteractiveSelection: false,
-                                      enableIMEPersonalizedLearning: false,
+                                      maxLength: 12,
+                                      keyboardType: TextInputType.number,
+                                      validator: (v) {
+                                        if (v == null || v.isEmpty) {
+                                          return 'No HP wajib';
+                                        }
+                                        if (!RegExp(r'^[0-9]+$').hasMatch(v)) {
+                                          return 'No HP harus berupa angka';
+                                        }
+                                        if (v.length > 12) {
+                                          return 'No HP maksimal 12 digit';
+                                        }
+                                        return null;
+                                      },
                                     ),
-                                  ),
-                                  TextFormField(
-                                    controller: _nikController,
-                                    readOnly: true,
-                                    onTap: () {
-                                      _activeController = _nikController;
-                                      setState(() {});
-                                    },
-                                    decoration: InputDecoration(
-                                      labelText: 'NIK',
-                                      hintText: 'Masukkan NIK (16 digit)',
-                                      border: const OutlineInputBorder(),
-                                      suffixIcon:
-                                          _activeController == _nikController
-                                          ? const Icon(Icons.keyboard)
-                                          : null,
-                                    ),
-                                    maxLength: 16,
-                                    validator: (v) {
-                                      if (v == null || v.isEmpty) {
-                                        return 'NIK wajib';
-                                      }
-                                      if (v.length != 16) {
-                                        return 'NIK harus 16 digit';
-                                      }
-                                      if (!RegExp(r'^[0-9]+$').hasMatch(v)) {
-                                        return 'NIK harus berupa angka';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  const SizedBox(height: 16),
+                                    const SizedBox(height: 16),
 
-                                  TextFormField(
-                                    controller: _nohpController,
-                                    readOnly: true,
-                                    onTap: () {
-                                      _activeController = _nohpController;
-                                      setState(() {});
-                                    },
-                                    decoration: InputDecoration(
-                                      labelText: 'No HP',
-                                      hintText: 'Masukkan No HP',
-                                      border: const OutlineInputBorder(),
-                                      suffixIcon:
-                                          _activeController == _nohpController
-                                          ? const Icon(Icons.keyboard)
-                                          : null,
+                                    InkWell(
+                                      onTap: _pickDate,
+                                      child: InputDecorator(
+                                        decoration: const InputDecoration(
+                                          labelText: 'Tanggal Periksa',
+                                          border: OutlineInputBorder(),
+                                          prefixIcon: Icon(Icons.calendar_today),
+                                        ),
+                                        child: Text(
+                                          _selectedDate != null
+                                              ? DateFormat(
+                                                  'dd/MM/yyyy',
+                                                ).format(_selectedDate!)
+                                              : 'Pilih tanggal',
+                                        ),
+                                      ),
                                     ),
-                                    maxLength: 12,
-                                    keyboardType: TextInputType.number,
-                                    validator: (v) {
-                                      if (v == null || v.isEmpty) {
-                                        return 'No HP wajib';
-                                      }
-                                      if (!RegExp(r'^[0-9]+$').hasMatch(v)) {
-                                        return 'No HP harus berupa angka';
-                                      }
-                                      if (v.length > 12) {
-                                        return 'No HP maksimal 12 digit';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  const SizedBox(height: 16),
+                                    const SizedBox(height: 16),
 
-                                  InkWell(
-                                    onTap: _pickDate,
-                                    child: InputDecorator(
+                                    DropdownButtonFormField<String>(
+                                      value: _selectedPoliId,
                                       decoration: const InputDecoration(
-                                        labelText: 'Tanggal Periksa',
+                                        labelText: 'Pilih Poli',
                                         border: OutlineInputBorder(),
-                                        prefixIcon: Icon(Icons.calendar_today),
+                                        prefixIcon: Icon(Icons.local_hospital),
                                       ),
-                                      child: Text(
-                                        _selectedDate != null
-                                            ? DateFormat(
-                                                'dd/MM/yyyy',
-                                              ).format(_selectedDate!)
-                                            : 'Pilih tanggal',
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-
-                                  DropdownButtonFormField<String>(
-                                    value: _selectedPoliId,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Pilih Poli',
-                                      border: OutlineInputBorder(),
-                                      prefixIcon: Icon(Icons.local_hospital),
-                                    ),
-                                    items: state.poliList.map((e) {
-                                      return DropdownMenuItem(
-                                        value: e.id.toString(),
-                                        child: Text(e.nama),
-                                      );
-                                    }).toList(),
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _selectedPoliId = value;
-                                        _selectedDokterId = null;
-                                        _selectedDokterNama = null;
-                                        _selectedJadwalId = null;
-                                        final selectedPoli = state.poliList
-                                            .firstWhere(
-                                              (e) => e.id.toString() == value,
-                                              orElse: () =>
-                                                  state.poliList.first,
-                                            );
-                                        _selectedPoliNama = selectedPoli.nama;
-                                      });
-
-                                      if (value != null &&
-                                          _selectedDate != null) {
-                                        context.read<BookingBloc>().add(
-                                          LoadDokterUmumEvent(
-                                            idLayanan: int.parse(value),
-                                            tanggal: DateFormat(
-                                              'yyyy-MM-dd',
-                                            ).format(_selectedDate!),
-                                          ),
+                                      items: state.poliList.map((e) {
+                                        return DropdownMenuItem(
+                                          value: e.id.toString(),
+                                          child: Text(e.nama),
                                         );
-                                      }
-                                    },
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Poli wajib dipilih';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  const SizedBox(height: 16),
+                                      }).toList(),
+                                      onChanged: (value) {
+                                        setState(() {
+                                          _selectedPoliId = value;
+                                          _selectedDokterId = null;
+                                          _selectedDokterNama = null;
+                                          _selectedJadwalId = null;
+                                          final selectedPoli = state.poliList
+                                              .firstWhere(
+                                                (e) => e.id.toString() == value,
+                                                orElse: () =>
+                                                    state.poliList.first,
+                                              );
+                                          _selectedPoliNama = selectedPoli.nama;
+                                        });
 
-                                  Row(
-                                    children: [
-                                      const Icon(
-                                        Icons.person,
-                                        size: 20,
-                                        color: Colors.blue,
-                                      ),
-                                      const SizedBox(width: 8),
-                                      const Text(
-                                        'Pilih Dokter',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      const Spacer(),
-                                      if (_selectedDokterId != null)
-                                        TextButton(
-                                          onPressed: () {
-                                            setState(() {
-                                              _selectedDokterId = null;
-                                              _selectedDokterNama = null;
-                                              _selectedJadwalId = null;
-                                            });
-                                          },
-                                          child: const Text('Hapus Pilihan'),
-                                        ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-
-                                  state.status == BookingStatus.loadingDokter
-                                      ? const Padding(
-                                          padding: EdgeInsets.all(AppSpacing.lg),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              SizedBox(
-                                                width: 20,
-                                                height: 20,
-                                                child: CircularProgressIndicator(
-                                                  strokeWidth: 2.5,
-                                                  color: AppColors.primary,
-                                                ),
-                                              ),
-                                              SizedBox(width: 12),
-                                              Text(
-                                                'Memuat data dokter...',
-                                                style: TextStyle(
-                                                  fontSize: 13.5,
-                                                  fontWeight: FontWeight.w600,
-                                                  color: AppColors.textSecondary,
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        )
-                                      : _buildDokterList(state),
-
-                                  const SizedBox(height: 12),
-
-                                  if (_selectedDokterId != null &&
-                                      _selectedDokterNama != null)
-                                    Container(
-                                      padding: const EdgeInsets.all(12),
-                                      decoration: BoxDecoration(
-                                        color: Colors.blue.withOpacity(0.05),
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          color: Colors.blue.withOpacity(0.2),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          const Icon(
-                                            Icons.check_circle,
-                                            color: Colors.blue,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          const Text(
-                                            'Dokter terpilih: ',
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w500,
+                                        if (value != null &&
+                                            _selectedDate != null) {
+                                          context.read<BookingBloc>().add(
+                                            LoadDokterUmumEvent(
+                                              idLayanan: int.parse(value),
+                                              tanggal: DateFormat(
+                                                'yyyy-MM-dd',
+                                              ).format(_selectedDate!),
                                             ),
-                                          ),
-                                          Expanded(
-                                            child: Text(
-                                              _selectedDokterNama!,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                          );
+                                        }
+                                      },
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Poli wajib dipilih';
+                                        }
+                                        return null;
+                                      },
                                     ),
-                                  const SizedBox(height: 20),
+                                    const SizedBox(height: 16),
 
-                                  AppGradientButton(
-                                    label: 'BOOKING',
-                                    icon: Icons.event_available_rounded,
-                                    gradient: AppGradients.umum,
-                                    height: 58,
-                                    loading:
-                                        state.status == BookingStatus.loading,
-                                    onPressed:
-                                        state.status == BookingStatus.loading
-                                        ? null
-                                        : () {
-                                            if (_formKey.currentState!
-                                                .validate()) {
-                                              _submitBooking(context);
-                                            }
-                                          },
-                                  ),
-                                ],
+                                    Row(
+                                      children: [
+                                        const Icon(
+                                          Icons.person,
+                                          size: 20,
+                                          color: Colors.blue,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        const Text(
+                                          'Pilih Dokter',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        const Spacer(),
+                                        if (_selectedDokterId != null)
+                                          TextButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                _selectedDokterId = null;
+                                                _selectedDokterNama = null;
+                                                _selectedJadwalId = null;
+                                              });
+                                            },
+                                            child: const Text('Hapus Pilihan'),
+                                          ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+
+                                    state.status == BookingStatus.loadingDokter
+                                        ? const Padding(
+                                            padding: EdgeInsets.all(AppSpacing.lg),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                SizedBox(
+                                                  width: 20,
+                                                  height: 20,
+                                                  child: CircularProgressIndicator(
+                                                    strokeWidth: 2.5,
+                                                    color: AppColors.primary,
+                                                  ),
+                                                ),
+                                                SizedBox(width: 12),
+                                                Text(
+                                                  'Memuat data dokter...',
+                                                  style: TextStyle(
+                                                    fontSize: 13.5,
+                                                    fontWeight: FontWeight.w600,
+                                                    color: AppColors.textSecondary,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          )
+                                        : _buildDokterList(state),
+
+                                    const SizedBox(height: 12),
+
+                                    if (_selectedDokterId != null &&
+                                        _selectedDokterNama != null)
+                                      Container(
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(
+                                          color: Colors.blue.withOpacity(0.05),
+                                          borderRadius: BorderRadius.circular(8),
+                                          border: Border.all(
+                                            color: Colors.blue.withOpacity(0.2),
+                                          ),
+                                        ),
+                                        child: Row(
+                                          children: [
+                                            const Icon(
+                                              Icons.check_circle,
+                                              color: Colors.blue,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            const Text(
+                                              'Dokter terpilih: ',
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            Expanded(
+                                              child: Text(
+                                                _selectedDokterNama!,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    const SizedBox(height: 20),
+
+                                    AppGradientButton(
+                                      label: 'BOOKING',
+                                      icon: Icons.event_available_rounded,
+                                      gradient: AppGradients.umum,
+                                      height: 58,
+                                      loading:
+                                          state.status == BookingStatus.loading,
+                                      onPressed:
+                                          state.status == BookingStatus.loading
+                                          ? null
+                                          : () {
+                                              if (_formKey.currentState!
+                                                  .validate()) {
+                                                _submitBooking(context);
+                                              }
+                                            },
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
 
-                        const SizedBox(width: 20),
+                          const SizedBox(width: 20),
 
-                        Expanded(
-                          flex: 2,
-                          child: NumberKeypad(
-                            accent: AppColors.umum,
-                            onDigit: _appendNumber,
-                            onBackspace: _backspace,
-                            onClear: _clear,
+                          Expanded(
+                            flex: 2,
+                            child: NumberKeypad(
+                              accent: AppColors.umum,
+                              onDigit: _appendNumber,
+                              onBackspace: _backspace,
+                              onClear: _clear,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                        ],
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
-            // Footer
-            _footer(),
-          ],
+              // Footer
+              _footer(),
+            ],
+          ),
         ),
       ),
     );

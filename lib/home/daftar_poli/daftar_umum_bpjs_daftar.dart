@@ -334,7 +334,8 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
         }
       },
       child: Scaffold(
-        body: SafeArea(
+        body: AppBackground(
+          child: SafeArea(
           child: Column(
             children: [
               const AppPageHeader(
@@ -1286,6 +1287,7 @@ class _DaftarUmumBpjsDaftarState extends State<DaftarUmumBpjsDaftar> {
             ],
           ),
         ),
+      ),
       ),
     );
   }

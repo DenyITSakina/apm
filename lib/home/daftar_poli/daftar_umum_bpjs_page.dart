@@ -114,64 +114,66 @@ class _PendaftaranPoliPageState extends State<PendaftaranPoliPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: BlocListener<CekinBloc, CekinState>(
-          listener: _handleState,
-          child: Column(
-            children: [
-              AppPageHeader(
-                title: 'PENDAFTARAN POLI',
-                subtitle: 'Verifikasi data pasien sebelum mendaftar poli',
-                badge: 'Step 1 dari 3',
-                badgeIcon: Icons.qr_code_scanner_rounded,
-              ),
-              Expanded(
-                child: SingleChildScrollView(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1000),
-                      child: NumberEntryBoard(
-                        controller: nomorController,
-                        focusNode: focusNode,
-                        label: _isBpjs
-                            ? 'NOMOR KARTU BPJS / NIK / NO BOOKING'
-                            : 'NOMOR REKAM MEDIS / NIK / NO BOOKING',
-                        accent: _isBpjs ? AppColors.bpjs : AppColors.umum,
-                        maxLength: 16,
-                        onDigit: _addDigit,
-                        onBackspace: _removeDigit,
-                        onClear: _clearText,
-                        onSubmit: _submitData,
-                        submitLabel: 'LANJUT',
-                        submitIcon: Icons.arrow_forward_rounded,
-                        submitGradient: _isBpjs
-                            ? AppGradients.bpjs
-                            : AppGradients.umum,
-                        submitLoading: loading,
-                        submitEnabled: nomorController.text.isNotEmpty,
-                        belowKeypad: AppNotice(
-                          title: 'Cara pendaftaran poli',
-                          message:
-                              'Pindai barcode atau masukkan nomor, lalu tekan '
-                              'LANJUT untuk verifikasi data pasien.',
-                          icon: Icons.assignment_turned_in_outlined,
-                          color: AppColors.primary,
-                          background: AppColors.primarySoft,
-                          points: const [
-                            'Nomor BPJS 13 digit atau NIK 16 digit.',
-                            'Pastikan Anda sudah memiliki nomor booking.',
-                          ],
+      body: AppBackground(
+        child: SafeArea(
+          child: BlocListener<CekinBloc, CekinState>(
+            listener: _handleState,
+            child: Column(
+              children: [
+                AppPageHeader(
+                  title: 'PENDAFTARAN POLI',
+                  subtitle: 'Verifikasi data pasien sebelum mendaftar poli',
+                  badge: 'Step 1 dari 3',
+                  badgeIcon: Icons.qr_code_scanner_rounded,
+                ),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxWidth: 1000),
+                        child: NumberEntryBoard(
+                          controller: nomorController,
+                          focusNode: focusNode,
+                          label: _isBpjs
+                              ? 'NOMOR KARTU BPJS / NIK / NO BOOKING'
+                              : 'NOMOR REKAM MEDIS / NIK / NO BOOKING',
+                          accent: _isBpjs ? AppColors.bpjs : AppColors.umum,
+                          maxLength: 16,
+                          onDigit: _addDigit,
+                          onBackspace: _removeDigit,
+                          onClear: _clearText,
+                          onSubmit: _submitData,
+                          submitLabel: 'LANJUT',
+                          submitIcon: Icons.arrow_forward_rounded,
+                          submitGradient: _isBpjs
+                              ? AppGradients.bpjs
+                              : AppGradients.umum,
+                          submitLoading: loading,
+                          submitEnabled: nomorController.text.isNotEmpty,
+                          belowKeypad: AppNotice(
+                            title: 'Cara pendaftaran poli',
+                            message:
+                                'Pindai barcode atau masukkan nomor, lalu tekan '
+                                'LANJUT untuk verifikasi data pasien.',
+                            icon: Icons.assignment_turned_in_outlined,
+                            color: AppColors.primary,
+                            background: AppColors.primarySoft,
+                            points: const [
+                              'Nomor BPJS 13 digit atau NIK 16 digit.',
+                              'Pastikan Anda sudah memiliki nomor booking.',
+                            ],
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              const AppPageFooter(
-                message: 'RSU Sakina Idaman - Pendaftaran Poli',
-              ),
-            ],
+                const AppPageFooter(
+                  message: 'RSU Sakina Idaman - Pendaftaran Poli',
+                ),
+              ],
+            ),
           ),
         ),
       ),

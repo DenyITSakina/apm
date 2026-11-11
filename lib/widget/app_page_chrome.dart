@@ -427,7 +427,7 @@ class _LiveClockState extends State<LiveClock> {
   }
 }
 
-/// Latar dekoratif lembut (gelembung) untuk halaman utama.
+/// Latar dekoratif untuk seluruh halaman APM.
 class AppBackground extends StatelessWidget {
   const AppBackground({super.key, required this.child, this.animate = true});
 
@@ -438,11 +438,12 @@ class AppBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Positioned.fill(
+        const Positioned.fill(
           child: DecoratedBox(
-            decoration: const BoxDecoration(gradient: AppGradients.brandSoft),
+            decoration: BoxDecoration(gradient: AppGradients.brandSoft),
           ),
         ),
+        const Positioned.fill(child: _StripedBackdrop()),
         Positioned(
           right: -80,
           top: -60,
@@ -461,10 +462,93 @@ class AppBackground extends StatelessWidget {
             alignment: Alignment.topRight,
           ),
         ),
+        Positioned(
+          right: 80,
+          bottom: -40,
+          child: _GlowBubble(
+            color: AppColors.bpjs,
+            size: 180,
+            alignment: Alignment.topLeft,
+          ),
+        ),
         child,
       ],
     );
   }
+}
+
+class _StripedBackdrop extends StatelessWidget {
+  const _StripedBackdrop();
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(painter: _DiagonalStripePainter());
+  }
+}
+
+class _DiagonalStripePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Offset.zero & size;
+
+    final base = Paint()
+      ..shader = LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [
+          Colors.white.withValues(alpha: 0.18),
+          Colors.white.withValues(alpha: 0.04),
+          Colors.white.withValues(alpha: 0.10),
+        ],
+      ).createShader(rect);
+    canvas.drawRect(rect, base);
+
+    final stripePaint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 18;
+
+    const spacing = 34.0;
+    final diagonal = size.width + size.height;
+    for (double x = -size.height; x < diagonal; x += spacing) {
+      final isAccent = ((x / spacing).round() % 4 == 0);
+      stripePaint.color = isAccent
+          ? AppColors.primary.withValues(alpha: 0.045)
+          : Colors.white.withValues(alpha: 0.055);
+      stripePaint.strokeWidth = isAccent ? 22 : 14;
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x + size.height, size.height),
+        stripePaint,
+      );
+    }
+
+    final thin = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1
+      ..color = Colors.white.withValues(alpha: 0.10);
+    for (double x = -size.height + spacing / 2; x < diagonal; x += spacing) {
+      canvas.drawLine(
+        Offset(x, 0),
+        Offset(x + size.height, size.height),
+        thin,
+      );
+    }
+
+    final vignette = Paint()
+      ..shader = RadialGradient(
+        center: Alignment.center,
+        radius: 0.95,
+        colors: [
+          Colors.transparent,
+          AppColors.primary.withValues(alpha: 0.035),
+        ],
+        stops: const [0.55, 1.0],
+      ).createShader(rect);
+    canvas.drawRect(rect, vignette);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
 class _GlowBubble extends StatelessWidget {

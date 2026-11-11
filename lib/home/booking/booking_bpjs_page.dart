@@ -154,13 +154,14 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Main content
-            Expanded(
-              child: BlocConsumer<BookingBloc, BookingState>(
-                listener: (context, state) {
+      body: AppBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              // Main content
+              Expanded(
+                child: BlocConsumer<BookingBloc, BookingState>(
+                  listener: (context, state) {
                   if (state.status == BookingStatus.error) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -781,6 +782,7 @@ class _BookingBpjsPageState extends State<BookingBpjsPage> {
             _footer(),
           ],
         ),
+      ),
       ),
     );
   }

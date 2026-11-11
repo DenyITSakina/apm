@@ -35,51 +35,53 @@ class _BookingPageState extends State<BookingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            AppPageHeader(
-              title: widget.isUmum ? 'BOOKING UMUM' : 'BOOKING BPJS',
-              subtitle: widget.isUmum
-                  ? 'Pilih poli, dokter, dan tanggal pemeriksaan'
-                  : 'Verifikasi data BPJS lalu pilih poli dan dokter',
-              badge: widget.isUmum ? 'Pasien Umum' : 'Peserta BPJS',
-              badgeIcon: widget.isUmum
-                  ? Icons.people_alt_rounded
-                  : Icons.health_and_safety_rounded,
-            ),
-            Expanded(
-              child: BlocConsumer<BookingBloc, BookingState>(
-                listener: (context, state) {
-                  if (state.status == BookingStatus.error) {
-                    TopToast.error(
-                      context,
-                      state.errorMessage ?? 'Terjadi kesalahan',
-                    );
-                  }
-                },
-                builder: (context, state) {
-                  if (state.status == BookingStatus.loading &&
-                      state.poliList.isEmpty) {
-                    return const _BookingLoading();
-                  }
-
-                  if (state.status == BookingStatus.error &&
-                      state.poliList.isEmpty) {
-                    return _BookingError(
-                      message: state.errorMessage ?? 'Terjadi kesalahan',
-                      onRetry: () =>
-                          context.read<BookingBloc>().add(LoadPoliEvent()),
-                    );
-                  }
-
-                  return widget.isUmum
-                      ? const BookingUmumPage()
-                      : const BookingBpjsPage();
-                },
+      body: AppBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              AppPageHeader(
+                title: widget.isUmum ? 'BOOKING UMUM' : 'BOOKING BPJS',
+                subtitle: widget.isUmum
+                    ? 'Pilih poli, dokter, dan tanggal pemeriksaan'
+                    : 'Verifikasi data BPJS lalu pilih poli dan dokter',
+                badge: widget.isUmum ? 'Pasien Umum' : 'Peserta BPJS',
+                badgeIcon: widget.isUmum
+                    ? Icons.people_alt_rounded
+                    : Icons.health_and_safety_rounded,
               ),
-            ),
-          ],
+              Expanded(
+                child: BlocConsumer<BookingBloc, BookingState>(
+                  listener: (context, state) {
+                    if (state.status == BookingStatus.error) {
+                      TopToast.error(
+                        context,
+                        state.errorMessage ?? 'Terjadi kesalahan',
+                      );
+                    }
+                  },
+                  builder: (context, state) {
+                    if (state.status == BookingStatus.loading &&
+                        state.poliList.isEmpty) {
+                      return const _BookingLoading();
+                    }
+
+                    if (state.status == BookingStatus.error &&
+                        state.poliList.isEmpty) {
+                      return _BookingError(
+                        message: state.errorMessage ?? 'Terjadi kesalahan',
+                        onRetry: () =>
+                            context.read<BookingBloc>().add(LoadPoliEvent()),
+                      );
+                    }
+
+                    return widget.isUmum
+                        ? const BookingUmumPage()
+                        : const BookingBpjsPage();
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
