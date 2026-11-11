@@ -184,80 +184,116 @@ class _DashboardApmState extends State<DashboardApm>
   }
 
   Widget _buildBrand({required bool isWide}) {
+    final double logoSize = isWide ? 88 : 68;
+
     return _fadeIn(
       Container(
         width: double.infinity,
+        clipBehavior: Clip.antiAlias,
         padding: EdgeInsets.symmetric(
-          horizontal: AppSpacing.lg,
-          vertical: isWide ? AppSpacing.lg : AppSpacing.md,
+          horizontal: isWide ? 28 : 18,
+          vertical: isWide ? 24 : 18,
         ),
         decoration: BoxDecoration(
           gradient: AppGradients.brand,
           borderRadius: BorderRadius.circular(AppRadius.xl),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.18),
+            width: 1,
+          ),
           boxShadow: AppShadow.glow(AppColors.primary),
         ),
         child: Stack(
           children: [
+            // Ornamen dekoratif
             Positioned(
-              right: -40,
-              top: -40,
+              right: -45,
+              top: -75,
               child: Container(
-                width: 160,
-                height: 160,
+                width: 190,
+                height: 190,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.08),
+                  color: Colors.white.withValues(alpha: 0.07),
                 ),
               ),
             ),
             Positioned(
-              left: -30,
-              bottom: -50,
+              right: 75,
+              bottom: -100,
               child: Container(
-                width: 120,
-                height: 120,
+                width: 170,
+                height: 170,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.06),
+                  color: Colors.white.withValues(alpha: 0.05),
                 ),
               ),
             ),
+            Positioned(
+              left: -55,
+              bottom: -85,
+              child: Container(
+                width: 150,
+                height: 150,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.04),
+                ),
+              ),
+            ),
+
+            // Konten utama
             Row(
               children: [
                 Expanded(
                   child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
+                      // Nama rumah sakit
                       Text(
                         'RSU SAKINA IDAMAN',
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: AppText.headerTitle(
-                          context,
-                        ).copyWith(fontSize: isWide ? 30 : 24),
+                        style: AppText.headerTitle(context).copyWith(
+                          fontSize: isWide ? 29 : 21,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: isWide ? 1.3 : 0.7,
+                          color: Colors.white,
+                          height: 1.2,
+                        ),
                       ),
-                      const SizedBox(height: 4),
+
+                      const SizedBox(height: 7),
+
+                      // Slogan
                       Text(
-                        'Peduli Sesama, Sakina Pilihanku',
+                        '#pedulisesama  .  #sakinapilihanku',
                         textAlign: TextAlign.center,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontFamily: AppText.family,
-                          fontSize: isWide ? 16 : 13.5,
+                          fontSize: isWide ? 15 : 12,
                           fontStyle: FontStyle.italic,
                           fontWeight: FontWeight.w500,
-                          color: Colors.white.withValues(alpha: 0.92),
+                          letterSpacing: 0.3,
+                          color: Colors.white.withValues(alpha: 0.85),
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.sm),
+
+                      SizedBox(height: isWide ? 18 : 13),
+
+                      // Badge anjungan
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 14,
-                          vertical: 6,
+                        padding: EdgeInsets.symmetric(
+                          horizontal: isWide ? 16 : 11,
+                          vertical: isWide ? 9 : 7,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.16),
+                          color: Colors.white.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(AppRadius.pill),
                           border: Border.all(
                             color: Colors.white.withValues(alpha: 0.3),
@@ -266,22 +302,16 @@ class _DashboardApmState extends State<DashboardApm>
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(
-                              Icons.touch_app_rounded,
-                              size: 16,
-                              color: Colors.white,
-                            ),
-                            const SizedBox(width: 8),
                             Flexible(
                               child: Text(
                                 'ANJUNGAN PENDAFTARAN MANDIRI',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontFamily: AppText.family,
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w700,
-                                  letterSpacing: 0.8,
+                                  fontSize: isWide ? 11.5 : 9,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: 0.6,
                                   color: Colors.white,
                                 ),
                               ),
@@ -292,8 +322,23 @@ class _DashboardApmState extends State<DashboardApm>
                     ],
                   ),
                 ),
-                const SizedBox(width: AppSpacing.md),
-                _BrandLogo(size: isWide ? 96 : 76),
+
+                SizedBox(width: isWide ? 24 : 12),
+
+                // Logo dengan bingkai transparan
+                Container(
+                  width: logoSize + 14,
+                  height: logoSize + 14,
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.16),
+                    borderRadius: BorderRadius.circular(22),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Center(child: _BrandLogo(size: logoSize)),
+                ),
               ],
             ),
           ],
