@@ -126,9 +126,9 @@ class _DashboardApmState extends State<DashboardApm>
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
-                                Expanded(flex: 3, child: _buildStepsCard()),
+                                Expanded(child: _buildStepsCard()),
                                 const SizedBox(width: AppSpacing.md),
-                                Expanded(flex: 2, child: _buildHelpCard()),
+                                Expanded(child: _buildHelpCard()),
                               ],
                             ),
                           )
@@ -414,21 +414,21 @@ class _DashboardApmState extends State<DashboardApm>
               text: 'Cara Penggunaan',
               icon: Icons.help_outline_rounded,
             ),
-            const SizedBox(height: AppSpacing.sm),
+            const SizedBox(height: 6),
             const _StepRow(
               number: '1',
               title: 'Pilih layanan',
-              description: 'Cek-In Umum, Cek In BPJS.',
+              description: 'Pilih Cek-in Umum atau Cek-in BPJS.',
             ),
             const _StepRow(
               number: '2',
               title: 'Pindai / ketik nomor',
-              description: 'Pindai barcode kartu, NIK, atau No RM.',
+              description: 'Pindai kartu, atau masukkan NIK / No. RM.',
             ),
             const _StepRow(
               number: '3',
               title: 'Verifikasi data',
-              description: 'Ikuti petunjuk poli atau loket dari petugas.',
+              description: 'Periksa data, lalu ikuti petunjuk petugas.',
               isLast: true,
             ),
           ],
@@ -440,17 +440,34 @@ class _DashboardApmState extends State<DashboardApm>
 
   Widget _buildHelpCard() {
     return _fadeIn(
-      AppNotice(
-        title: 'Jam operasional 24 jam',
-        message:
-            'Layanan UGD tersedia 24 jam. Untuk informasi lain hubungi petugas front office.',
-        icon: Icons.support_agent_rounded,
-        color: AppColors.warning,
-        background: AppColors.warningSoft,
-        points: const [
-          'Booking dulu sebelum datang.',
-          'Simpan bukti booking / kode antrean.',
-        ],
+      AppCard(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const AppSectionLabel(
+              text: 'Jam Operasional',
+              icon: Icons.schedule_rounded,
+            ),
+            const SizedBox(height: 6),
+            const _StepRow(
+              number: '24',
+              title: 'Layanan 24 Jam',
+              description: 'UGD buka 24 jam setiap hari.',
+            ),
+            const _StepRow(
+              number: 'i',
+              title: 'Informasi & Bantuan',
+              description: 'Info lain: hubungi petugas front office.',
+            ),
+            const _StepRow(
+              number: '•',
+              title: 'Persiapan Kunjungan',
+              description: 'Booking dahulu dan simpan kode antrean.',
+              isLast: true,
+            ),
+          ],
+        ),
       ),
       4,
     );
@@ -861,8 +878,8 @@ class _StepRow extends StatelessWidget {
           Column(
             children: [
               Container(
-                width: 30,
-                height: 30,
+                width: 26,
+                height: 26,
                 alignment: Alignment.center,
                 decoration: const BoxDecoration(
                   gradient: AppGradients.brand,
@@ -872,7 +889,7 @@ class _StepRow extends StatelessWidget {
                   number,
                   style: const TextStyle(
                     fontFamily: AppText.family,
-                    fontSize: 13,
+                    fontSize: 12,
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
                   ),
@@ -882,16 +899,16 @@ class _StepRow extends StatelessWidget {
                 Expanded(
                   child: Container(
                     width: 2,
-                    margin: const EdgeInsets.symmetric(vertical: 4),
+                    margin: const EdgeInsets.symmetric(vertical: 2),
                     color: AppColors.border,
                   ),
                 ),
             ],
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Padding(
-              padding: EdgeInsets.only(bottom: isLast ? 0 : AppSpacing.md),
+              padding: EdgeInsets.only(bottom: isLast ? 0 : 6),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -899,9 +916,10 @@ class _StepRow extends StatelessWidget {
                     title,
                     style: const TextStyle(
                       fontFamily: AppText.family,
-                      fontSize: 15,
+                      fontSize: 14.5,
                       fontWeight: FontWeight.w700,
                       color: AppColors.textPrimary,
+                      height: 1.2,
                     ),
                   ),
                   const SizedBox(height: 2),
@@ -910,7 +928,7 @@ class _StepRow extends StatelessWidget {
                     style: const TextStyle(
                       fontFamily: AppText.family,
                       fontSize: 13.5,
-                      height: 1.45,
+                      height: 1.4,
                       color: AppColors.textSecondary,
                     ),
                   ),

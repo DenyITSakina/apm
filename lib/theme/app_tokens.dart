@@ -95,27 +95,15 @@ class AppShadow {
   const AppShadow._();
 
   static const List<BoxShadow> card = [
-    BoxShadow(
-      color: Color(0x0F0E7C86),
-      blurRadius: 24,
-      offset: Offset(0, 10),
-    ),
+    BoxShadow(color: Color(0x0F0E7C86), blurRadius: 24, offset: Offset(0, 10)),
   ];
 
   static const List<BoxShadow> soft = [
-    BoxShadow(
-      color: Color(0x0A0E7C86),
-      blurRadius: 14,
-      offset: Offset(0, 6),
-    ),
+    BoxShadow(color: Color(0x0A0E7C86), blurRadius: 14, offset: Offset(0, 6)),
   ];
 
   static const List<BoxShadow> raised = [
-    BoxShadow(
-      color: Color(0x1A0E7C86),
-      blurRadius: 24,
-      offset: Offset(0, 12),
-    ),
+    BoxShadow(color: Color(0x1A0E7C86), blurRadius: 24, offset: Offset(0, 12)),
   ];
 
   static List<BoxShadow> glow(Color color) => [
@@ -143,7 +131,7 @@ class AppInfo {
   const AppInfo._();
 
   static const String appName = 'APM RSU Sakina Idaman';
-  static const String version = '1.0.0';
+  static const String version = '2.0.0';
 
   static String get label => 'v$version';
 }
