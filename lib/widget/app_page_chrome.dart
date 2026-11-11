@@ -318,12 +318,6 @@ class AppPageFooter extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(
-            Icons.local_hospital_rounded,
-            color: Colors.white70,
-            size: 16,
-          ),
-          const SizedBox(width: 8),
           Expanded(
             child: Text(
               message ??
