@@ -25,19 +25,19 @@ DB_CONFIG = {
     "password": "12344321",
 }
 
-# FRISTA_PATH = r"C:\frista_v3.0.2\frista\Frista.exe"
+FRISTA_PATH = r"C:\frista\frista.exe"
 AFTER_PATH = (
     r"C:\Program Files (x86)\BPJS Kesehatan"
     r"\Aplikasi Sidik Jari BPJS Kesehatan\After.exe"
 )
 
 AFTER_PROCESS_NAME = "After.exe"
-# FRISTA_PROCESS_NAME = "Frista.exe"
+FRISTA_PROCESS_NAME = "Frista.exe"
 
 # ===== WAKTU TUNGGU (detik) =====
 POLL_INTERVAL = 0.1
 AFTER_LAUNCH_TIMEOUT = 6
-# AFTER_LOGIN_TIMEOUT = 12
+AFTER_LOGIN_TIMEOUT = 12
 AFTER_EXIT_TIMEOUT = 180
 FRISTA_LAUNCH_TIMEOUT = 15
 
@@ -150,7 +150,13 @@ def fast_type(text, interval=0.02):
 
 # ===== AFTER.EXE (Sidik Jari) =====
 def run_after(username, password):
-    """Jalankan After.exe, auto login, lalu tunggu proses selesai."""
+    """Jalankan After.exe, auto login, lalu tunggu proses selesai.
+    
+    Returns:
+        True bila After.exe selesai dengan exit code 0.
+        False bila gagal (file tidak ditemukan, window tidak muncul,
+        atau masih berjalan setelah batas waktu).
+    """
     print(">>> Menjalankan After.exe ...")
     proc = None
 
@@ -193,43 +199,87 @@ def run_after(username, password):
     print(f">>> After.exe selesai, exit code: {code}")
     return code == 0
 
-# # ===== FRISTA =====
-# def start_frista_and_login(username, password):
-#     """Buka Frista dan login otomatis (tanpa input no_peserta)."""
-#     if not os.path.exists(FRISTA_PATH):
-#         print(f"[!] Frista.exe tidak ditemukan: {FRISTA_PATH}")
-#         return False
 
-#     print(">>> Membuka Frista ...")
-#     subprocess.Popen([FRISTA_PATH])
+def run_after_with_retry(username, password, max_retries=3):
+    """Jalankan After.exe dengan retry. Jika gagal max_retries kali, beralih ke Frista."""
+    for attempt in range(1, max_retries + 1):
+        print(f"\n>>> Percobaan After.exe ke-{attempt}/{max_retries}")
+        if run_after(username, password):
+            print(f"[OK] After.exe percobaan ke-{attempt}sukses")
+            return True
+        print(f"[!] After.exe percobaan ke-{attempt} gagal")
+        if attempt < max_retries:
+            time.sleep(2.0)  # Tunggu sebelum retry
+    
+    print(f"\n[!] After.exe gagal setelah {max_retries} percobaan, beralih ke Frista")
+    return False
 
-#     if not wait_until(
-#         lambda: is_process_running(FRISTA_PROCESS_NAME), FRISTA_LAUNCH_TIMEOUT
-#     ):
-#         print("[!] Frista gagal start / verifikasi wajah")
-#         return False
 
-#     activate_window("Frista.exe", 3)
+# ===== FRISTA =====
+def start_frista_and_login(username, password):
+    """Buka Frista dan login otomatis (tanpa input no_peserta)."""
+    if not os.path.exists(FRISTA_PATH):
+        print(f"[!] Frista.exe tidak ditemukan: {FRISTA_PATH}")
+        return False
 
-#     pyautogui.write(username, interval=0.02)
-#     pyautogui.press("tab")
-#     pyautogui.write(password, interval=0.02)
-#     pyautogui.press("enter")
-#     print(">>> Auto login Frista dikirim")
-#     time.sleep(1.5)
+    if is_process_running(FRISTA_PROCESS_NAME):
+        print(">>> Frista sudah berjalan, menggunakan instance yang ada")
+    else:
+        print(">>> Membuka Frista ...")
+        subprocess.Popen([FRISTA_PATH])
 
-#     return True
+    if not wait_until(
+        lambda: is_process_running(FRISTA_PROCESS_NAME), FRISTA_LAUNCH_TIMEOUT
+    ):
+        print("[!] Frista gagal start / verifikasi wajah")
+        return False
+
+    activate_window("Frista.exe", 3)
+
+    pyautogui.write(username, interval=0.02)
+    pyautogui.press("tab")
+    pyautogui.write(password, interval=0.02)
+    pyautogui.press("enter")
+    print(">>> Auto login Frista dikirim")
+    time.sleep(1.5)
+
+    return True
+
+
+def wait_frista_finish(timeout=300):
+    """Tunggu Frista selesai."""
+    deadline = time.time() + timeout
+    while is_process_running(FRISTA_PROCESS_NAME) and time.time() < deadline:
+        time.sleep(0.5)
+    
+    if is_process_running(FRISTA_PROCESS_NAME):
+        print("[!] Frista masih berjalan setelah batas waktu")
+        return False
+    print(">>> Frista selesai")
+    return True
+
 
 # ===== EKSEKUSI =====
 def main():
     username, password = get_account_from_db()
     print(f"User: {username}, Password: {'*' * len(password)}")
 
-    if not run_after(username, password):
-        print("[!] Sidik jari gagal diproses")
+    # Coba After.exe (sidik jari) dengan retry hingga 3 kali
+    if run_after_with_retry(username, password, max_retries=3):
+        print("[OK] Sidik jari (After.exe) berhasil diproses")
+        return 0
+
+    # Jika After.exe gagal 3 kali, gunakan Frista
+    print("\n>>> Mengaktifkan Frista sebagai fallback ...")
+    if not start_frista_and_login(username, password):
+        print("[!] Frista gagal dijalankan")
         return 1
 
-    print("[OK] Sidik jari berhasil diproses")
+    if not wait_frista_finish():
+        print("[!] Frista tidak selesai dalam waktu yang ditentukan")
+        return 1
+
+    print("[OK] Frista selesai diproses")
     return 0
 
 
