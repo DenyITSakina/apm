@@ -66,3 +66,34 @@
 [2026-11-13T13:56:31.106474] Sidik jari selesai | sukses=true | ditutupOtomatis=true | reason=
 [2026-11-13T13:56:31.132629] Lanjut ke poli (pembuatan SEP) | rm=0023****7913 | diagnosaAwal=E11.8
 [2026-11-13T13:56:31.424922] Gagal | rm=0023****7913 | Peserta Booking Tidak Ditemukan
+[2026-11-13T14:21:16.773552] Mulai validasi | nomor=0023****7913 | jenis=bpjs
+[2026-11-13T14:21:20.861712] Log file: D:\Sakina\apm\bpjs_checkin_log.txt
+[2026-11-13T14:21:20.883713] Mulai proses ke poli | rm=0023****7913 | pasienBaru=0 | bpjsAktif=true | adaRujukan=true
+[2026-11-13T14:21:33.030092] Sidik jari selesai | sukses=true | ditutupOtomatis=true | reason=
+[2026-11-13T14:21:33.056092] Lanjut ke poli (pembuatan SEP) | rm=0023****7913 | diagnosaAwal=E11.8
+[2026-11-13T14:21:33.346587] Gagal | rm=0023****7913 | Peserta Booking Tidak Ditemukan
+[2026-11-13T14:32:11.556022] Mulai validasi | nomor=0023****7913 | jenis=bpjs
+[2026-11-13T14:32:13.771611] Log file: D:\Sakina\apm\bpjs_checkin_log.txt
+[2026-11-13T14:32:13.787612] Mulai proses ke poli | rm=0023****7913 | pasienBaru=0 | bpjsAktif=true | adaRujukan=true
+[2026-11-13T14:32:37.077100] Sidik jari selesai | sukses=false | ditutupOtomatis=false | reason=After.ini WSURL kosong (login tetap dicoba) (Sidik jari gagal diproses.)
+[2026-11-13T14:32:51.588347] Log file: D:\Sakina\apm\bpjs_checkin_log.txt
+[2026-11-13T14:32:51.614398] Mulai proses ke poli | rm=0023****7913 | pasienBaru=0 | bpjsAktif=true | adaRujukan=true
+[2026-11-13T14:33:17.278394] Sidik jari selesai | sukses=false | ditutupOtomatis=false | reason=After.ini WSURL kosong (login tetap dicoba) (Sidik jari gagal diproses.)
+[2026-11-13T14:38:03.991489] Mulai validasi | nomor=0023****7913 | jenis=bpjs
+[2026-11-13T14:38:06.325541] Log file: D:\Sakina\apm\bpjs_checkin_log.txt
+[2026-11-13T14:38:06.995644] Mulai proses ke poli | rm=0023****7913 | pasienBaru=0 | bpjsAktif=true | adaRujukan=true
+[2026-11-13T14:38:21.024259] Sidik jari selesai | sukses=true | ditutupOtomatis=true | reason=
+[2026-11-13T14:38:21.050258] Lanjut ke poli (pembuatan SEP) | rm=0023****7913 | diagnosaAwal=E11.8
+[2026-11-13T14:38:21.354398] Gagal | rm=0023****7913 | Peserta Booking Tidak Ditemukan
+[2026-11-13T14:42:35.340321] Mulai validasi | nomor=0023****7913 | jenis=bpjs
+[2026-11-13T14:42:37.619390] Log file: D:\Sakina\apm\bpjs_checkin_log.txt
+[2026-11-13T14:42:37.642413] Mulai proses ke poli | rm=0023****7913 | pasienBaru=0 | bpjsAktif=true | adaRujukan=true
+[2026-11-13T14:42:49.735330] Sidik jari selesai | sukses=true | ditutupOtomatis=true | reason=
+[2026-11-13T14:42:49.754330] Lanjut ke poli (pembuatan SEP) | rm=0023****7913 | diagnosaAwal=E11.8
+[2026-11-13T14:42:50.088926] Gagal | rm=0023****7913 | Peserta Booking Tidak Ditemukan
+[2026-11-13T14:55:47.406368] Mulai validasi | nomor=0023****7913 | jenis=bpjs
+[2026-11-13T14:55:49.747297] Log file: D:\Sakina\apm\bpjs_checkin_log.txt
+[2026-11-13T14:55:49.777298] Mulai proses ke poli | rm=0023****7913 | pasienBaru=0 | bpjsAktif=true | adaRujukan=true
+[2026-11-13T14:56:06.821884] Sidik jari selesai | sukses=true | ditutupOtomatis=true | reason=
+[2026-11-13T14:56:06.844891] Lanjut ke poli (pembuatan SEP) | rm=0023****7913 | diagnosaAwal=E11.8
+[2026-11-13T14:56:07.118998] Gagal | rm=0023****7913 | Peserta Booking Tidak Ditemukan

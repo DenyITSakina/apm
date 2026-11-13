@@ -183,3 +183,65 @@
 [2026-11-13T13:56:31.012017] Aplikasi menutup diri -> sidik jari dianggap selesai
 [2026-11-13T13:56:31.027106] Status setelah 18 detik: SidikJariStatus.ditutupOtomatis
 [2026-11-13T13:56:31.057207] Aplikasi sidik jari menutup diri tanpa teks konfirmasi, lanjut sebagai selesai
+[2026-11-13T14:21:20.916716] Mulai proses | nomor=0000****3033 | app=D:\Sakina\apm
+[2026-11-13T14:21:20.947712] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-11-13T14:21:21.252716] Ambil akun VClaim (273 ms)
+[2026-11-13T14:21:21.281714] Login otomatis memakai user=ci*******a
+[2026-11-13T14:21:21.453744] After.exe tidak berjalan
+[2026-11-13T14:21:21.483747] After.exe dijalankan (pid=13376), menunggu proses muncul
+[2026-11-13T14:21:25.405798] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=LOGIN_OK | STEP=MODE_OK | STEP=NOMOR_OK
+[2026-11-13T14:21:25.439897] Otomasi UI selesai (3821 ms)
+[2026-11-13T14:21:32.901080] Aplikasi menutup diri -> sidik jari dianggap selesai
+[2026-11-13T14:21:32.939092] Status setelah 7 detik: SidikJariStatus.ditutupOtomatis
+[2026-11-13T14:21:32.998092] Aplikasi sidik jari menutup diri tanpa teks konfirmasi, lanjut sebagai selesai
+[2026-11-13T14:32:13.818619] Mulai proses | nomor=0000****3033 | app=D:\Sakina\apm
+[2026-11-13T14:32:13.841612] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-11-13T14:32:14.109504] Ambil akun VClaim (233 ms)
+[2026-11-13T14:32:14.133501] Login otomatis memakai user=ci*******a
+[2026-11-13T14:32:14.332084] After.exe tidak berjalan
+[2026-11-13T14:32:14.361085] After.exe dijalankan (pid=2980), menunggu proses muncul
+[2026-11-13T14:32:36.889060] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=LOGIN_TIMEOUT
+[2026-11-13T14:32:36.918060] Otomasi UI selesai (22372 ms)
+[2026-11-13T14:32:37.048060] GAGAL: After.ini WSURL kosong (login tetap dicoba) (Sidik jari gagal diproses.)
+[2026-11-13T14:32:51.645414] Mulai proses | nomor=0000****3033 | app=D:\Sakina\apm
+[2026-11-13T14:32:51.668398] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-11-13T14:32:51.912845] Ambil akun VClaim (210 ms)
+[2026-11-13T14:32:51.934856] Login otomatis memakai user=ci*******a
+[2026-11-13T14:32:52.064756] After.exe tidak berjalan
+[2026-11-13T14:32:52.092757] After.exe dijalankan (pid=17740), menunggu proses muncul
+[2026-11-13T14:33:17.099394] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=LOGIN_TIMEOUT
+[2026-11-13T14:33:17.128393] Otomasi UI selesai (24915 ms)
+[2026-11-13T14:33:17.254393] GAGAL: After.ini WSURL kosong (login tetap dicoba) (Sidik jari gagal diproses.)
+[2026-11-13T14:38:07.110646] Mulai proses | nomor=0000****3033 | app=D:\Sakina\apm
+[2026-11-13T14:38:07.182884] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-11-13T14:38:07.523941] Ambil akun VClaim (265 ms)
+[2026-11-13T14:38:07.913352] Login otomatis memakai user=ci*******a
+[2026-11-13T14:38:08.186352] After.exe tidak berjalan
+[2026-11-13T14:38:08.260362] After.exe dijalankan (pid=13380), menunggu proses muncul
+[2026-11-13T14:38:20.792822] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=APP_CLOSED_DURING_LOGIN
+[2026-11-13T14:38:20.825194] Otomasi UI selesai (12428 ms)
+[2026-11-13T14:38:20.964259] After.exe tidak berjalan
+[2026-11-13T14:38:20.991259] After.exe menutup diri saat otomasi (After.ini WSURL kosong (login tetap dicoba)), lanjut sebagai selesai
+[2026-11-13T14:42:37.664415] Mulai proses | nomor=0000****3033 | app=D:\Sakina\apm
+[2026-11-13T14:42:37.685419] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-11-13T14:42:37.942345] Ambil akun VClaim (222 ms)
+[2026-11-13T14:42:37.969345] Login otomatis memakai user=ci*******a
+[2026-11-13T14:42:38.162741] After.exe tidak berjalan
+[2026-11-13T14:42:38.189849] After.exe dijalankan (pid=16568), menunggu proses muncul
+[2026-11-13T14:42:49.515738] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=APP_CLOSED_DURING_LOGIN
+[2026-11-13T14:42:49.554820] Otomasi UI selesai (11231 ms)
+[2026-11-13T14:42:49.683747] After.exe tidak berjalan
+[2026-11-13T14:42:49.704335] After.exe menutup diri saat otomasi (After.ini WSURL kosong (login tetap dicoba)), lanjut sebagai selesai
+[2026-11-13T14:55:49.812307] Mulai proses | nomor=0000****3033 | app=D:\Sakina\apm
+[2026-11-13T14:55:49.829300] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-11-13T14:55:50.098916] Ambil akun VClaim (237 ms)
+[2026-11-13T14:55:50.119466] Login otomatis memakai user=ci*******a
+[2026-11-13T14:55:50.145519] Percobaan sidik jari ke-1/3
+[2026-11-13T14:55:50.177611] [!] Pastika Mesih Fingerprint Terhubung Dengan PC
+[2026-11-13T14:55:50.204609] Menutup otomatis After.exe lalu membuka kembali...
+[2026-11-13T14:55:51.365662] After.exe dijalankan (pid=10976), menunggu proses muncul
+[2026-11-13T14:56:06.598512] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED
+[2026-11-13T14:56:06.622609] Otomasi UI selesai (15137 ms)
+[2026-11-13T14:56:06.748869] After.exe tidak berjalan
+[2026-11-13T14:56:06.763884] After.exe menutup diri saat otomasi (After.ini WSURL kosong (login tetap dicoba))
+[2026-11-13T14:56:06.794884] After.exe menutup diri tanpa teks konfirmasi, lanjut sebagai selesai
