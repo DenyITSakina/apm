@@ -25,14 +25,14 @@ DB_CONFIG = {
     "password": "12344321",
 }
 
-# FRISTA_PATH = r"C:\frista\Frista.exe"
+FRISTA_PATH = r"C:\frista\Frista.exe"
 AFTER_PATH = (
     r"C:\Program Files (x86)\BPJS Kesehatan"
     r"\Aplikasi Sidik Jari BPJS Kesehatan\After.exe"
 )
 
 AFTER_PROCESS_NAME = "After.exe"
-# FRISTA_PROCESS_NAME = "Frista.exe"
+FRISTA_PROCESS_NAME = "Frista.exe"
 
 # ===== WAKTU TUNGGU (detik) =====
 POLL_INTERVAL = 0.1
@@ -40,6 +40,7 @@ AFTER_LAUNCH_TIMEOUT = 6
 # AFTER_LOGIN_TIMEOUT = 12
 AFTER_EXIT_TIMEOUT = 180
 FRISTA_LAUNCH_TIMEOUT = 15
+MAX_AFTER_ATTEMPTS = 2
 
 DEFAULT_USER = "cicifitria"
 DEFAULT_PASSWORD = "Idaman99!"
@@ -171,6 +172,7 @@ def run_after(username, password):
         return False
 
     # Auto login (username, tab, password, enter)
+    login_time = time.time()
     pyautogui.write(username, interval=0.02)
     pyautogui.press("tab")
     pyautogui.write(password, interval=0.02)
@@ -191,46 +193,65 @@ def run_after(username, password):
 
     code = proc.wait() if proc else 0
     print(f">>> After.exe selesai, exit code: {code}")
+    # Penutupan sangat cepat setelah login biasanya popup/error, bukan proses
+    # sidik jari yang selesai normal.
+    if proc is not None and (time.time() - login_time) < 8:
+        print("[!] After.exe tertutup terlalu cepat setelah login")
+        return False
     return code == 0
 
-# # ===== FRISTA =====
-# def start_frista_and_login(username, password):
-#     """Buka Frista dan login otomatis (tanpa input no_peserta)."""
-#     if not os.path.exists(FRISTA_PATH):
-#         print(f"[!] Frista.exe tidak ditemukan: {FRISTA_PATH}")
-#         return False
+# ===== FRISTA =====
+def start_frista_and_login(username, password):
+    """Buka Frista sebagai fallback setelah sidik jari gagal berulang."""
+    if not os.path.exists(FRISTA_PATH):
+        print(f"[!] Frista.exe tidak ditemukan: {FRISTA_PATH}")
+        return False
 
-#     print(">>> Membuka Frista ...")
-#     subprocess.Popen([FRISTA_PATH])
+    print(">>> Membuka Frista ...")
+    subprocess.Popen([FRISTA_PATH])
 
-#     if not wait_until(
-#         lambda: is_process_running(FRISTA_PROCESS_NAME), FRISTA_LAUNCH_TIMEOUT
-#     ):
-#         print("[!] Frista gagal start / verifikasi wajah")
-#         return False
+    if not wait_until(
+        lambda: is_process_running(FRISTA_PROCESS_NAME), FRISTA_LAUNCH_TIMEOUT
+    ):
+        print("[!] Frista gagal start")
+        return False
 
-#     activate_window("Frista.exe", 3)
+    if activate_window(FRISTA_PROCESS_NAME, 3):
+        pyautogui.write(username, interval=0.02)
+        pyautogui.press("tab")
+        pyautogui.write(password, interval=0.02)
+        pyautogui.press("enter")
+        print(">>> Auto login Frista dikirim")
+        time.sleep(1.5)
+    else:
+        print("[!] Window Frista tidak aktif, proses tetap dibuka")
 
-#     pyautogui.write(username, interval=0.02)
-#     pyautogui.press("tab")
-#     pyautogui.write(password, interval=0.02)
-#     pyautogui.press("enter")
-#     print(">>> Auto login Frista dikirim")
-#     time.sleep(1.5)
+    return True
 
-#     return True
 
 # ===== EKSEKUSI =====
 def main():
     username, password = get_account_from_db()
     print(f"User: {username}, Password: {'*' * len(password)}")
 
-    if not run_after(username, password):
-        print("[!] Sidik jari gagal diproses")
-        return 1
+    for attempt in range(1, MAX_AFTER_ATTEMPTS + 1):
+        print(f">>> Percobaan sidik jari {attempt}/{MAX_AFTER_ATTEMPTS}")
+        if run_after(username, password):
+            print("[OK] Sidik jari berhasil diproses")
+            return 0
 
-    print("[OK] Sidik jari berhasil diproses")
-    return 0
+        print(f"[!] Sidik jari gagal pada percobaan {attempt}")
+        if is_process_running(AFTER_PROCESS_NAME):
+            kill_process(AFTER_PROCESS_NAME)
+        if attempt < MAX_AFTER_ATTEMPTS:
+            time.sleep(1.0)
+
+    print("[!] Sidik jari gagal 2x, membuka Frista")
+    if start_frista_and_login(username, password):
+        return 2
+
+    print("[!] Gagal membuka Frista setelah sidik jari gagal 2x")
+    return 1
 
 
 if __name__ == "__main__":

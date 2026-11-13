@@ -13,9 +13,11 @@ const int vkTab = 0x09;
 
 const String sidikJariExePath =
     r"C:\Program Files (x86)\BPJS Kesehatan\Aplikasi Sidik Jari BPJS Kesehatan\After.exe";
+const String fristaExePath = r"C:\frista\Frista.exe";
 
 const Duration _sidikJariLaunchTimeout = Duration(seconds: 10);
 const Duration _sidikJariExitTimeout = Duration(seconds: 180);
+const int _maxSidikJariAttempts = 2;
 
 const int _maxLogBytes = 2 * 1024 * 1024;
 
@@ -768,12 +770,6 @@ String _alasanDariLangkah(List<String> langkah) {
   if (cari('STEP=FIELDS_NOT_FOUND') != null) {
     return 'field login tidak ditemukan (versi aplikasi berubah?)';
   }
-  if (cari('STEP=WARN_NO_SERVER') != null) {
-    return 'After.ini WSURL kosong (login tetap dicoba)';
-  }
-  if (cari('STEP=WARN_READER') != null) {
-    return 'mesin fingerprint dilaporkan belum terhubung';
-  }
   if (cari('STEP=USER_FAIL') != null) return 'username gagal diisi';
   if (cari('STEP=PASS_FAIL') != null) return 'password gagal diisi';
   if (cari('STEP=LOGIN_FAIL') != null) return 'tombol login gagal ditekan';
@@ -784,6 +780,17 @@ String _alasanDariLangkah(List<String> langkah) {
     return 'login ditolak (periksa akun VClaim dan jaringan)';
   }
   if (cari('STEP=NOMOR_FAIL') != null) return 'nomor gagal diisi';
+
+  // Peringatan lingkungan, bukan alasan kegagalan utama.
+  if (cari('STEP=WARN_NO_SERVER') != null) {
+    return 'After.ini WSURL kosong (login tetap dicoba)';
+  }
+  if (cari('STEP=WARN_NO_INI') != null) {
+    return 'After.ini tidak ditemukan';
+  }
+  if (cari('STEP=WARN_READER') != null) {
+    return 'mesin fingerprint dilaporkan belum terhubung';
+  }
   return 'langkah otomasi tidak lengkap';
 }
 
@@ -1103,6 +1110,9 @@ String lastSidikJariReason = '';
 /// True kalau After.exe menutup dirinya sendiri tanpa teks konfirmasi.
 bool lastSidikJariDitutupOtomatis = false;
 
+/// True kalau sidik jari gagal berulang dan dialihkan ke Frista.
+bool lastSidikJariDialihkanKeFrista = false;
+
 /// Samarkan nomor untuk log (jangan tulis nomor BPJS penuh ke file).
 String maskNomorLog(String? nomor) {
   final value = (nomor ?? '').trim();
@@ -1156,6 +1166,7 @@ Future<bool> openExe(
 }) async {
   lastSidikJariReason = '';
   lastSidikJariDitutupOtomatis = false;
+  lastSidikJariDialihkanKeFrista = false;
 
   void gagal(String alasan, [String? pesan]) {
     lastSidikJariReason = '$alasan${pesan != null ? ' ($pesan)' : ''}';
@@ -1177,9 +1188,6 @@ Future<bool> openExe(
     return false;
   }
 
-  Process? process;
-  int? pid;
-
   try {
     _logSidikJari(
       "Mulai proses | nomor=${maskNomorLog(noPeserta)} | app=${Directory.current.path}",
@@ -1200,125 +1208,172 @@ Future<bool> openExe(
     }
     _logSidikJari("Login otomatis memakai user=${maskUserLog(akun.username)}");
 
-    final sudahBerjalan = await isSidikJariRunning();
+    for (var percobaan = 1; percobaan <= _maxSidikJariAttempts; percobaan++) {
+      lastSidikJariDitutupOtomatis = false;
+      Process? process;
+      _logSidikJari("Percobaan sidik jari $percobaan/$_maxSidikJariAttempts");
 
-    if (sudahBerjalan) {
-      _logSidikJari(
-        "PERINGATAN: After.exe sudah berjalan dari sesi sebelumnya, "
-        "nomor dikirim ke window yang ada",
-      );
-    } else {
-      if (!File(sidikJariExePath).existsSync()) {
-        gagal("exe tidak ditemukan", "Aplikasi sidik jari tidak ditemukan.");
-        return false;
-      }
-
-      process = await Process.start(
-        sidikJariExePath,
-        [],
-        runInShell: true,
-        mode: ProcessStartMode.normal,
-      );
-      pid = process.pid;
-      _logSidikJari("After.exe dijalankan (pid=$pid), menunggu proses muncul");
-
-      final muncul = await waitUntil(
-        isSidikJariRunning,
-        timeout: _sidikJariLaunchTimeout,
-      );
-
-      if (!muncul) {
-        gagal(
-          "proses tidak muncul dalam ${_sidikJariLaunchTimeout.inSeconds} dtk",
+      final sudahBerjalan = await isSidikJariRunning();
+      if (sudahBerjalan) {
+        _logSidikJari(
+          "PERINGATAN: After.exe sudah berjalan dari sesi sebelumnya, "
+          "nomor dikirim ke window yang ada",
         );
-        return false;
-      }
-    }
+      } else {
+        if (!File(sidikJariExePath).existsSync()) {
+          gagal("exe tidak ditemukan", "Aplikasi sidik jari tidak ditemukan.");
+          return false;
+        }
 
-    // Jalur cepat: kendalikan UI After.exe langsung (bukan mengetik buta).
-    final swOto = Stopwatch()..start();
-    final hasilOto = await jalankanOtomatisSidikJari(
-      username: akun.username!,
-      password: akun.password!,
-      nomor: nomor,
-      tipe: tipe,
-    );
-    _logSidikJari("Otomasi UI selesai (${swOto.elapsedMilliseconds} ms)");
+        process = await Process.start(
+          sidikJariExePath,
+          [],
+          runInShell: true,
+          mode: ProcessStartMode.normal,
+        );
+        _logSidikJari(
+          "After.exe dijalankan (pid=${process.pid}), menunggu proses muncul",
+        );
 
-    var sukses = hasilOto.berhasil;
-    if (!sukses && hasilOto.alasan.contains('field login tidak ditemukan')) {
-      // Struktur UI berubah: pakai jalur ketik lama.
-      _logSidikJari("Fallback ke input keyboard");
-      if (!context.mounted) {
-        return false;
+        final muncul = await waitUntil(
+          isSidikJariRunning,
+          timeout: _sidikJariLaunchTimeout,
+        );
+
+        if (!muncul) {
+          lastSidikJariReason =
+              "proses tidak muncul dalam ${_sidikJariLaunchTimeout.inSeconds} dtk";
+          _logSidikJari("GAGAL percobaan $percobaan: $lastSidikJariReason");
+          if (percobaan < _maxSidikJariAttempts) {
+            await Future<void>.delayed(const Duration(seconds: 1));
+            continue;
+          }
+          break;
+        }
       }
-      sukses = await _jalankanViaKetik(
-        context: context,
+
+      // Jalur cepat: kendalikan UI After.exe langsung (bukan mengetik buta).
+      final swOto = Stopwatch()..start();
+      final hasilOto = await jalankanOtomatisSidikJari(
         username: akun.username!,
         password: akun.password!,
         nomor: nomor,
+        tipe: tipe,
       );
-    }
+      _logSidikJari("Otomasi UI selesai (${swOto.elapsedMilliseconds} ms)");
 
-    if (!sukses) {
-      // After.exe bisa menutup dirinya sendiri di tengah jalan (misalnya popup
-      // "Tidak Dapat Terhubung Ke Server" atau versi kadaluarsa). Bila proses
-      // sudah tidak ada, perlakukan sebagai penutupan otomatis dan tetap
-      // lanjut ke dialog konfirmasi.
-      final masihBerjalan = await isSidikJariRunning();
-      if (!masihBerjalan) {
-        lastSidikJariDitutupOtomatis = true;
-        _logSidikJari(
-          "After.exe menutup diri saat otomasi (${hasilOto.alasan}), "
-          "lanjut sebagai selesai",
+      var sukses = hasilOto.berhasil;
+      if (!sukses && hasilOto.alasan.contains('field login tidak ditemukan')) {
+        // Struktur UI berubah: pakai jalur ketik lama.
+        _logSidikJari("Fallback ke input keyboard");
+        if (!context.mounted) {
+          return false;
+        }
+        sukses = await _jalankanViaKetik(
+          context: context,
+          username: akun.username!,
+          password: akun.password!,
+          nomor: nomor,
         );
-        return true;
       }
-      gagal(hasilOto.alasan, "Sidik jari gagal diproses.");
-      return false;
+
+      if (!sukses) {
+        // After.exe menutup diri saat otomasi/login sebelum nomor selesai
+        // diproses = percobaan gagal, bukan sukses. Coba lagi lalu fallback
+        // ke Frista bila tetap gagal (tanpa interaksi klik manual).
+        final masihBerjalan = await isSidikJariRunning();
+        if (!masihBerjalan) {
+          lastSidikJariReason = hasilOto.alasan.isEmpty
+              ? 'aplikasi sidik jari menutup diri saat otomasi'
+              : 'aplikasi sidik jari menutup diri saat otomasi (${hasilOto.alasan})';
+          _logSidikJari("GAGAL percobaan $percobaan: $lastSidikJariReason");
+          if (percobaan < _maxSidikJariAttempts) {
+            await Future<void>.delayed(const Duration(seconds: 1));
+            continue;
+          }
+          break;
+        }
+        lastSidikJariReason = hasilOto.alasan.isEmpty
+            ? 'otomasi sidik jari gagal'
+            : hasilOto.alasan;
+        _logSidikJari("GAGAL percobaan $percobaan: $lastSidikJariReason");
+        await closeSidikJariExe();
+        if (percobaan < _maxSidikJariAttempts) {
+          await Future<void>.delayed(const Duration(seconds: 1));
+          continue;
+        }
+        break;
+      }
+
+      if (process == null) {
+        _logSidikJari("Dipantau proses yang sudah berjalan sebelumnya");
+      }
+
+      final swTunggu = Stopwatch()..start();
+      final status = await waitSidikJariSelesai(_sidikJariExitTimeout);
+      _logSidikJari(
+        "Status setelah ${swTunggu.elapsed.inSeconds} detik: $status",
+      );
+
+      switch (status) {
+        case SidikJariStatus.selesai:
+          _logSidikJari("Sidik jari terverifikasi dari UI aplikasi");
+          return true;
+        case SidikJariStatus.ditutupOtomatis:
+          // After.exe menutup diri tanpa teks konfirmasi; tetap dianggap sukses
+          // supaya alur lanjut ke dialog konfirmasi.
+          _logSidikJari(
+            "Aplikasi sidik jari menutup diri tanpa teks konfirmasi, "
+            "lanjut sebagai selesai",
+          );
+          lastSidikJariDitutupOtomatis = true;
+          return true;
+        case SidikJariStatus.popupError:
+          lastSidikJariReason =
+              "ditolak aplikasi: ${lastTeksSidikJari ?? 'pesan tidak terbaca'}";
+          _logSidikJari("GAGAL percobaan $percobaan: $lastSidikJariReason");
+          await closeSidikJariExe();
+          if (percobaan < _maxSidikJariAttempts) {
+            await Future<void>.delayed(const Duration(seconds: 1));
+            continue;
+          }
+          break;
+        case SidikJariStatus.timeout:
+          lastSidikJariReason =
+              "belum selesai dalam ${_sidikJariExitTimeout.inMinutes} menit"
+                  "${lastTeksSidikJari != null && lastTeksSidikJari != 'teks UI tidak terbaca' ? ' ($lastTeksSidikJari)' : ''}";
+          _logSidikJari("GAGAL percobaan $percobaan: $lastSidikJariReason");
+          await closeSidikJariExe();
+          if (percobaan < _maxSidikJariAttempts) {
+            await Future<void>.delayed(const Duration(seconds: 1));
+            continue;
+          }
+          break;
+      }
     }
 
-    if (process == null) {
-      _logSidikJari("Dipantau proses yang sudah berjalan sebelumnya");
-    }
-
-    final swTunggu = Stopwatch()..start();
-    final status = await waitSidikJariSelesai(_sidikJariExitTimeout);
     _logSidikJari(
-      "Status setelah ${swTunggu.elapsed.inSeconds} detik: $status",
+      "Sidik jari gagal $_maxSidikJariAttempts kali, mencoba membuka Frista",
     );
-
-    switch (status) {
-      case SidikJariStatus.selesai:
-        _logSidikJari("Sidik jari terverifikasi dari UI aplikasi");
-        return true;
-      case SidikJariStatus.ditutupOtomatis:
-        // After.exe menutup diri tanpa teks konfirmasi; tetap dianggap sukses
-        // supaya alur lanjut ke dialog konfirmasi.
-        _logSidikJari(
-          "Aplikasi sidik jari menutup diri tanpa teks konfirmasi, "
-          "lanjut sebagai selesai",
+    final fristaDibuka = await _bukaFristaFallback();
+    if (fristaDibuka) {
+      lastSidikJariDialihkanKeFrista = true;
+      lastSidikJariReason =
+          "sidik jari gagal $_maxSidikJariAttempts kali, dialihkan ke Frista";
+      if (tampilkanToast && context.mounted) {
+        TopToast.warning(
+          context,
+          "Sidik jari gagal 2 kali. Aplikasi Frista dibuka.",
         );
-        lastSidikJariDitutupOtomatis = true;
-        return true;
-      case SidikJariStatus.popupError:
-        gagal(
-          "ditolak aplikasi: ${lastTeksSidikJari ?? 'pesan tidak terbaca'}",
-          "Aplikasi sidik jari menolak proses.",
-        );
-        return true;
-      case SidikJariStatus.timeout:
-        gagal(
-          "belum selesai dalam ${_sidikJariExitTimeout.inMinutes} menit"
-              "${lastTeksSidikJari != null && lastTeksSidikJari != 'teks UI tidak terbaca' ? ' ($lastTeksSidikJari)' : ''}",
-          "Sidik jari belum selesai diproses.",
-        );
-        return true;
+      }
+    } else {
+      gagal(lastSidikJariReason, "Sidik jari gagal diproses.");
     }
+    return false;
   } catch (e) {
     lastSidikJariReason = 'error tidak terduga: $e';
     _logSidikJari("GAGAL: $lastSidikJariReason");
-    return true;
+    return false;
   }
 }
 
@@ -1361,6 +1416,26 @@ Future<_AkunVclaim> _ambilAkunVclaim() async {
       berhasil: false,
       alasan: 'API akun tidak dapat diakses',
     );
+  }
+}
+
+Future<bool> _bukaFristaFallback() async {
+  try {
+    if (!File(fristaExePath).existsSync()) {
+      _logSidikJari("Frista.exe tidak ditemukan: $fristaExePath");
+      return false;
+    }
+    await Process.start(
+      fristaExePath,
+      [],
+      runInShell: true,
+      mode: ProcessStartMode.normal,
+    );
+    _logSidikJari("Frista.exe dibuka sebagai fallback");
+    return true;
+  } catch (e) {
+    _logSidikJari("Gagal membuka Frista: $e");
+    return false;
   }
 }
 

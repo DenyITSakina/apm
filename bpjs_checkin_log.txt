@@ -97,3 +97,16 @@
 [2026-11-13T14:56:06.821884] Sidik jari selesai | sukses=true | ditutupOtomatis=true | reason=
 [2026-11-13T14:56:06.844891] Lanjut ke poli (pembuatan SEP) | rm=0023****7913 | diagnosaAwal=E11.8
 [2026-11-13T14:56:07.118998] Gagal | rm=0023****7913 | Peserta Booking Tidak Ditemukan
+[2026-11-13T15:04:22.314111] Mulai validasi | nomor=0023****7913 | jenis=bpjs
+[2026-11-13T15:04:24.749275] Log file: D:\Sakina\apm\bpjs_checkin_log.txt
+[2026-11-13T15:04:24.774289] Mulai proses ke poli | rm=0023****7913 | pasienBaru=0 | bpjsAktif=true | adaRujukan=true
+[2026-11-13T15:04:31.352235] Sidik jari selesai | sukses=true | ditutupOtomatis=true | dialihkanFrista=false | reason=
+[2026-11-13T15:04:31.375236] Lanjut ke poli (pembuatan SEP) | rm=0023****7913 | diagnosaAwal=E11.8
+[2026-11-13T15:04:31.674743] Gagal | rm=0023****7913 | Peserta Booking Tidak Ditemukan
+[2026-11-13T15:08:30.271300] Mulai validasi | nomor=0023****7913 | jenis=bpjs
+[2026-11-13T15:08:32.631603] Log file: D:\Sakina\apm\bpjs_checkin_log.txt
+[2026-11-13T15:08:32.652221] Mulai proses ke poli | rm=0023****7913 | pasienBaru=0 | bpjsAktif=true | adaRujukan=true
+[2026-11-13T15:08:57.353624] Sidik jari selesai | sukses=false | ditutupOtomatis=false | dialihkanFrista=true | reason=sidik jari gagal 2 kali, dialihkan ke Frista
+[2026-11-13T15:09:47.984098] Log file: D:\Sakina\apm\bpjs_checkin_log.txt
+[2026-11-13T15:09:48.005095] Mulai proses ke poli | rm=0023****7913 | pasienBaru=0 | bpjsAktif=true | adaRujukan=true
+[2026-11-13T15:10:02.317347] Sidik jari selesai | sukses=false | ditutupOtomatis=false | dialihkanFrista=true | reason=sidik jari gagal 2 kali, dialihkan ke Frista

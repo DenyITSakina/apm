@@ -245,3 +245,54 @@
 [2026-11-13T14:56:06.748869] After.exe tidak berjalan
 [2026-11-13T14:56:06.763884] After.exe menutup diri saat otomasi (After.ini WSURL kosong (login tetap dicoba))
 [2026-11-13T14:56:06.794884] After.exe menutup diri tanpa teks konfirmasi, lanjut sebagai selesai
+[2026-11-13T15:04:24.804292] Mulai proses | nomor=0000****3033 | app=D:\Sakina\apm
+[2026-11-13T15:04:24.825289] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-11-13T15:04:25.072531] Ambil akun VClaim (211 ms)
+[2026-11-13T15:04:25.092534] Login otomatis memakai user=ci*******a
+[2026-11-13T15:04:25.126593] Percobaan sidik jari 1/2
+[2026-11-13T15:04:25.359836] After.exe tidak berjalan
+[2026-11-13T15:04:25.386875] After.exe dijalankan (pid=13984), menunggu proses muncul
+[2026-11-13T15:04:31.147584] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=APP_CLOSED_DURING_LOGIN
+[2026-11-13T15:04:31.167596] Otomasi UI selesai (5657 ms)
+[2026-11-13T15:04:31.293122] After.exe tidak berjalan
+[2026-11-13T15:04:31.317540] After.exe menutup diri saat otomasi (After.ini WSURL kosong (login tetap dicoba)), lanjut sebagai selesai
+[2026-11-13T15:08:32.705223] Mulai proses | nomor=0000****3033 | app=D:\Sakina\apm
+[2026-11-13T15:08:32.729266] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-11-13T15:08:32.980829] Ambil akun VClaim (227 ms)
+[2026-11-13T15:08:33.004825] Login otomatis memakai user=ci*******a
+[2026-11-13T15:08:33.035912] Percobaan sidik jari 1/2
+[2026-11-13T15:08:33.302652] After.exe tidak berjalan
+[2026-11-13T15:08:33.342657] After.exe dijalankan (pid=16268), menunggu proses muncul
+[2026-11-13T15:08:50.309816] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED
+[2026-11-13T15:08:50.347899] Otomasi UI selesai (16859 ms)
+[2026-11-13T15:08:50.481408] After.exe tidak berjalan
+[2026-11-13T15:08:50.513407] GAGAL percobaan 1: aplikasi sidik jari menutup diri saat otomasi (After.ini WSURL kosong (login tetap dicoba))
+[2026-11-13T15:08:51.548689] Percobaan sidik jari 2/2
+[2026-11-13T15:08:51.690494] After.exe tidak berjalan
+[2026-11-13T15:08:51.714504] After.exe dijalankan (pid=3544), menunggu proses muncul
+[2026-11-13T15:08:57.056506] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=APP_CLOSED_DURING_LOGIN
+[2026-11-13T15:08:57.089138] Otomasi UI selesai (5224 ms)
+[2026-11-13T15:08:57.230561] After.exe tidak berjalan
+[2026-11-13T15:08:57.264560] GAGAL percobaan 2: aplikasi sidik jari menutup diri saat otomasi (aplikasi sidik jari tertutup saat login)
+[2026-11-13T15:08:57.287561] Sidik jari gagal 2 kali, mencoba membuka Frista
+[2026-11-13T15:08:57.331624] Frista.exe dibuka sebagai fallback
+[2026-11-13T15:09:48.034104] Mulai proses | nomor=0000****3033 | app=D:\Sakina\apm
+[2026-11-13T15:09:48.058609] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-11-13T15:09:48.349661] Ambil akun VClaim (259 ms)
+[2026-11-13T15:09:48.375325] Login otomatis memakai user=ci*******a
+[2026-11-13T15:09:48.407946] Percobaan sidik jari 1/2
+[2026-11-13T15:09:48.578018] After.exe tidak berjalan
+[2026-11-13T15:09:48.602017] After.exe dijalankan (pid=6076), menunggu proses muncul
+[2026-11-13T15:09:54.325616] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=APP_CLOSED_DURING_LOGIN
+[2026-11-13T15:09:54.350626] Otomasi UI selesai (5592 ms)
+[2026-11-13T15:09:54.524229] After.exe tidak berjalan
+[2026-11-13T15:09:54.550229] GAGAL percobaan 1: aplikasi sidik jari menutup diri saat otomasi (aplikasi sidik jari tertutup saat login)
+[2026-11-13T15:09:55.585061] Percobaan sidik jari 2/2
+[2026-11-13T15:09:55.695679] After.exe tidak berjalan
+[2026-11-13T15:09:55.721678] After.exe dijalankan (pid=13824), menunggu proses muncul
+[2026-11-13T15:10:02.002422] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=APP_CLOSED_DURING_LOGIN
+[2026-11-13T15:10:02.026435] Otomasi UI selesai (6174 ms)
+[2026-11-13T15:10:02.201307] After.exe tidak berjalan
+[2026-11-13T15:10:02.226344] GAGAL percobaan 2: aplikasi sidik jari menutup diri saat otomasi (aplikasi sidik jari tertutup saat login)
+[2026-11-13T15:10:02.258343] Sidik jari gagal 2 kali, mencoba membuka Frista
+[2026-11-13T15:10:02.296347] Frista.exe dibuka sebagai fallback

@@ -463,8 +463,18 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
     if (!mounted) return;
 
     AppLog.instance.write(
-      'Sidik jari selesai | sukses=$sukses | ditutupOtomatis=$lastSidikJariDitutupOtomatis | reason=${lastSidikJariReason}',
+      'Sidik jari selesai | sukses=$sukses | ditutupOtomatis=$lastSidikJariDitutupOtomatis | dialihkanFrista=$lastSidikJariDialihkanKeFrista | reason=$lastSidikJariReason',
     );
+
+    if (lastSidikJariDialihkanKeFrista) {
+      sedangProses = false;
+      tutupDialog();
+      TopToast.warning(
+        context,
+        'Sidik jari gagal 2 kali. Silakan lanjutkan melalui aplikasi Frista.',
+      );
+      return;
+    }
 
     // After.exe yang menutup dirinya sendiri (popup error, versi kadaluarsa,
     // dll) tetap diteruskan, tidak dianggap gagal.
