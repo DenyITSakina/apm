@@ -16,6 +16,7 @@ import 'package:apm/widget/patient_choice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 class CekinBpjsDataPage extends StatefulWidget {
   const CekinBpjsDataPage({
@@ -57,6 +58,90 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
   /// Peserta BPJS tanpa rujukan tidak bisa mendapat SEP, jadi tombol
   /// LANJUT KE POLI dinonaktifkan sampai syarat terpenuhi.
   bool get lanjutKePoliBisa => data.bpjsSiapSep;
+
+  /// Hitung umur dari data BPJS (prioritas: umur eksplisit, lalu tgl lahir BPJS).
+  int _hitungUmur() {
+    if (data.punyaDataBpjs) {
+      final u = data.bpjsUmur;
+      if (u != null && u >= 0) return u;
+      final bpjsAge = _hitungUmurDariTgl(data.bpjsTglLahir);
+      if (bpjsAge != null) return bpjsAge;
+    }
+    // Fallback data pasien jika data BPJS tidak tersedia
+    return _hitungUmurDariTgl(data.tglLahir) ?? 0;
+  }
+
+  /// Hitung umur dari string tanggal lahir (null jika tidak bisa diparse).
+  int? _hitungUmurDariTgl(String tglLahir) {
+    if (tglLahir.isEmpty) return null;
+    try {
+      final birthDate = _parseTglLahir(tglLahir);
+      if (birthDate == null) return null;
+      final now = DateTime.now();
+      int age = now.year - birthDate.year;
+      if (now.month < birthDate.month ||
+          (now.month == birthDate.month && now.day < birthDate.day)) {
+        age--;
+      }
+      return age;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Parse tanggal lahir dari berbagai format.
+  DateTime? _parseTglLahir(String input) {
+    input = input.trim();
+
+    // Coba format umum
+    final formats = [
+      'yyyy-MM-dd',
+      'yyyy-M-d',
+      'dd-MM-yyyy',
+      'd-M-yyyy',
+      'dd/MM/yyyy',
+      'd/M/yyyy',
+      'yyyy/MM/dd',
+      'yyyy/M/d',
+    ];
+
+    for (final format in formats) {
+      try {
+        return DateFormat(format).parseStrict(input);
+      } catch (_) {}
+    }
+
+    // Manual parse fallback
+    try {
+      final cleaned = input.replaceAll(RegExp(r'[^0-9\s\-/]'), '');
+      final parts = cleaned.split(RegExp(r'[\s\-/]'));
+
+      if (parts.length != 3) return null;
+
+      final p1 = int.tryParse(parts[0]) ?? 0;
+      final p2 = int.tryParse(parts[1]) ?? 0;
+      final p3 = int.tryParse(parts[2]) ?? 0;
+
+      if (p1 > 1000 && p2 >= 1 && p2 <= 12 && p3 >= 1 && p3 <= 31) {
+        return DateTime(p1, p2, p3);
+      }
+
+      if (p3 > 1000 && p2 >= 1 && p2 <= 12 && p1 >= 1 && p1 <= 31) {
+        return DateTime(p3, p2, p1);
+      }
+
+      if (p3 > 1000 && p1 >= 1 && p1 <= 12 && p2 >= 1 && p2 <= 31) {
+        return DateTime(p3, p1, p2);
+      }
+
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Cek apakah umur pasien kurang dari 16 tahun.
+  bool get isUmurKurangDari16 => _hitungUmur() < 16;
 
   @override
   Widget build(BuildContext context) {
@@ -195,7 +280,9 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
         AppDataRow(
           icon: Icons.cake_rounded,
           label: 'Tanggal Lahir',
-          value: formatTglBlnTahun(data.tglLahir),
+          value: formatTglBlnTahun(
+            data.bpjsTglLahir.isNotEmpty ? data.bpjsTglLahir : data.tglLahir,
+          ),
           dense: dense,
         ),
         AppDataRow(
@@ -445,8 +532,29 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
     AppLog.instance.write(
       'Mulai proses ke poli | rm=${AppLog.maskNomor(data.rm)} | '
       'pasienBaru=${data.pasienBaru} | bpjsAktif=${data.bpjsAktif} | '
-      'adaRujukan=${data.adaRujukan}',
+      'adaRujukan=${data.adaRujukan} | umur=${_hitungUmur()}',
     );
+
+    // Jika umur kurang dari 16 tahun, lewati sidik jari dan frista
+    if (isUmurKurangDari16) {
+      AppLog.instance.write(
+        'Umur kurang dari 16 tahun (${_hitungUmur()} thn), lewati sidik jari & frista | rm=${AppLog.maskNomor(data.rm)}',
+      );
+      HapticFeedback.mediumImpact();
+      TopToast.info(
+        context,
+        'Umur pasien di bawah 16 tahun. Sidik jari dan Frista dilewati.',
+      );
+      context.read<AntrianApmBloc>().add(
+        LanjutKePoliEvent(
+          noRm: data.rm,
+          jenisAntrian: widget.jenisPasien.toLowerCase(),
+          diagAwal: data.diagAwal,
+        ),
+      );
+      sedangProses = false;
+      return;
+    }
 
     // BPJS: klik poli -> langsung tampil sidik jari.
     final tutupDialog = showSidikJariProgress(context);
@@ -469,10 +577,7 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
     if (lastSidikJariDialihkanKeFrista) {
       sedangProses = false;
       tutupDialog();
-      TopToast.warning(
-        context,
-        'Sidik jari gagal 2 kali. Silakan lanjutkan melalui aplikasi Frista.',
-      );
+      TopToast.warning(context, 'Sidik jari gagal. Dialihkan ke Frista.');
       return;
     }
 
@@ -504,7 +609,6 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
         diagAwal: data.diagAwal,
       ),
     );
-
     // Tutup loading sidik jari setelah SEP loading mulai (via bloc)
     tutupDialog();
   }

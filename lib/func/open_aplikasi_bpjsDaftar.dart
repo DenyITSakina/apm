@@ -15,7 +15,7 @@ const String sidikJariExePath =
     r"C:\Program Files (x86)\BPJS Kesehatan\Aplikasi Sidik Jari BPJS Kesehatan\After.exe";
 const String fristaExePath = r"C:\frista\Frista.exe";
 
-const Duration _sidikJariLaunchTimeout = Duration(seconds: 10);
+const Duration _sidikJariLaunchTimeout = Duration(seconds: 5);
 const Duration _sidikJariExitTimeout = Duration(seconds: 180);
 const int _maxSidikJariAttempts = 1;
 
@@ -97,7 +97,7 @@ Future<bool> isSidikJariRunning() async {
 Future<bool> waitUntil(
   Future<bool> Function() condition, {
   required Duration timeout,
-  Duration interval = const Duration(milliseconds: 300),
+  Duration interval = Duration.zero,
 }) async {
   final stopwatch = Stopwatch()..start();
   while (true) {
@@ -111,7 +111,9 @@ Future<bool> waitUntil(
     if (stopwatch.elapsed >= timeout) {
       return false;
     }
-    await Future<void>.delayed(interval);
+    if (interval > Duration.zero) {
+      await Future<void>.delayed(interval);
+    }
   }
 }
 
@@ -120,11 +122,25 @@ Future<void> closeSidikJariExe() async {
     return;
   }
 
+  // Tanpa delay/menunggu: tembak taskkill secepat mungkin.
   try {
-    await Process.run('taskkill', ['/IM', 'After.exe', '/F'], runInShell: true);
-  } catch (e) {
-    debugPrint("Gagal menutup After.exe: $e");
-  }
+    Process.start(
+      'taskkill',
+      ['/IM', 'After.exe', '/F', '/T'],
+      runInShell: true,
+      mode: ProcessStartMode.detached,
+    );
+  } catch (_) {}
+}
+
+/// Tutup cepat sidik jari (kill proses), tanpa delay/menunggu.
+void tutupSidikJariCepat() {
+  unawaited(closeSidikJariExe());
+}
+
+/// Tutup cepat saat teks gagal/sukses terdeteksi, tanpa delay/menunggu.
+void _closeSidikJariOnFailFast() {
+  tutupSidikJariCepat();
 }
 
 String _escapePowerShell(String value) => value.replaceAll("'", "''");
@@ -227,7 +243,20 @@ const List<String> _kunciGagal = [
   'ip address salah',
   'ip lan harus diisi',
   'harus diisi',
+  'pastikan mesin fingerprint terhubung dengan pc',
+  'mesin fingerprint terhubung',
 ];
+
+final Set<String> _kunciGagalLower =
+    _kunciGagal.map((k) => k.toLowerCase()).toSet();
+
+bool _mengandungKunciGagal(String teks) {
+  final t = teks.toLowerCase();
+  for (final k in _kunciGagalLower) {
+    if (t.contains(k)) return true;
+  }
+  return false;
+}
 
 /// Kondisi lingkungan (bukan penolakan nomor). Hanya untuk pesan informatif.
 const List<String> _kunciPeringatan = [
@@ -246,20 +275,22 @@ const List<String> _kunciHasilDiWindowUtama = [
   'data sidik jari gagal',
   'selesai',
   'berhasil',
+  'Pastikan mesin fingerprint terhubung dengan PC',
 ];
 
 /// Klasifikasi teks dialog hasil (dialog muncul karena aksi pengguna, jadi
 /// aman memakai daftar[_kunciGagal]). Null = belum ada petunjuk.
 SidikJariStatus? _klasifikasiDialog(String teks) {
   final t = teks.toLowerCase();
+  // Cek gagal dulu agar "gagal disimpan"/"tidak ditemukan" langsung terdeteksi.
+  if (_mengandungKunciGagal(t)) {
+    return SidikJariStatus.popupError;
+  }
   if (t.contains('sudah terdaftar')) {
     return SidikJariStatus.selesai;
   }
   if (_kunciSukses.any(t.contains)) {
     return SidikJariStatus.selesai;
-  }
-  if (_kunciGagal.any(t.contains)) {
-    return SidikJariStatus.popupError;
   }
   return null;
 }
@@ -267,13 +298,12 @@ SidikJariStatus? _klasifikasiDialog(String teks) {
 /// Klasifikasi teks window utama memakai frasa hasil yang spesifik saja.
 SidikJariStatus? _klasifikasiWindowUtama(String teks) {
   final t = teks.toLowerCase();
-  if (t.contains('sudah terdaftar')) {
-    return SidikJariStatus.selesai;
-  }
-  if (_kunciSukses.any(t.contains)) {
-    return SidikJariStatus.selesai;
-  }
-  if (_kunciHasilDiWindowUtama.any(t.contains)) {
+  // Prioritaskan deteksi gagal di window utama untuk close instan.
+  if (_kunciHasilDiWindowUtama.any((k) => t.contains(k.toLowerCase())) ||
+      _mengandungKunciGagal(t)) {
+    if (t.contains('sudah terdaftar') || _kunciSukses.any(t.contains)) {
+      return SidikJariStatus.selesai;
+    }
     return SidikJariStatus.popupError;
   }
   return null;
@@ -287,7 +317,7 @@ String _ringkasTeks(String teks) {
   final bagian = teks.split('~').map((e) => e.trim());
   final mencurigakan = bagian.where((e) {
     final t = e.toLowerCase();
-    return _kunciGagal.any(t.contains) ||
+    return _mengandungKunciGagal(t) ||
         _kunciSukses.any(t.contains) ||
         _kunciPeringatan.any(t.contains);
   }).toList();
@@ -305,7 +335,6 @@ String _ringkasTeks(String teks) {
 /// bisa tetap melanjutkan ke dialog konfirmasi. Teks error/penolakan
 /// menghasilkan kegagalan lebih awal.
 Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
-  const interval = Duration(milliseconds: 300);
   final stopwatch = Stopwatch()..start();
   var sudahBacaTeks = false;
 
@@ -323,11 +352,26 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
 
     sudahBacaTeks = true;
 
+    // Deteksi kilat: jika ada teks _kunciGagal, close instan tanpa langkah lain.
+    final teksGabungan =
+        '${statusUi.dialog} ${statusUi.windowUtama} ${statusUi.peringatan}';
+    if (_mengandungKunciGagal(teksGabungan)) {
+      lastTeksSidikJari = _ringkasTeks(teksGabungan);
+      _logSidikJari("Teks gagal terdeteksi: $lastTeksSidikJari");
+      _closeSidikJariOnFailFast();
+      return SidikJariStatus.popupError;
+    }
+
     // 1) Dialog hasil (pop-up terpisah) = sumber penentuan yang paling tepat.
     if (statusUi.dialog.isNotEmpty) {
       lastTeksSidikJari = _ringkasTeks(statusUi.dialog);
       final statusDialog = _klasifikasiDialog(statusUi.dialog);
       if (statusDialog != null) {
+        if (statusDialog == SidikJariStatus.popupError) {
+          _closeSidikJariOnFailFast();
+        } else if (statusDialog == SidikJariStatus.selesai) {
+          tutupSidikJariCepat();
+        }
         _logSidikJari("Dialog hasil terdeteksi: $lastTeksSidikJari");
         return statusDialog;
       }
@@ -336,6 +380,7 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
     // 2) Window utama: hanya frasa hasil spesifik (hindari salah tolak).
     final statusUtama = _klasifikasiWindowUtama(statusUi.windowUtama);
     if (statusUtama == SidikJariStatus.selesai) {
+      tutupSidikJariCepat();
       lastTeksSidikJari = _ringkasTeks(statusUi.windowUtama);
       _logSidikJari("Teks sukses terdeteksi: $lastTeksSidikJari");
       return SidikJariStatus.selesai;
@@ -343,18 +388,13 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
     if (statusUtama == SidikJariStatus.popupError) {
       lastTeksSidikJari = _ringkasTeks(statusUi.windowUtama);
       _logSidikJari("Teks penolakan terdeteksi: $lastTeksSidikJari");
+      _closeSidikJariOnFailFast();
       return SidikJariStatus.popupError;
-    }
-
-    if (statusUi.peringatan.isNotEmpty) {
-      lastTeksSidikJari = statusUi.peringatan;
     }
 
     if (stopwatch.elapsed >= timeout) {
       return SidikJariStatus.timeout;
     }
-
-    await Future<void>.delayed(interval);
   }
 }
 
@@ -446,7 +486,6 @@ $proc = $null
 while ((Get-Date) -lt $deadline) {
   $proc = Find-AfterWindow
   if ($proc) { break }
-  Start-Sleep -Milliseconds 100
 }
 if (-not $proc) { Write-Output 'STEP=WINDOW_NOT_FOUND'; exit 2 }
 
@@ -459,7 +498,6 @@ while ((Get-Date) -lt $deadline) {
     $root = Get-Root $proc
     if (Get-El $root 'ao') { $formSiap = $true; break }
   }
-  Start-Sleep -Milliseconds 150
 }
 if (-not $formSiap) { Write-Output 'STEP=FIELDS_NOT_FOUND'; exit 3 }
 Write-Output ("STEP=WINDOW_OK " + $proc.MainWindowTitle)
@@ -467,7 +505,6 @@ Write-Output ("STEP=WINDOW_OK " + $proc.MainWindowTitle)
 $h = $proc.MainWindowHandle
 if ([Fg]::IsIconic($h)) { [Fg]::ShowWindow($h, 9) | Out-Null }
 [Fg]::SetForegroundWindow($h) | Out-Null
-Start-Sleep -Milliseconds 120
 
 $root = Get-Root $proc
 $editUser = Get-El $root 'am'
@@ -517,7 +554,6 @@ $passOk = $false
 $lewatTab = $false
 for ($i = 0; $i -lt 8; $i++) {
   Activate-After $proc
-  Start-Sleep -Milliseconds 200
   try {
     $editPass.SetFocus()
     $passOk = $true
@@ -525,13 +561,11 @@ for ($i = 0; $i -lt 8; $i++) {
   } catch { }
   try {
     $editUser.SetFocus()
-    Start-Sleep -Milliseconds 120
     [System.Windows.Forms.SendKeys]::SendWait('{TAB}')
     $passOk = $true
     $lewatTab = $true
     break
   } catch { }
-  Start-Sleep -Milliseconds 200
 }
 if (-not $passOk) {
   Write-Output 'STEP=PASS_FAIL tidak bisa memfokuskan field password'
@@ -539,9 +573,7 @@ if (-not $passOk) {
 }
 if ($lewatTab) { Write-Output 'STEP=PASS_VIA_TAB' }
 
-Start-Sleep -Milliseconds 150
 [System.Windows.Forms.SendKeys]::SendWait('^a')
-Start-Sleep -Milliseconds 50
 Send-Text $Password
 Write-Output 'STEP=PASS_OK'
 
@@ -556,7 +588,6 @@ try {
 $deadline = (Get-Date).AddSeconds($LoginTimeoutSec)
 $siap = $false
 while ((Get-Date) -lt $deadline) {
-  Start-Sleep -Milliseconds 200
   $proc = Find-AfterWindow
   if (-not $proc) { Write-Output 'STEP=APP_CLOSED_DURING_LOGIN'; exit 7 }
   $root = Get-Root $proc
@@ -569,7 +600,7 @@ Write-Output 'STEP=LOGIN_OK'
 if ($radio) {
   try {
     $sp = $radio.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern)
-    if (-not $sp.Current.IsSelected) { $sp.Select(); Start-Sleep -Milliseconds 200; Write-Output ('STEP=MODE_SET ' + $Mode) }
+    if (-not $sp.Current.IsSelected) { $sp.Select(); Write-Output ('STEP=MODE_SET ' + $Mode) }
     else { Write-Output 'STEP=MODE_OK' }
   } catch {
     Write-Output ("STEP=MODE_FAIL " + $_.Exception.Message)
@@ -580,7 +611,6 @@ try {
   $editNomor = Get-El $root 'au'
   $editNomor.GetCurrentPattern([System.Windows.Automation.ValuePattern]::Pattern).SetValue($Nomor)
   $editNomor.SetFocus()
-  Start-Sleep -Milliseconds 150
   [System.Windows.Forms.SendKeys]::SendWait('{ENTER}')
   Write-Output 'STEP=NOMOR_OK'
 } catch {
@@ -717,7 +747,7 @@ Future<HasilOtomatis> jalankanOtomatisSidikJari({
   required String password,
   required String nomor,
   required String tipe,
-  int loginTimeoutDetik = 20,
+  int loginTimeoutDetik = 10,
 }) async {
   try {
     final output = await _jalankanScriptPs(
@@ -1004,7 +1034,7 @@ String _escapeSendKeysText(String text) {
 ///
 /// Sebelumnya tiap tombol spawn `powershell.exe` sendiri (~23 kali), sehingga
 /// UI membeku 7-10 detik. Sekarang satu spawn untuk semua tombol.
-Future<void> sendKeySequence(List<String> keys, {int jedaMs = 25}) async {
+Future<void> sendKeySequence(List<String> keys, {int jedaMs = 0}) async {
   if (kIsWeb || keys.isEmpty) {
     return;
   }
@@ -1014,9 +1044,6 @@ Future<void> sendKeySequence(List<String> keys, {int jedaMs = 25}) async {
     buffer.writeln(
       "[System.Windows.Forms.SendKeys]::SendWait('${_escapePowerShell(key)}')",
     );
-    if (jedaMs > 0) {
-      buffer.writeln('Start-Sleep -Milliseconds $jedaMs');
-    }
   }
 
   try {
@@ -1036,7 +1063,6 @@ Future<void> sendAutoLogin({
   required String username,
   required String password,
 }) async {
-  await Future.delayed(const Duration(milliseconds: 250));
   await sendKeySequence([
     _escapeSendKeysText(username),
     '{TAB}',
@@ -1249,8 +1275,8 @@ Future<bool> openExe(
           lastSidikJariReason =
               "proses tidak muncul dalam ${_sidikJariLaunchTimeout.inSeconds} dtk";
           _logSidikJari("GAGAL percobaan $percobaan: $lastSidikJariReason");
+          _closeSidikJariOnFailFast();
           if (percobaan < _maxSidikJariAttempts) {
-            await Future<void>.delayed(const Duration(milliseconds: 300));
             continue;
           }
           break;
@@ -1292,8 +1318,8 @@ Future<bool> openExe(
               ? 'aplikasi sidik jari menutup diri saat otomasi'
               : 'aplikasi sidik jari menutup diri saat otomasi (${hasilOto.alasan})';
           _logSidikJari("GAGAL percobaan $percobaan: $lastSidikJariReason");
+          _closeSidikJariOnFailFast();
           if (percobaan < _maxSidikJariAttempts) {
-            await Future<void>.delayed(const Duration(milliseconds: 300));
             continue;
           }
           break;
@@ -1302,9 +1328,8 @@ Future<bool> openExe(
             ? 'otomasi sidik jari gagal'
             : hasilOto.alasan;
         _logSidikJari("GAGAL percobaan $percobaan: $lastSidikJariReason");
-        await closeSidikJariExe();
+        _closeSidikJariOnFailFast();
         if (percobaan < _maxSidikJariAttempts) {
-          await Future<void>.delayed(const Duration(milliseconds: 300));
           continue;
         }
         break;
@@ -1323,6 +1348,7 @@ Future<bool> openExe(
       switch (status) {
         case SidikJariStatus.selesai:
           _logSidikJari("Sidik jari terverifikasi dari UI aplikasi");
+          tutupSidikJariCepat();
           return true;
         case SidikJariStatus.ditutupOtomatis:
           // After.exe menutup diri tanpa teks konfirmasi; tetap dianggap sukses
@@ -1337,9 +1363,8 @@ Future<bool> openExe(
           lastSidikJariReason =
               "ditolak aplikasi: ${lastTeksSidikJari ?? 'pesan tidak terbaca'}";
           _logSidikJari("GAGAL percobaan $percobaan: $lastSidikJariReason");
-          await closeSidikJariExe();
+          _closeSidikJariOnFailFast();
           if (percobaan < _maxSidikJariAttempts) {
-            await Future<void>.delayed(const Duration(milliseconds: 300));
             continue;
           }
           break;
@@ -1348,9 +1373,8 @@ Future<bool> openExe(
               "belum selesai dalam ${_sidikJariExitTimeout.inMinutes} menit"
               "${lastTeksSidikJari != null && lastTeksSidikJari != 'teks UI tidak terbaca' ? ' ($lastTeksSidikJari)' : ''}";
           _logSidikJari("GAGAL percobaan $percobaan: $lastSidikJariReason");
-          await closeSidikJariExe();
+          _closeSidikJariOnFailFast();
           if (percobaan < _maxSidikJariAttempts) {
-            await Future<void>.delayed(const Duration(milliseconds: 300));
             continue;
           }
           break;
@@ -1360,16 +1384,17 @@ Future<bool> openExe(
     _logSidikJari(
       "Sidik jari gagal $_maxSidikJariAttempts kali, mencoba membuka Frista",
     );
-    final fristaDibuka = await _bukaFristaFallback();
+    final fristaDibuka = await _bukaFristaFallback(
+      username: akun.username,
+      password: akun.password,
+      nomor: nomor,
+    );
     if (fristaDibuka) {
       lastSidikJariDialihkanKeFrista = true;
       lastSidikJariReason =
           "sidik jari gagal $_maxSidikJariAttempts kali, dialihkan ke Frista";
       if (tampilkanToast && context.mounted) {
-        TopToast.warning(
-          context,
-          "Sidik jari gagal 2 kali. Aplikasi Frista dibuka.",
-        );
+        TopToast.warning(context, "Sidik jari gagal. Aplikasi Frista dibuka.");
       }
     } else {
       gagal(lastSidikJariReason, "Sidik jari gagal diproses.");
@@ -1424,19 +1449,117 @@ Future<_AkunVclaim> _ambilAkunVclaim() async {
   }
 }
 
-Future<bool> _bukaFristaFallback() async {
+Future<bool> _bukaFristaFallback({
+  String? username,
+  String? password,
+  String? nomor,
+}) async {
   try {
     if (!File(fristaExePath).existsSync()) {
       _logSidikJari("Frista.exe tidak ditemukan: $fristaExePath");
       return false;
     }
+
+    final appDir = Directory.current.path;
+    final sep = Platform.pathSeparator;
+
+    // Cari script otomasi
+    final scriptCandidates = <String>[
+      '$appDir${sep}python_scripts${sep}frista_automation.py',
+      '$appDir${sep}data${sep}python_scripts${sep}frista_automation.py',
+    ];
+    String? scriptPath;
+    for (final p in scriptCandidates) {
+      if (File(p).existsSync()) {
+        scriptPath = p;
+        break;
+      }
+    }
+
+    // Cari python: PATH dulu (punya deps), lalu bundled
+    final pythonCandidates = <String>[
+      'python',
+      'py',
+      '$appDir${sep}data${sep}python${sep}python.exe',
+      '$appDir${sep}python_runtime${sep}python.exe',
+    ];
+
+    if (scriptPath != null) {
+      // Pastikan Frista minimal terbuka walau proses python/script bermasalah
+      bool fristaTriggered = false;
+      for (final py in pythonCandidates) {
+        final pyOk = py == 'python' || py == 'py' || File(py).existsSync();
+        if (!pyOk) continue;
+        try {
+          await Process.start(
+            py,
+            [
+              scriptPath,
+              '--frista',
+              if (username != null && username.isNotEmpty) ...[
+                '--username',
+                username,
+              ],
+              if (password != null && password.isNotEmpty) ...[
+                '--password',
+                password,
+              ],
+              if (nomor != null && nomor.isNotEmpty) ...[
+                '--nomor',
+                nomor,
+              ],
+            ],
+            runInShell: true,
+            workingDirectory: File(scriptPath).parent.path,
+            mode: ProcessStartMode.detached,
+          );
+          _logSidikJari(
+            "Frista dibuka+auto-login via frista_automation.py ($py, $scriptPath, nomor=${maskNomorLog(nomor)})",
+          );
+          fristaTriggered = true;
+          break;
+        } catch (e) {
+          _logSidikJari("Gagal jalankan otomasi Frista ($py): $e");
+        }
+      }
+      if (fristaTriggered) {
+        // Jaring pengaman cepat: jika script gagal diam-diam, buka exe langsung
+        Future<void>.delayed(const Duration(milliseconds: 800), () async {
+          try {
+            final r = await Process.run('tasklist', [
+              '/FI',
+              'IMAGENAME eq Frista.exe',
+            ]);
+            if (!r.stdout.toString().toLowerCase().contains('frista.exe')) {
+              await Process.start(
+                fristaExePath,
+                [],
+                runInShell: true,
+                mode: ProcessStartMode.normal,
+              );
+              _logSidikJari(
+                "Frista.exe dibuka (fallback, script tidak menampilkan window)",
+              );
+            }
+          } catch (_) {}
+        });
+        return true;
+      }
+      _logSidikJari(
+        "Otomasi Frista gagal dijalankan, fallback buka exe langsung",
+      );
+    }
+
+    // Fallback: buka exe saja (tanpa pengisian otomatis script)
     await Process.start(
       fristaExePath,
       [],
       runInShell: true,
       mode: ProcessStartMode.normal,
     );
-    _logSidikJari("Frista.exe dibuka sebagai fallback");
+    _logSidikJari(
+      "Frista.exe dibuka sebagai fallback (tanpa auto-login script)",
+    );
     return true;
   } catch (e) {
     _logSidikJari("Gagal membuka Frista: $e");
@@ -1453,7 +1576,6 @@ Future<bool> _jalankanViaKetik({
 }) async {
   await focusWindow(sidikJariExePath);
   await sendAutoLogin(username: username, password: password);
-  await Future<void>.delayed(const Duration(milliseconds: 800));
   if (!context.mounted) {
     return false;
   }
@@ -1501,12 +1623,10 @@ Future<void> sendNoPeserta(BuildContext context, String nomor) async {
       }
 
       if (await isSidikJariRunning()) {
-        await closeSidikJariExe();
+        _closeSidikJariOnFailFast();
       }
       return;
     }
-
-    await Future.delayed(const Duration(milliseconds: 100));
 
     await focusWindow(sidikJariExePath);
 

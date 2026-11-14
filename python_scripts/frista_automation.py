@@ -10,10 +10,18 @@ import subprocess
 import sys
 import time
 
-import mysql.connector
+try:
+    import mysql.connector
+    from mysql.connector import Error
+except Exception:  # mysql opsional (mode --frista bisa pakai default)
+    mysql = None
+
+    class Error(Exception):
+        pass
+
 import psutil
 import pyautogui
-from mysql.connector import Error
+
 
 pyautogui.FAILSAFE = False
 
@@ -35,15 +43,17 @@ AFTER_PROCESS_NAME = "After.exe"
 FRISTA_PROCESS_NAME = "Frista.exe"
 
 # ===== WAKTU TUNGGU (detik) =====
-POLL_INTERVAL = 0.1
-AFTER_LAUNCH_TIMEOUT = 6
+POLL_INTERVAL = 0.01
+AFTER_LAUNCH_TIMEOUT = 3
 # AFTER_LOGIN_TIMEOUT = 12
 AFTER_EXIT_TIMEOUT = 180
-FRISTA_LAUNCH_TIMEOUT = 15
-MAX_AFTER_ATTEMPTS = 2
+FRISTA_LAUNCH_TIMEOUT = 10
+MAX_AFTER_ATTEMPTS = 1
+FAST_FAIL_AFTER_LOGIN = 3  # detik: tutup cepat setelah login dianggap gagal
 
-DEFAULT_USER = "cicifitria"
-DEFAULT_PASSWORD = "Idaman99!"
+# Kredensial default dihapus: ambil dari DB (vclaim_accounts) atau argumen CLI.
+DEFAULT_USER = None
+DEFAULT_PASSWORD = None
 
 user32 = ctypes.windll.user32
 SW_RESTORE = 9
@@ -52,6 +62,9 @@ SW_RESTORE = 9
 # ===== HELPER =====
 def get_account_from_db():
     """Ambil satu account aktif (tanpa no_peserta)."""
+    if mysql is None:
+        print("[!] mysql.connector tidak tersedia, memakai default")
+        return DEFAULT_USER, DEFAULT_PASSWORD
     connection = None
     cursor = None
     try:
@@ -67,14 +80,20 @@ def get_account_from_db():
         print("[!] Akun tidak ditemukan di database, memakai default")
     except Error as exc:
         print(f"[!] Error koneksi database: {exc}, memakai default")
+    except Exception as exc:
+        print(f"[!] Error ambil akun: {exc}, memakai default")
     finally:
         if cursor is not None:
             try:
                 cursor.close()
-            except Error:
+            except Exception:
                 pass
-        if connection is not None and connection.is_connected():
-            connection.close()
+        if connection is not None:
+            try:
+                if connection.is_connected():
+                    connection.close()
+            except Exception:
+                pass
     return DEFAULT_USER, DEFAULT_PASSWORD
 
 
@@ -92,12 +111,23 @@ def is_process_running(name):
 
 
 def kill_process(name):
+    """Tutup proses secepat mungkin tanpa menunggu (taskkill /F /T detached)."""
+    lower = name.lower()
     for proc in psutil.process_iter(["name"]):
-        if (proc.info["name"] or "").lower() == name.lower():
+        if (proc.info["name"] or "").lower() == lower:
             try:
                 proc.kill()
             except Exception:
                 pass
+    try:
+        subprocess.Popen(
+            ["taskkill", "/IM", name, "/F", "/T"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+    except Exception:
+        pass
 
 
 def wait_until(predicate, timeout):
@@ -178,53 +208,183 @@ def run_after(username, password):
     pyautogui.write(password, interval=0.02)
     pyautogui.press("enter")
     print(">>> Auto login After.exe dikirim")
-    time.sleep(1.0)
 
-    activate_window(AFTER_PROCESS_NAME, 2)
+    # Deteksi cepat: jika After menutup diri segera setelah login, gagal cepat.
+    fast_deadline = login_time + FAST_FAIL_AFTER_LOGIN
+    while time.time() < fast_deadline:
+        if not is_process_running(AFTER_PROCESS_NAME):
+            print("[!] After.exe tertutup cepat setelah login")
+            return False
+        time.sleep(0.01)
+
+    activate_window(AFTER_PROCESS_NAME, 1)
 
     # Tunggu After.exe selesai (pasien selesai sidik jari), dibatasi waktu.
     deadline = time.time() + AFTER_EXIT_TIMEOUT
     while is_process_running(AFTER_PROCESS_NAME) and time.time() < deadline:
-        time.sleep(0.25)
+        time.sleep(0.02)
 
     if is_process_running(AFTER_PROCESS_NAME):
         print("[!] After.exe masih berjalan setelah batas waktu")
+        kill_process(AFTER_PROCESS_NAME)
         return False
 
-    code = proc.wait() if proc else 0
+    # Jika kita tidak membuka proses sendiri, exit code tidak bisa dipastikan;
+    # anggap tidak berhasil agar fallback Frista bisa dijalankan.
+    if proc is None:
+        print("[!] After.exe ditutup/selesai (instance lama), status tidak pasti")
+        return False
+
+    code = proc.wait()
     print(f">>> After.exe selesai, exit code: {code}")
-    # Penutupan sangat cepat setelah login biasanya popup/error, bukan proses
-    # sidik jari yang selesai normal.
-    if proc is not None and (time.time() - login_time) < 8:
+    if (time.time() - login_time) < FAST_FAIL_AFTER_LOGIN:
         print("[!] After.exe tertutup terlalu cepat setelah login")
         return False
     return code == 0
 
 # ===== FRISTA =====
-def start_frista_and_login(username, password):
-    """Buka Frista sebagai fallback setelah sidik jari gagal berulang."""
+def start_frista_and_login(username, password, nomor=None):
+    """Buka Frista, login otomatis, lalu isi no peserta jika diberikan."""
     if not os.path.exists(FRISTA_PATH):
         print(f"[!] Frista.exe tidak ditemukan: {FRISTA_PATH}")
         return False
 
-    print(">>> Membuka Frista ...")
-    subprocess.Popen([FRISTA_PATH])
+    if not is_process_running(FRISTA_PROCESS_NAME):
+        print(">>> Membuka Frista ...")
+        subprocess.Popen([FRISTA_PATH])
+    else:
+        print(">>> Frista sudah berjalan, lanjut pengisian otomatis")
 
-    if not wait_until(
-        lambda: is_process_running(FRISTA_PROCESS_NAME), FRISTA_LAUNCH_TIMEOUT
+    # Tampilkan window secepat mungkin begitu tersedia
+    shown = False
+    deadline = time.time() + FRISTA_LAUNCH_TIMEOUT
+    while time.time() < deadline:
+        hwnd = find_window(FRISTA_PROCESS_NAME)
+        if hwnd:
+            user32.ShowWindow(hwnd, SW_RESTORE)
+            user32.BringWindowToTop(hwnd)
+            user32.SetForegroundWindow(hwnd)
+            shown = True
+            break
+        if not is_process_running(FRISTA_PROCESS_NAME):
+            time.sleep(0.01)
+            continue
+        time.sleep(0.01)
+
+    if not shown and not wait_until(
+        lambda: is_process_running(FRISTA_PROCESS_NAME), 2
     ):
         print("[!] Frista gagal start")
         return False
 
-    if activate_window(FRISTA_PROCESS_NAME, 3):
-        pyautogui.write(username, interval=0.02)
-        pyautogui.press("tab")
-        pyautogui.write(password, interval=0.02)
-        pyautogui.press("enter")
-        print(">>> Auto login Frista dikirim")
-        time.sleep(1.5)
-    else:
-        print("[!] Window Frista tidak aktif, proses tetap dibuka")
+    try:
+        # Fokus window dan beri waktu UI siap sesingkat mungkin
+        time.sleep(0.1)
+        if not activate_window(FRISTA_PROCESS_NAME, 2):
+            hwnd = find_window(FRISTA_PROCESS_NAME)
+            if hwnd:
+                user32.ShowWindow(hwnd, SW_RESTORE)
+                user32.BringWindowToTop(hwnd)
+                user32.SetForegroundWindow(hwnd)
+        hwnd = find_window(FRISTA_PROCESS_NAME)
+        if hwnd:
+            user32.BringWindowToTop(hwnd)
+            user32.SetForegroundWindow(hwnd)
+
+        old_pause = pyautogui.PAUSE
+        pyautogui.PAUSE = 0
+        try:
+            # Isi username
+            pyautogui.click(904, 536)
+            pyautogui.hotkey("ctrl", "a")
+            pyautogui.write(username, interval=0)
+
+            # Isi password
+            pyautogui.click(903, 602)
+            pyautogui.hotkey("ctrl", "a")
+            pyautogui.write(password, interval=0)
+
+            # Login
+            pyautogui.click(961, 682)
+            print(">>> Auto login Frista dikirim (koordinat)")
+
+            # Setelah login berhasil, isi no peserta jika ada
+            if nomor:
+                # Tunggu halaman utama Frista siap (singkat, secepat mungkin)
+                time.sleep(1.0)
+                activate_window(FRISTA_PROCESS_NAME, 3)
+                hwnd = find_window(FRISTA_PROCESS_NAME)
+                if hwnd:
+                    user32.BringWindowToTop(hwnd)
+                    user32.SetForegroundWindow(hwnd)
+                time.sleep(0.1)
+                pyautogui.click(1124, 406)
+                pyautogui.hotkey("ctrl", "a")
+                pyautogui.write(str(nomor), interval=0)
+                pyautogui.press("enter")
+                print(f">>> No peserta dikirim: {nomor}")
+
+                # Tunggu deteksi wajah (kotak biru) lalu ambil foto (timer fullscreen)
+                wait_total = 10
+                try:
+                    import tkinter as tk
+
+                    transparent = "#010203"
+                    root = tk.Tk()
+                    root.attributes("-fullscreen", True)
+                    root.configure(bg=transparent)
+                    root.attributes("-transparentcolor", transparent)
+                    root.attributes("-topmost", True)
+                    root.overrideredirect(True)
+                    label = tk.Label(
+                        root,
+                        text=str(wait_total),
+                        fg="white",
+                        bg=transparent,
+                        font=("Arial", 160, "bold"),
+                    )
+                    label.place(relx=0.5, rely=0.5, anchor="center")
+                    sub = tk.Label(
+                        root,
+                        text=(
+                            "Silakan arahkan wajah Anda ke kamera.\n"
+                            "Pastikan kotak berwarna biru muncul dengan jelas.\n\n"
+                            "Mohon tunggu beberapa detik hingga proses\n"
+                            "pengambilan foto selesai."
+                        ),
+                        fg="black",
+                        bg=transparent,
+                        font=("Courier New", 12, "bold"),
+                        justify="center",
+                    )
+                    sub.place(relx=0.5, rely=0.7, anchor="center")
+
+                    def _tick(n):
+                        if n <= 0:
+                            root.destroy()
+                            return
+                        label.config(text=str(n))
+                        root.after(1000, _tick, n - 1)
+
+                    root.after(1000, _tick, wait_total - 1)
+                    root.mainloop()
+                except Exception:
+                    # Fallback jika tkinter tidak tersedia
+                    for _ in range(wait_total):
+                        time.sleep(1)
+
+                activate_window(FRISTA_PROCESS_NAME, 2)
+                hwnd = find_window(FRISTA_PROCESS_NAME)
+                if hwnd:
+                    user32.BringWindowToTop(hwnd)
+                    user32.SetForegroundWindow(hwnd)
+                pyautogui.click(1257, 552)
+                print(">>> Ambil foto dikirim (koordinat 1257,552)")
+        finally:
+            pyautogui.PAUSE = old_pause
+    except Exception as exc:
+        # Pastikan Frista tetap terbuka walau automasi input gagal
+        print(f"[!] Gagal auto-login/isi Frista: {exc}")
 
     return True
 
@@ -246,13 +406,50 @@ def main():
         if attempt < MAX_AFTER_ATTEMPTS:
             time.sleep(0.3)
 
-    print("[!] Sidik jari gagal 2x, membuka Frista")
+    print("[!] Sidik jari gagal, membuka Frista")
     if start_frista_and_login(username, password):
         return 2
 
-    print("[!] Gagal membuka Frista setelah sidik jari gagal 2x")
+    print("[!] Gagal membuka Frista setelah sidik jari gagal 1x")
     return 1
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    args = sys.argv[1:]
+    # Ambil kredensial/nomor dari argumen jika diberikan
+    cli_user = None
+    cli_pass = None
+    cli_nomor = None
+    i = 0
+    while i < len(args):
+        if args[i] in ("--username", "-u") and i + 1 < len(args):
+            cli_user = args[i + 1]
+            i += 2
+        elif args[i] in ("--password", "-p") and i + 1 < len(args):
+            cli_pass = args[i + 1]
+            i += 2
+        elif args[i] in ("--nomor", "-n", "--no-peserta") and i + 1 < len(args):
+            cli_nomor = args[i + 1]
+            i += 2
+        else:
+            i += 1
+
+    # Mode khusus: langsung buka/login Frista (dipakai fallback dari app)
+    if any(a in ("--frista", "--frista-only", "frista") for a in args):
+        if cli_user and cli_pass:
+            username, password = cli_user, cli_pass
+        else:
+            try:
+                username, password = get_account_from_db()
+            except Exception as exc:
+                print(f"[!] Gagal ambil akun: {exc}")
+                sys.exit(1)
+        print(f"User: {username}, Password: {'*' * len(password)}")
+        ok = start_frista_and_login(username, password, nomor=cli_nomor)
+        sys.exit(2 if ok else 1)
+
+    try:
+        sys.exit(main())
+    except Exception as exc:
+        print(f"[!] Gagal: {exc}")
+        sys.exit(1)

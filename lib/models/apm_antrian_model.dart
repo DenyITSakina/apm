@@ -31,6 +31,8 @@ class ApmAntrianModel {
   final String bpjsNoKartu;
   final String bpjsNik;
   final String bpjsTglSep;
+  final String bpjsTglLahir;
+  final int? bpjsUmur;
 
   /// Rujukan BPJS terbaru (dipakai otomatis sebagai `diag_awal` SEP).
   final bool adaRujukan;
@@ -72,6 +74,8 @@ class ApmAntrianModel {
     this.bpjsNoKartu = '',
     this.bpjsNik = '',
     this.bpjsTglSep = '',
+    this.bpjsTglLahir = '',
+    this.bpjsUmur,
     this.adaRujukan = false,
     this.rujukanKode = '',
     this.rujukanNama = '',
@@ -118,6 +122,8 @@ class ApmAntrianModel {
       bpjsNoKartu: bpjs.noKartu,
       bpjsNik: bpjs.nik,
       bpjsTglSep: bpjs.tglSep,
+      bpjsTglLahir: bpjs.tglLahir,
+      bpjsUmur: bpjs.umur,
       adaRujukan: bpjs.adaRujukan,
       rujukanKode: bpjs.rujukanKode,
       rujukanNama: bpjs.rujukanNama,
@@ -149,6 +155,8 @@ class ApmAntrianModel {
       noKartu: _toString(bpjs, 'no_kartu'),
       nik: _toString(bpjs, 'nik'),
       tglSep: _toString(bpjs, 'tgl_sep'),
+      tglLahir: _toString(bpjs, 'tgl_lahir') ?? _toString(bpjs, 'tglLahir') ?? '',
+      umur: _toInt(bpjs, 'umur') ?? _toInt(bpjs, 'umur_sekarang'),
       adaRujukan: rujukan.isNotEmpty,
       rujukanKode: _toString(diagnosa, 'kode'),
       rujukanNama: _toString(diagnosa, 'nama'),
@@ -274,6 +282,8 @@ class _BpjsInfo {
   final String noKartu;
   final String nik;
   final String tglSep;
+  final String tglLahir;
+  final int? umur;
   final bool adaRujukan;
   final String rujukanKode;
   final String rujukanNama;
@@ -292,6 +302,8 @@ class _BpjsInfo {
     this.noKartu = '',
     this.nik = '',
     this.tglSep = '',
+    this.tglLahir = '',
+    this.umur,
     this.adaRujukan = false,
     this.rujukanKode = '',
     this.rujukanNama = '',
