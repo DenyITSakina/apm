@@ -5,6 +5,7 @@ via Win32, dan selesai/keluar dilaporkan lewat exit code.
 """
 
 import ctypes
+import ctypes.wintypes as wintypes
 import os
 import subprocess
 import sys
@@ -242,6 +243,13 @@ def run_after(username, password):
         return False
     return code == 0
 
+def _mask_nomor(nomor):
+    s = str(nomor or "")
+    if len(s) <= 12:
+        return "*" * len(s)
+    return s[:4] + ("*" * (len(s) - 12)) + s[-8:]
+
+
 # ===== FRISTA =====
 def start_frista_and_login(username, password, nomor=None):
     """Buka Frista, login otomatis, lalu isi no peserta jika diberikan."""
@@ -322,10 +330,14 @@ def start_frista_and_login(username, password, nomor=None):
                 pyautogui.hotkey("ctrl", "a")
                 pyautogui.write(str(nomor), interval=0)
                 pyautogui.press("enter")
-                print(f">>> No peserta dikirim: {nomor}")
+                print(f">>> No peserta dikirim: {_mask_nomor(nomor)}")
 
                 # Tunggu deteksi wajah (kotak biru) lalu ambil foto (timer fullscreen)
                 wait_total = 10
+                batal_coords = [
+                    (1137, 630), (1206, 673), (1281, 648), (1338, 676),
+                    (1333, 634), (1414, 651), (1379, 673), (1310, 643),
+                ]
                 try:
                     import tkinter as tk
 
@@ -359,14 +371,69 @@ def start_frista_and_login(username, password, nomor=None):
                     )
                     sub.place(relx=0.5, rely=0.7, anchor="center")
 
-                    def _tick(n):
-                        if n <= 0:
-                            root.destroy()
-                            return
-                        label.config(text=str(n))
-                        root.after(1000, _tick, n - 1)
+                    state = {"n": wait_total}
 
-                    root.after(1000, _tick, wait_total - 1)
+                    def _refill_nomor():
+                        try:
+                            activate_window(FRISTA_PROCESS_NAME, 1)
+                            hwnd = find_window(FRISTA_PROCESS_NAME)
+                            if hwnd:
+                                user32.ShowWindow(hwnd, SW_RESTORE)
+                                user32.BringWindowToTop(hwnd)
+                                user32.SetForegroundWindow(hwnd)
+                            time.sleep(0.1)
+                            pyautogui.click(1124, 406)
+                            time.sleep(0.05)
+                            pyautogui.hotkey("ctrl", "a")
+                            pyautogui.press("delete")
+                            pyautogui.write(str(nomor), interval=0)
+                            pyautogui.press("enter")
+                        except Exception:
+                            pass
+
+                    def _poll_batal():
+                        try:
+                            down = bool(user32.GetAsyncKeyState(0x01) & 0x8000)
+                            if down:
+                                pt = wintypes.POINT()
+                                if user32.GetCursorPos(ctypes.byref(pt)):
+                                    for bx, by in batal_coords:
+                                        if abs(pt.x - bx) <= 50 and abs(pt.y - by) <= 50:
+                                            # sembunyikan overlay agar klik/refill ke Frista
+                                            try:
+                                                root.withdraw()
+                                                root.update()
+                                            except Exception:
+                                                pass
+                                            _refill_nomor()
+                                            print(f">>> Batal terdeteksi, no peserta diisi ulang: {_mask_nomor(nomor)}")
+                                            try:
+                                                root.deiconify()
+                                                root.attributes("-topmost", True)
+                                                root.attributes("-fullscreen", True)
+                                            except Exception:
+                                                pass
+                                            break
+                        except Exception:
+                            pass
+                        try:
+                            root.after(100, _poll_batal)
+                        except Exception:
+                            pass
+
+                    def _tick():
+                        if state["n"] <= 0:
+                            try:
+                                root.destroy()
+                            except Exception:
+                                pass
+                            return
+                        label.config(text=str(state["n"]))
+                        state["n"] -= 1
+                        root.after(1000, _tick)
+
+                    root.after(100, _poll_batal)
+                    root.after(1000, _tick)
                     root.mainloop()
                 except Exception:
                     # Fallback jika tkinter tidak tersedia
@@ -380,6 +447,48 @@ def start_frista_and_login(username, password, nomor=None):
                     user32.SetForegroundWindow(hwnd)
                 pyautogui.click(1257, 552)
                 print(">>> Ambil foto dikirim (koordinat 1257,552)")
+
+                # Setelah ambil foto: jaga nomor tetap terisi & isi ulang jika Batal diklik
+                print(">>> Monitoring: nomor tetap terisi, isi ulang jika Batal diklik...")
+                monitor_deadline = time.time() + 180  # detik
+                last_refill = 0
+
+                def _refill_now(reason=""):
+                    activate_window(FRISTA_PROCESS_NAME, 2)
+                    hwnd = find_window(FRISTA_PROCESS_NAME)
+                    if hwnd:
+                        user32.ShowWindow(hwnd, SW_RESTORE)
+                        user32.BringWindowToTop(hwnd)
+                        user32.SetForegroundWindow(hwnd)
+                    time.sleep(0.1)
+                    pyautogui.click(1124, 406)
+                    time.sleep(0.05)
+                    pyautogui.hotkey("ctrl", "a")
+                    pyautogui.press("delete")
+                    pyautogui.write(str(nomor), interval=0)
+                    pyautogui.press("enter")
+                    if reason:
+                        print(f">>> {reason}, no peserta diisi ulang: {_mask_nomor(nomor)}")
+
+                while time.time() < monitor_deadline and is_process_running(FRISTA_PROCESS_NAME):
+                    # isi ulang berkala agar nomor tetap terisi setelah ambil foto/batal
+                    now = time.time()
+                    if now - last_refill >= 2.0:
+                        _refill_now()
+                        last_refill = now
+
+                    down = bool(user32.GetAsyncKeyState(0x01) & 0x8000)
+                    if down:
+                        pt = wintypes.POINT()
+                        if user32.GetCursorPos(ctypes.byref(pt)):
+                            for bx, by in batal_coords:
+                                if abs(pt.x - bx) <= 60 and abs(pt.y - by) <= 60:
+                                    # tunggu sebentar agar aksi Batal selesai, lalu isi ulang
+                                    time.sleep(0.15)
+                                    _refill_now("Batal terdeteksi")
+                                    last_refill = time.time()
+                                    break
+                    time.sleep(0.05)
         finally:
             pyautogui.PAUSE = old_pause
     except Exception as exc:
