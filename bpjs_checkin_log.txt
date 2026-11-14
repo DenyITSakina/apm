@@ -110,3 +110,13 @@
 [2026-11-13T15:09:47.984098] Log file: D:\Sakina\apm\bpjs_checkin_log.txt
 [2026-11-13T15:09:48.005095] Mulai proses ke poli | rm=0023****7913 | pasienBaru=0 | bpjsAktif=true | adaRujukan=true
 [2026-11-13T15:10:02.317347] Sidik jari selesai | sukses=false | ditutupOtomatis=false | dialihkanFrista=true | reason=sidik jari gagal 2 kali, dialihkan ke Frista
+[2026-11-13T15:16:16.659721] Mulai validasi | nomor=0023****7913 | jenis=bpjs
+[2026-11-13T15:16:19.411538] Log file: D:\Sakina\apm\bpjs_checkin_log.txt
+[2026-11-13T15:16:19.433565] Mulai proses ke poli | rm=0023****7913 | pasienBaru=0 | bpjsAktif=true | adaRujukan=true
+[2026-11-13T15:16:39.409132] Sidik jari selesai | sukses=false | ditutupOtomatis=false | dialihkanFrista=true | reason=sidik jari gagal 2 kali, dialihkan ke Frista
+[2026-11-13T15:17:19.835576] Log file: D:\Sakina\apm\bpjs_checkin_log.txt
+[2026-11-13T15:17:19.852587] Mulai proses ke poli | rm=0023****7913 | pasienBaru=0 | bpjsAktif=true | adaRujukan=true
+[2026-11-13T15:17:31.731747] Sidik jari selesai | sukses=false | ditutupOtomatis=false | dialihkanFrista=true | reason=sidik jari gagal 2 kali, dialihkan ke Frista
+[2026-11-13T15:17:55.011600] Log file: D:\Sakina\apm\bpjs_checkin_log.txt
+[2026-11-13T15:17:55.035602] Mulai proses ke poli | rm=0023****7913 | pasienBaru=0 | bpjsAktif=true | adaRujukan=true
+[2026-11-13T15:18:10.379891] Sidik jari selesai | sukses=false | ditutupOtomatis=false | dialihkanFrista=true | reason=sidik jari gagal 2 kali, dialihkan ke Frista

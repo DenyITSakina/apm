@@ -244,7 +244,7 @@ def main():
         if is_process_running(AFTER_PROCESS_NAME):
             kill_process(AFTER_PROCESS_NAME)
         if attempt < MAX_AFTER_ATTEMPTS:
-            time.sleep(1.0)
+            time.sleep(0.3)
 
     print("[!] Sidik jari gagal 2x, membuka Frista")
     if start_frista_and_login(username, password):

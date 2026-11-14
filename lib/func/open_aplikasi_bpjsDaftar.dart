@@ -17,7 +17,7 @@ const String fristaExePath = r"C:\frista\Frista.exe";
 
 const Duration _sidikJariLaunchTimeout = Duration(seconds: 10);
 const Duration _sidikJariExitTimeout = Duration(seconds: 180);
-const int _maxSidikJariAttempts = 2;
+const int _maxSidikJariAttempts = 1;
 
 const int _maxLogBytes = 2 * 1024 * 1024;
 
@@ -216,7 +216,6 @@ const List<String> _kunciGagal = [
   'harus 13 digit',
   'harus 16 digit',
   'format no',
-  'sudah terdaftar',
   'penolakan',
   'tidak dapat terhubung',
   'tidak dapat tehubung',
@@ -253,6 +252,9 @@ const List<String> _kunciHasilDiWindowUtama = [
 /// aman memakai daftar[_kunciGagal]). Null = belum ada petunjuk.
 SidikJariStatus? _klasifikasiDialog(String teks) {
   final t = teks.toLowerCase();
+  if (t.contains('sudah terdaftar')) {
+    return SidikJariStatus.selesai;
+  }
   if (_kunciSukses.any(t.contains)) {
     return SidikJariStatus.selesai;
   }
@@ -265,6 +267,9 @@ SidikJariStatus? _klasifikasiDialog(String teks) {
 /// Klasifikasi teks window utama memakai frasa hasil yang spesifik saja.
 SidikJariStatus? _klasifikasiWindowUtama(String teks) {
   final t = teks.toLowerCase();
+  if (t.contains('sudah terdaftar')) {
+    return SidikJariStatus.selesai;
+  }
   if (_kunciSukses.any(t.contains)) {
     return SidikJariStatus.selesai;
   }
@@ -300,7 +305,7 @@ String _ringkasTeks(String teks) {
 /// bisa tetap melanjutkan ke dialog konfirmasi. Teks error/penolakan
 /// menghasilkan kegagalan lebih awal.
 Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
-  const interval = Duration(milliseconds: 1000);
+  const interval = Duration(milliseconds: 300);
   final stopwatch = Stopwatch()..start();
   var sudahBacaTeks = false;
 
@@ -1245,7 +1250,7 @@ Future<bool> openExe(
               "proses tidak muncul dalam ${_sidikJariLaunchTimeout.inSeconds} dtk";
           _logSidikJari("GAGAL percobaan $percobaan: $lastSidikJariReason");
           if (percobaan < _maxSidikJariAttempts) {
-            await Future<void>.delayed(const Duration(seconds: 1));
+            await Future<void>.delayed(const Duration(milliseconds: 300));
             continue;
           }
           break;
@@ -1288,7 +1293,7 @@ Future<bool> openExe(
               : 'aplikasi sidik jari menutup diri saat otomasi (${hasilOto.alasan})';
           _logSidikJari("GAGAL percobaan $percobaan: $lastSidikJariReason");
           if (percobaan < _maxSidikJariAttempts) {
-            await Future<void>.delayed(const Duration(seconds: 1));
+            await Future<void>.delayed(const Duration(milliseconds: 300));
             continue;
           }
           break;
@@ -1299,7 +1304,7 @@ Future<bool> openExe(
         _logSidikJari("GAGAL percobaan $percobaan: $lastSidikJariReason");
         await closeSidikJariExe();
         if (percobaan < _maxSidikJariAttempts) {
-          await Future<void>.delayed(const Duration(seconds: 1));
+          await Future<void>.delayed(const Duration(milliseconds: 300));
           continue;
         }
         break;
@@ -1334,18 +1339,18 @@ Future<bool> openExe(
           _logSidikJari("GAGAL percobaan $percobaan: $lastSidikJariReason");
           await closeSidikJariExe();
           if (percobaan < _maxSidikJariAttempts) {
-            await Future<void>.delayed(const Duration(seconds: 1));
+            await Future<void>.delayed(const Duration(milliseconds: 300));
             continue;
           }
           break;
         case SidikJariStatus.timeout:
           lastSidikJariReason =
               "belum selesai dalam ${_sidikJariExitTimeout.inMinutes} menit"
-                  "${lastTeksSidikJari != null && lastTeksSidikJari != 'teks UI tidak terbaca' ? ' ($lastTeksSidikJari)' : ''}";
+              "${lastTeksSidikJari != null && lastTeksSidikJari != 'teks UI tidak terbaca' ? ' ($lastTeksSidikJari)' : ''}";
           _logSidikJari("GAGAL percobaan $percobaan: $lastSidikJariReason");
           await closeSidikJariExe();
           if (percobaan < _maxSidikJariAttempts) {
-            await Future<void>.delayed(const Duration(seconds: 1));
+            await Future<void>.delayed(const Duration(milliseconds: 300));
             continue;
           }
           break;
