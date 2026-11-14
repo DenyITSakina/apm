@@ -275,8 +275,9 @@ const List<String> _kunciGagal = [
   'mesin fingerprint terhubung',
 ];
 
-final Set<String> _kunciGagalLower =
-    _kunciGagal.map((k) => k.toLowerCase()).toSet();
+final Set<String> _kunciGagalLower = _kunciGagal
+    .map((k) => k.toLowerCase())
+    .toSet();
 
 bool _mengandungKunciGagal(String teks) {
   final t = teks.toLowerCase();
@@ -1434,7 +1435,9 @@ Future<bool> openExe(
     );
     if (fristaDibuka) {
       if (lastFristaBerhasil) {
-        _logSidikJari("Frista sukses (Peserta telah terdaftar Hari ini), lanjut SEP");
+        _logSidikJari(
+          "Frista sukses (Peserta telah terdaftar Hari ini), lanjut SEP",
+        );
         return true;
       }
       lastSidikJariDialihkanKeFrista = true;
@@ -1559,10 +1562,7 @@ Future<bool> _bukaFristaFallback({
                 '--password',
                 password,
               ],
-              if (nomor != null && nomor.isNotEmpty) ...[
-                '--nomor',
-                nomor,
-              ],
+              if (nomor != null && nomor.isNotEmpty) ...['--nomor', nomor],
               '--result-file',
               resultFile.path,
             ],
@@ -1609,7 +1609,9 @@ Future<bool> _bukaFristaFallback({
               final content = resultFile.readAsStringSync().trim();
               if (content == 'SUCCESS') {
                 lastFristaBerhasil = true;
-                _logSidikJari("Frista: Peserta telah terdaftar Hari ini (sukses)");
+                _logSidikJari(
+                  "Frista: Peserta telah terdaftar Hari ini (sukses)",
+                );
                 return true;
               }
             }

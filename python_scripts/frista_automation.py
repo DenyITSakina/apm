@@ -480,10 +480,10 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                 pyautogui.click(1257, 552)
                 print(">>> Ambil foto dikirim (koordinat 1257,552)")
 
-                # Setelah ambil foto: jaga nomor, deteksi hasil pengenalan wajah
+                # Setelah ambil foto: deteksi hasil & jaga nomor (tanpa benturan)
                 print(">>> Monitoring: nomor tetap terisi, deteksi hasil Frista...")
-                monitor_deadline = time.time() + 180  # detik
-                last_refill = 0
+                monitor_deadline = time.time() + 190  # detik
+                last_refill = time.time()
                 last_text_check = 0
                 success = False
 
@@ -504,34 +504,59 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                     if reason:
                         print(f">>> {reason}, no peserta diisi ulang: {_mask_nomor(nomor)}")
 
-                while time.time() < monitor_deadline and is_process_running(FRISTA_PROCESS_NAME):
+                while time.time() < monitor_deadline:
+                    # Jika Frista ditutup, anggap sudah terdaftar/berhasil
+                    if not is_process_running(FRISTA_PROCESS_NAME):
+                        print(">>> Frista tertutup, dianggap terdaftar (berhasil)")
+                        success = True
+                        break
+
                     now = time.time()
-                    # Deteksi popup "Peserta telah terdaftar Hari ini" (berhasil) -> close & lanjut SEP
-                    if now - last_text_check >= 0.8:
+
+                    # Deteksi popup hasil Frista (UI Automation, lalu OCR fallback)
+                    if now - last_text_check >= 0.5:
                         last_text_check = now
                         try:
                             texts = get_frista_texts()
-                            if "peserta telah terdaftar hari ini" in texts:
-                                print(">>> Hasil: Peserta telah terdaftar Hari ini (berhasil)")
+                            if not _is_frista_terdaftar(texts):
+                                texts = get_frista_texts_ocr()
+                            if _is_frista_terdaftar(texts):
+                                print(">>> Hasil Frista terdeteksi: terdaftar/sudah terdaftar (berhasil)")
+                                # klik OK lalu close popup hasil (tanpa gangguan isi ulang)
+                                pyautogui.click(1027, 590)
+                                time.sleep(0.05)
                                 pyautogui.click(1531, 295)
-                                print(">>> Close popup hasil dikirim (1531,295)")
                                 success = True
                                 break
                         except Exception:
                             pass
 
-                    # isi ulang berkala agar nomor tetap terisi setelah ambil foto/batal
-                    if now - last_refill >= 2.0:
-                        _refill_now()
-                        last_refill = now
+                    # Jaga nomor dengan delay (jarang) agar tidak benturan dengan verifikasi.
+                    # Cek sukses dulu, baru isi ulang jika perlu.
+                    if not success and now - last_refill >= 8.0:
+                        try:
+                            texts = get_frista_texts()
+                            if _is_frista_terdaftar(texts):
+                                print(">>> Hasil Frista terdeteksi: terdaftar/sudah terdaftar (berhasil)")
+                                pyautogui.click(1027, 590)
+                                time.sleep(0.05)
+                                pyautogui.click(1531, 295)
+                                success = True
+                                break
+                        except Exception:
+                            pass
+                        if not success:
+                            _refill_now()
+                            last_refill = time.time()
 
+                    # Isi ulang hanya saat tombol Batal diklik
                     down = bool(user32.GetAsyncKeyState(0x01) & 0x8000)
                     if down:
                         pt = wintypes.POINT()
                         if user32.GetCursorPos(ctypes.byref(pt)):
                             for bx, by in batal_coords:
                                 if abs(pt.x - bx) <= 60 and abs(pt.y - by) <= 60:
-                                    time.sleep(0.15)
+                                    time.sleep(0.2)
                                     _refill_now("Batal terdeteksi")
                                     last_refill = time.time()
                                     break
