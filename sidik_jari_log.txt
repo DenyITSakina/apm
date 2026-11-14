@@ -1,0 +1,15 @@
+[2026-11-14T15:30:28.907532] Mulai proses | nomor=0000****3033 | app=D:\Sakina\apm
+[2026-11-14T15:30:28.931973] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-11-14T15:30:29.206765] Ambil akun VClaim (218 ms)
+[2026-11-14T15:30:29.231461] Login otomatis memakai user=ci*******a
+[2026-11-14T15:30:29.288033] Percobaan sidik jari 1/1
+[2026-11-14T15:30:29.457064] After.exe tidak berjalan
+[2026-11-14T15:30:29.507582] After.exe dijalankan (pid=18740), menunggu proses muncul
+[2026-11-14T15:30:33.684452] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=APP_CLOSED_DURING_LOGIN
+[2026-11-14T15:30:33.715971] Otomasi UI selesai (4083 ms)
+[2026-11-14T15:30:33.833481] After.exe tidak berjalan
+[2026-11-14T15:30:33.850532] GAGAL percobaan 1: aplikasi sidik jari menutup diri saat otomasi (aplikasi sidik jari tertutup saat login)
+[2026-11-14T15:30:33.880537] Sidik jari gagal 1 kali, mencoba membuka Frista
+[2026-11-14T15:30:33.913051] Frista dibuka+auto-login via frista_automation.py (python, D:\Sakina\apm\python_scripts\frista_automation.py, nomor=0000****3033)
+[2026-11-14T15:31:28.102025] Frista: Peserta telah terdaftar Hari ini (sukses)
+[2026-11-14T15:31:28.124685] Frista sukses (Peserta telah terdaftar Hari ini), lanjut SEP

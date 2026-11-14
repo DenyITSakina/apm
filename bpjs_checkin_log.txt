@@ -1,0 +1,6 @@
+[2026-11-14T15:30:27.051470] Mulai validasi | nomor=0023****7913 | jenis=bpjs
+[2026-11-14T15:30:28.847422] Log file: D:\Sakina\apm\bpjs_checkin_log.txt
+[2026-11-14T15:30:28.880440] Mulai proses ke poli | rm=0023****7913 | pasienBaru=0 | bpjsAktif=true | adaRujukan=true | umur=26
+[2026-11-14T15:31:28.153266] Sidik jari selesai | sukses=true | ditutupOtomatis=false | dialihkanFrista=false | reason=aplikasi sidik jari menutup diri saat otomasi (aplikasi sidik jari tertutup saat login)
+[2026-11-14T15:31:28.176267] Lanjut ke poli (pembuatan SEP) | rm=0023****7913 | diagnosaAwal=E11.8
+[2026-11-14T15:31:28.752297] Gagal | rm=0023****7913 | Peserta belum terdaftar pada Faskes Primer di BPJS. Data peserta perlu diperbaiki lebih dulu di BPJS.

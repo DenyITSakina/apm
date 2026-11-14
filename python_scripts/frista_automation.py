@@ -482,7 +482,7 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
 
                 # Setelah ambil foto: deteksi hasil & jaga nomor (tanpa benturan)
                 print(">>> Monitoring: nomor tetap terisi, deteksi hasil Frista...")
-                monitor_deadline = time.time() + 190  # detik
+                monitor_deadline = time.time() + 150  # detik
                 last_refill = time.time()
                 last_text_check = 0
                 success = False
