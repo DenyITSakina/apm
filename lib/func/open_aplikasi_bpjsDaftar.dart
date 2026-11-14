@@ -143,6 +143,32 @@ void _closeSidikJariOnFailFast() {
   tutupSidikJariCepat();
 }
 
+/// "Sidik Jari Peserta Sudah Terdaftar" = sukses -> klik OK (1027,590) lalu close (1206,319).
+void _closeSudahTerdaftar() {
+  if (kIsWeb) return;
+  try {
+    Process.start(
+      'powershell.exe',
+      [
+        '-NoProfile',
+        '-ExecutionPolicy',
+        'Bypass',
+        '-Command',
+        "Add-Type -AssemblyName System.Windows.Forms;"
+            "Add-Type -MemberDefinition '[DllImport(\"user32.dll\")] public static extern void mouse_event(int f,int x,int y,int d,int e);' -Name U -Namespace W;"
+            "[System.Windows.Forms.Cursor]::Position=New-Object System.Drawing.Point(1027,590);"
+            "[W.U]::mouse_event(2,0,0,0,0);[W.U]::mouse_event(4,0,0,0,0);"
+            "Start-Sleep -Milliseconds 50;"
+            "[System.Windows.Forms.Cursor]::Position=New-Object System.Drawing.Point(1206,319);"
+            "[W.U]::mouse_event(2,0,0,0,0);[W.U]::mouse_event(4,0,0,0,0)",
+      ],
+      runInShell: true,
+      mode: ProcessStartMode.detached,
+    );
+  } catch (_) {}
+  tutupSidikJariCepat();
+}
+
 String _escapePowerShell(String value) => value.replaceAll("'", "''");
 
 /// Judul semua window milik proses After.exe (termasuk dialog/popup).
@@ -227,6 +253,8 @@ const List<String> _kunciGagal = [
   'gagal disimpan',
   'tidak ditemukan',
   'tidak bisa dikenali',
+  'sidik jari tidak di kenali',
+  'tidak di kenali',
   'belum terdaftar',
   'tidak sesuai',
   'harus 13 digit',
@@ -352,9 +380,20 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
 
     sudahBacaTeks = true;
 
-    // Deteksi kilat: jika ada teks _kunciGagal, close instan tanpa langkah lain.
     final teksGabungan =
         '${statusUi.dialog} ${statusUi.windowUtama} ${statusUi.peringatan}';
+    final teksGabunganLower = teksGabungan.toLowerCase();
+
+    // "Sidik Jari Peserta Sudah Terdaftar" = sukses, langsung klik OK lalu close.
+    if (teksGabunganLower.contains('sidik jari peserta sudah terdaftar') ||
+        teksGabunganLower.contains('sidik jari peserta sudah terdaftar.')) {
+      lastTeksSidikJari = 'Sidik Jari Peserta Sudah Terdaftar';
+      _logSidikJari("Sudah terdaftar terdeteksi: $lastTeksSidikJari");
+      _closeSudahTerdaftar();
+      return SidikJariStatus.selesai;
+    }
+
+    // Deteksi kilat: jika ada teks _kunciGagal, close instan tanpa langkah lain.
     if (_mengandungKunciGagal(teksGabungan)) {
       lastTeksSidikJari = _ringkasTeks(teksGabungan);
       _logSidikJari("Teks gagal terdeteksi: $lastTeksSidikJari");
@@ -1144,6 +1183,9 @@ bool lastSidikJariDitutupOtomatis = false;
 /// True kalau sidik jari gagal berulang dan dialihkan ke Frista.
 bool lastSidikJariDialihkanKeFrista = false;
 
+/// True kalau Frista berhasil (mis. "Peserta telah terdaftar Hari ini") -> lanjut SEP.
+bool lastFristaBerhasil = false;
+
 /// Samarkan nomor untuk log (jangan tulis nomor BPJS penuh ke file).
 String maskNomorLog(String? nomor) {
   final value = (nomor ?? '').trim();
@@ -1198,6 +1240,7 @@ Future<bool> openExe(
   lastSidikJariReason = '';
   lastSidikJariDitutupOtomatis = false;
   lastSidikJariDialihkanKeFrista = false;
+  lastFristaBerhasil = false;
 
   void gagal(String alasan, [String? pesan]) {
     lastSidikJariReason = '$alasan${pesan != null ? ' ($pesan)' : ''}';
@@ -1390,6 +1433,10 @@ Future<bool> openExe(
       nomor: nomor,
     );
     if (fristaDibuka) {
+      if (lastFristaBerhasil) {
+        _logSidikJari("Frista sukses (Peserta telah terdaftar Hari ini), lanjut SEP");
+        return true;
+      }
       lastSidikJariDialihkanKeFrista = true;
       lastSidikJariReason =
           "sidik jari gagal $_maxSidikJariAttempts kali, dialihkan ke Frista";
@@ -1463,6 +1510,14 @@ Future<bool> _bukaFristaFallback({
     final appDir = Directory.current.path;
     final sep = Platform.pathSeparator;
 
+    // File hasil (deteksi popup "Peserta telah terdaftar Hari ini" -> sukses SEP)
+    final resultFile = File(
+      '${Directory.systemTemp.path}${sep}frista_result_${DateTime.now().millisecondsSinceEpoch}.txt',
+    );
+    try {
+      if (resultFile.existsSync()) resultFile.deleteSync();
+    } catch (_) {}
+
     // Cari script otomasi
     final scriptCandidates = <String>[
       '$appDir${sep}python_scripts${sep}frista_automation.py',
@@ -1508,6 +1563,8 @@ Future<bool> _bukaFristaFallback({
                 '--nomor',
                 nomor,
               ],
+              '--result-file',
+              resultFile.path,
             ],
             runInShell: true,
             workingDirectory: File(scriptPath).parent.path,
@@ -1543,6 +1600,23 @@ Future<bool> _bukaFristaFallback({
             }
           } catch (_) {}
         });
+
+        // Tunggu hasil Frista: "Peserta telah terdaftar Hari ini" -> sukses (lanjut SEP)
+        final deadline = DateTime.now().add(const Duration(seconds: 200));
+        while (DateTime.now().isBefore(deadline)) {
+          try {
+            if (resultFile.existsSync()) {
+              final content = resultFile.readAsStringSync().trim();
+              if (content == 'SUCCESS') {
+                lastFristaBerhasil = true;
+                _logSidikJari("Frista: Peserta telah terdaftar Hari ini (sukses)");
+                return true;
+              }
+            }
+          } catch (_) {}
+          await Future<void>.delayed(const Duration(milliseconds: 500));
+        }
+        _logSidikJari("Frista: menunggu hasil selesai tanpa status SUCCESS");
         return true;
       }
       _logSidikJari(

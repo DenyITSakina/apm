@@ -250,9 +250,41 @@ def _mask_nomor(nomor):
     return s[:4] + ("*" * (len(s) - 12)) + s[-8:]
 
 
+def get_frista_texts():
+    """Baca teks UI window Frista (best-effort, untuk deteksi popup hasil)."""
+    ps = r"""
+$ErrorActionPreference='Stop'
+Add-Type -AssemblyName UIAutomationClient
+Add-Type -AssemblyName UIAutomationTypes
+$targets=@(Get-Process -Name Frista -ErrorAction SilentlyContinue | ForEach-Object { $_.Id })
+if($targets.Count -eq 0){ exit 1 }
+$cond=[System.Windows.Automation.Condition]::TrueCondition
+$out=@()
+foreach($p in (Get-Process -Name Frista -ErrorAction SilentlyContinue | Where-Object { $_.MainWindowHandle -ne 0 })){
+  try{
+    $root=[System.Windows.Automation.AutomationElement]::FromHandle($p.MainWindowHandle)
+    foreach($e in $root.FindAll([System.Windows.Automation.TreeScope]::Descendants,$cond)){
+      $n=$e.Current.Name
+      if($n -and $n.Length -gt 1){ $out += $n }
+    }
+  }catch{}
+}
+($out | Select-Object -Unique) -join ' ~ '
+"""
+    try:
+        r = subprocess.run(
+            ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ps],
+            capture_output=True, text=True, timeout=3,
+            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+        )
+        return (r.stdout or "").lower()
+    except Exception:
+        return ""
+
+
 # ===== FRISTA =====
-def start_frista_and_login(username, password, nomor=None):
-    """Buka Frista, login otomatis, lalu isi no peserta jika diberikan."""
+def start_frista_and_login(username, password, nomor=None, result_file=None):
+    """Buka Frista, login otomatis, isi no peserta, dan deteksi hasil jika diberikan."""
     if not os.path.exists(FRISTA_PATH):
         print(f"[!] Frista.exe tidak ditemukan: {FRISTA_PATH}")
         return False
@@ -448,10 +480,12 @@ def start_frista_and_login(username, password, nomor=None):
                 pyautogui.click(1257, 552)
                 print(">>> Ambil foto dikirim (koordinat 1257,552)")
 
-                # Setelah ambil foto: jaga nomor tetap terisi & isi ulang jika Batal diklik
-                print(">>> Monitoring: nomor tetap terisi, isi ulang jika Batal diklik...")
+                # Setelah ambil foto: jaga nomor, deteksi hasil pengenalan wajah
+                print(">>> Monitoring: nomor tetap terisi, deteksi hasil Frista...")
                 monitor_deadline = time.time() + 180  # detik
                 last_refill = 0
+                last_text_check = 0
+                success = False
 
                 def _refill_now(reason=""):
                     activate_window(FRISTA_PROCESS_NAME, 2)
@@ -471,8 +505,22 @@ def start_frista_and_login(username, password, nomor=None):
                         print(f">>> {reason}, no peserta diisi ulang: {_mask_nomor(nomor)}")
 
                 while time.time() < monitor_deadline and is_process_running(FRISTA_PROCESS_NAME):
-                    # isi ulang berkala agar nomor tetap terisi setelah ambil foto/batal
                     now = time.time()
+                    # Deteksi popup "Peserta telah terdaftar Hari ini" (berhasil) -> close & lanjut SEP
+                    if now - last_text_check >= 0.8:
+                        last_text_check = now
+                        try:
+                            texts = get_frista_texts()
+                            if "peserta telah terdaftar hari ini" in texts:
+                                print(">>> Hasil: Peserta telah terdaftar Hari ini (berhasil)")
+                                pyautogui.click(1531, 295)
+                                print(">>> Close popup hasil dikirim (1531,295)")
+                                success = True
+                                break
+                        except Exception:
+                            pass
+
+                    # isi ulang berkala agar nomor tetap terisi setelah ambil foto/batal
                     if now - last_refill >= 2.0:
                         _refill_now()
                         last_refill = now
@@ -483,12 +531,20 @@ def start_frista_and_login(username, password, nomor=None):
                         if user32.GetCursorPos(ctypes.byref(pt)):
                             for bx, by in batal_coords:
                                 if abs(pt.x - bx) <= 60 and abs(pt.y - by) <= 60:
-                                    # tunggu sebentar agar aksi Batal selesai, lalu isi ulang
                                     time.sleep(0.15)
                                     _refill_now("Batal terdeteksi")
                                     last_refill = time.time()
                                     break
                     time.sleep(0.05)
+
+                if result_file:
+                    try:
+                        with open(result_file, "w", encoding="utf-8") as rf:
+                            rf.write("SUCCESS" if success else "DONE")
+                    except Exception:
+                        pass
+                if success:
+                    print(">>> FRISTA_SUCCESS")
         finally:
             pyautogui.PAUSE = old_pause
     except Exception as exc:
@@ -529,6 +585,7 @@ if __name__ == "__main__":
     cli_user = None
     cli_pass = None
     cli_nomor = None
+    cli_result = None
     i = 0
     while i < len(args):
         if args[i] in ("--username", "-u") and i + 1 < len(args):
@@ -539,6 +596,9 @@ if __name__ == "__main__":
             i += 2
         elif args[i] in ("--nomor", "-n", "--no-peserta") and i + 1 < len(args):
             cli_nomor = args[i + 1]
+            i += 2
+        elif args[i] in ("--result-file", "-r") and i + 1 < len(args):
+            cli_result = args[i + 1]
             i += 2
         else:
             i += 1
@@ -554,7 +614,7 @@ if __name__ == "__main__":
                 print(f"[!] Gagal ambil akun: {exc}")
                 sys.exit(1)
         print(f"User: {username}, Password: {'*' * len(password)}")
-        ok = start_frista_and_login(username, password, nomor=cli_nomor)
+        ok = start_frista_and_login(username, password, nomor=cli_nomor, result_file=cli_result)
         sys.exit(2 if ok else 1)
 
     try:
