@@ -246,10 +246,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
 
     final tanggalBooking = state.apmData.tglBooking.trim();
     if (tanggalBooking.isNotEmpty) {
-      TopToast.warning(
-        context,
-        'Tanggal booking Anda $tanggalBooking, silakan lanjutkan check-in.',
-      );
+      TopToast.warning(context, 'Tanggal booking Anda $tanggalBooking');
     }
 
     // Nomor harus disimpan sebelum controller dikosongkan.
