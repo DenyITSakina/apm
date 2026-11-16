@@ -142,7 +142,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
                               ? 'Sedang memeriksa data Anda, mohon tunggu sebentar. Jangan menekan tombol lain.'
                               : hasInput
                               ? 'Nomor sudah terisi. Periksa kembali, lalu tekan tombol "CEK BPJS" untuk mencari dan memverifikasi data Anda.'
-                              : 'Silakan masukkan nomor Kartu BPJS, NIK, atau No. Rekam Medis Anda. Anda juga bisa memindai (scan) kartu/barcode pada alat scanner, nomor akan terisi otomatis. Setelah itu tekan "CEK BPJS".';
+                              : 'Layanan ini khusus pasien dengan booking BPJS (jenis BPJS). Silakan masukkan nomor Kartu BPJS, NIK, atau No. Rekam Medis Anda. Anda juga bisa memindai (scan) kartu/barcode pada alat scanner, nomor akan terisi otomatis. Setelah itu tekan "CEK BPJS".';
 
                           return Stack(
                             children: [

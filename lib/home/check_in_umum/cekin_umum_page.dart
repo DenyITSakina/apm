@@ -142,7 +142,7 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
                               ? 'Sedang memeriksa data Anda, mohon tunggu sebentar. Jangan menekan tombol lain.'
                               : hasInput
                               ? 'Nomor sudah terisi. Periksa kembali, lalu tekan tombol "CARI DATA" untuk mencari data Anda.'
-                              : 'Silakan masukkan Nomor Rekam Medis, NIK, atau No. Booking Anda. Anda juga bisa memindai (scan) kartu/barcode pada alat scanner, nomor akan terisi otomatis. Setelah itu tekan "CARI DATA".';
+                              : 'Layanan ini khusus pasien dengan booking Umum (non-BPJS). Silakan masukkan Nomor Rekam Medis, NIK, atau No. Booking Anda. Anda juga bisa memindai (scan) kartu/barcode pada alat scanner, nomor akan terisi otomatis. Setelah itu tekan "CARI DATA".';
 
                           return Stack(
                             children: [
