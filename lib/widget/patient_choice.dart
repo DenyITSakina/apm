@@ -272,7 +272,7 @@ class _DataTile extends StatelessWidget {
 ///
 /// Hanya satu tombol yang tampil mengikuti status pasien agar layar tidak
 /// membingungkan dan tidak ada dua aksi yang bisa tertukar.
-class PatientChoiceActions extends StatefulWidget {
+class PatientChoiceActions extends StatelessWidget {
   const PatientChoiceActions({
     super.key,
     required this.isPasienBaru,
@@ -310,62 +310,16 @@ class PatientChoiceActions extends StatefulWidget {
   final bool showNotice;
 
   @override
-  State<PatientChoiceActions> createState() => _PatientChoiceActionsState();
-}
-
-class _PatientChoiceActionsState extends State<PatientChoiceActions>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _pulseController;
-  late final Animation<double> _pulseAnimation;
-
-  @override
-  void initState() {
-    super.initState();
-    _pulseController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 900),
-    );
-    _pulseAnimation = Tween<double>(begin: 1.0, end: 1.06).animate(
-      CurvedAnimation(
-        parent: _pulseController,
-        curve: Curves.easeInOut,
-      ),
-    );
-    // Hanya berdenyut bila tombol "LANJUT KE POLI" yang tampil.
-    if (!widget.isPasienBaru && widget.poliEnabled) {
-      _pulseController.repeat(reverse: true);
-    }
-  }
-
-  @override
-  void didUpdateWidget(PatientChoiceActions oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    final shouldPulse = !widget.isPasienBaru && widget.poliEnabled;
-    final wasPulsing = oldWidget.isPasienBaru == false && oldWidget.poliEnabled;
-    if (shouldPulse && !wasPulsing) {
-      _pulseController.repeat(reverse: true);
-    } else if (!shouldPulse && wasPulsing) {
-      _pulseController.stop();
-    }
-  }
-
-  @override
-  void dispose() {
-    _pulseController.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final keLoket = widget.isPasienBaru;
+    final keLoket = isPasienBaru;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         AppCard(
-          padding: EdgeInsets.all(widget.dense ? AppSpacing.sm : AppSpacing.md),
-child: Column(
+padding: EdgeInsets.all(dense ? AppSpacing.sm : AppSpacing.md),
+          child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -375,7 +329,7 @@ child: Column(
                     'LANGKAH SELANJUTNYA',
                     style: TextStyle(
                       fontFamily: AppText.family,
-                      fontSize: widget.dense ? 10 : 11,
+                      fontSize: dense ? 10 : 11,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1,
                       color: AppColors.textMuted,
@@ -387,7 +341,7 @@ child: Column(
                   ),
                 ],
               ),
-              SizedBox(height: widget.dense ? AppSpacing.sm : 12),
+              SizedBox(height: dense ? AppSpacing.sm : 12),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -431,7 +385,7 @@ child: Column(
                                 : 'Pasien Lama - Langsung ke Poli',
                             style: TextStyle(
                               fontFamily: AppText.family,
-                              fontSize: widget.dense ? 13.5 : 14.5,
+                              fontSize: dense ? 13.5 : 14.5,
                               fontWeight: FontWeight.w800,
                               color: AppColors.textPrimary,
                             ),
@@ -456,48 +410,68 @@ child: Column(
                   ],
                 ),
               ),
-              SizedBox(height: widget.dense ? AppSpacing.sm : 12),
-              ScaleTransition(
-                scale: _pulseAnimation,
-                child: AppGradientButton(
-                  label: keLoket ? widget.loketTitle : widget.poliTitle,
-                  icon: keLoket
-                      ? Icons.account_balance_wallet_rounded
-                      : Icons.arrow_forward_rounded,
-                  caption: keLoket ? widget.loketCaption : widget.poliCaption,
-                  onPressed: keLoket ? widget.onLoket : widget.onPoli,
-                  enabled: keLoket || widget.poliEnabled,
-                  loading: keLoket ? widget.loketBusy : widget.poliBusy,
-                  height: widget.dense ? 62 : 78,
-                  fontSize: widget.dense ? 15.5 : 17,
-                ),
+SizedBox(height: dense ? AppSpacing.sm : 12),
+              AppGradientButton(
+                label: keLoket ? loketTitle : poliTitle,
+                icon: keLoket
+                    ? Icons.account_balance_wallet_rounded
+                    : Icons.arrow_forward_rounded,
+                caption: keLoket ? loketCaption : poliCaption,
+                onPressed: keLoket ? onLoket : onPoli,
+                enabled: keLoket || poliEnabled,
+                loading: keLoket ? loketBusy : poliBusy,
+                height: dense ? 62 : 78,
+                fontSize: dense ? 15.5 : 17,
               ),
+              if (!keLoket) ...[
+                SizedBox(height: dense ? 4 : 6),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.arrow_upward_rounded,
+                      size: dense ? 14 : 16,
+                      color: AppColors.accentDark,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Klik tombol di atas jika lanjut',
+                      style: TextStyle(
+                        fontFamily: AppText.family,
+                        fontSize: dense ? 10.5 : 11.5,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.accentDark,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ],
           ),
         ),
-        if (widget.showNotice) ...[
-          SizedBox(height: widget.dense ? AppSpacing.sm : AppSpacing.md),
+        if (showNotice) ...[
+          SizedBox(height: dense ? AppSpacing.sm : AppSpacing.md),
           AppNotice(
             title: 'Informasi pelayanan',
-message: keLoket
+            message: keLoket
                 ? 'Karena berstatus pasien baru, Anda diarahkan ke loket Front '
                       'Office untuk registrasi awal.'
-                : !widget.poliEnabled
+                : !poliEnabled
                 ? 'Check-in ke poli belum bisa dilanjutkan karena data BPJS '
                       'belum memenuhi syarat pembuatan SEP.'
                 : 'Karena berstatus pasien lama, Anda dapat langsung menuju '
                       'poliklinik tujuan.',
-            icon: keLoket || !widget.poliEnabled
+            icon: keLoket || !poliEnabled
                 ? Icons.warning_amber_rounded
                 : Icons.info_outline_rounded,
-            color: keLoket || !widget.poliEnabled
+            color: keLoket || !poliEnabled
                 ? AppColors.warning
                 : AppColors.accentDark,
-            background: keLoket || !widget.poliEnabled
+            background: keLoket || !poliEnabled
                 ? AppColors.warningSoft
                 : AppColors.accentSoft,
             points: [
-              if (keLoket || !widget.poliEnabled) ...[
+              if (keLoket || !poliEnabled) ...[
                 'Peserta BPJS wajib berstatus aktif dan memiliki rujukan.',
                 'Silakan hubungi petugas loket atau petugas BPJS.',
               ] else ...[

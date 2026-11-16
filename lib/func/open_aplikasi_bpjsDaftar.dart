@@ -238,9 +238,16 @@ enum SidikJariStatus { selesai, popupError, timeout }
 const String _namaScriptOtomatis = 'sidik_jari_otomatis.ps1';
 const String _namaScriptStatus = 'sidik_jari_status.ps1';
 
-/// Satu-satunya teks yang dianggap validasi sidik jari BERHASIL.
-/// Teks lain (mis. "Data berhasil disimpan") dianggap GAGAL.
-const String _teksSuksesSidikJari = 'sidik jari peserta sudah terdaftar';
+/// Teks yang dianggap validasi sidik jari BERHASIL.
+const List<String> _teksSuksesSidikJari = [
+  'sidik jari peserta sudah terdaftar',
+  'data berhasil disimpan',
+  'sidik jari berhasil disimpan',
+  'berhasil disimpan',
+  'verifikasi berhasil',
+  'selesai',
+  'berhasil',
+];
 
 /// Teks UI After.exe yang menandakan penolakan atas nomor yang dikirim.
 const List<String> _kunciGagal = [
@@ -318,13 +325,12 @@ bool _adalahDialogInfo(String teks) {
 
 /// Klasifikasi teks dialog hasil.
 ///
-/// Validasi dianggap BERHASIL hanya bila dialog memuat
-/// [_teksSuksesSidikJari]. Teks lain (termasuk "berhasil disimpan") dianggap
-/// gagal. Dialog informasional (changelog/info versi) dan teks peringatan
+/// Validasi dianggap BERHASIL bila dialog memuat salah satu
+/// [_teksSuksesSidikJari]. Teks lain dianggap gagal. Teks peringatan
 /// lingkungan dianggap bukan hasil (null) supaya tidak salah menolak.
 SidikJariStatus? _klasifikasiDialog(String teks) {
   final t = _rapikanTeks(teks);
-  if (t.contains(_teksSuksesSidikJari)) {
+  if (_teksSuksesSidikJari.any(t.contains)) {
     return SidikJariStatus.selesai;
   }
   if (_kunciPeringatan.any(t.contains)) {
@@ -355,7 +361,7 @@ String _ringkasTeks(String teks) {
   final mencurigakan = bagian.where((e) {
     final t = _rapikanTeks(e);
     return _mengandungKunciGagal(t) ||
-        t.contains(_teksSuksesSidikJari) ||
+        _teksSuksesSidikJari.any(t.contains) ||
         _kunciPeringatan.any(t.contains);
   }).toList();
   if (mencurigakan.isEmpty) {
@@ -370,7 +376,7 @@ String _ringkasTeks(String teks) {
 
 /// Menunggu sidik jari selesai dengan membaca teks UI After.exe.
 ///
-/// Penanda sukses HANYA teks "Sidik Jari Peserta Sudah Terdaftar". Teks lain,
+/// Penanda sukses: salah satu teks pada [_teksSuksesSidikJari]. Teks lain,
 /// termasuk aplikasi yang menutup diri tanpa teks tersebut, dianggap gagal
 /// supaya pemanggil bisa langsung beralih ke Frista.
 Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
@@ -384,11 +390,10 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
     if (!statusUi.aplikasiTerbuka) {
       _logSidikJari(
         sudahBacaTeks
-            ? "Aplikasi menutup diri tanpa teks '$_teksSuksesSidikJari'"
+            ? "Aplikasi menutup diri tanpa teks sukses"
             : "Aplikasi menutup diri (${stopwatch.elapsed.inSeconds} dtk setelah nomor dikirim)",
       );
-      lastTeksSidikJari =
-          'aplikasi menutup diri tanpa teks "$_teksSuksesSidikJari"';
+      lastTeksSidikJari = 'aplikasi menutup diri tanpa teks sukses';
       return SidikJariStatus.popupError;
     }
 
@@ -410,12 +415,14 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
     // Sukses HANYA dibaca dari dialog hasil. Window utama memuat teks kategori
     // statis "Sidik Jari Peserta Sudah Terdaftar", jadi tidak boleh dipakai
     // sebagai penanda berhasil (kalau tidak, popup gagal ikut lolos).
-    if (!dialogInfo &&
-        _rapikanTeks(statusUi.dialog).contains(_teksSuksesSidikJari)) {
-      lastTeksSidikJari = 'Sidik Jari Peserta Sudah Terdaftar';
-      _logSidikJari("Sudah terdaftar terdeteksi: $lastTeksSidikJari");
-      _closeSudahTerdaftar();
-      return SidikJariStatus.selesai;
+    if (!dialogInfo) {
+      final dialogTeks = _rapikanTeks(statusUi.dialog);
+      if (_teksSuksesSidikJari.any(dialogTeks.contains)) {
+        lastTeksSidikJari = _ringkasTeks(statusUi.dialog);
+        _logSidikJari("Sukses terdeteksi: $lastTeksSidikJari");
+        _closeSudahTerdaftar();
+        return SidikJariStatus.selesai;
+      }
     }
 
     // Deteksi kilat: jika ada teks _kunciGagal, close instan tanpa langkah lain.
@@ -1130,8 +1137,14 @@ Future<void> sendAutoLogin({
   ]);
 }
 
+/// Teks progres dialog proses. Berubah menjadi "Memproses Frista" saat proses
+/// dialihkan dari sidik jari ke Frista.
+final ValueNotifier<String> sidikJariProgressText =
+    ValueNotifier<String>('Memproses Sidik Jari');
+
 Future<void> Function() showSidikJariProgress(BuildContext context) {
   VoidCallback? closer;
+  sidikJariProgressText.value = 'Memproses Sidik Jari';
 
   showGeneralDialog(
     context: context,
@@ -1167,17 +1180,25 @@ Future<void> Function() showSidikJariProgress(BuildContext context) {
                 size: 40,
               ),
               const SizedBox(height: 16),
-              Text(
-                "Memproses Sidik Jari",
-                style: Theme.of(
-                  dialogContext,
-                ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+              ValueListenableBuilder<String>(
+                valueListenable: sidikJariProgressText,
+                builder: (ctx, value, _) => Text(
+                  value,
+                  style: Theme.of(
+                    ctx,
+                  ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                ),
               ),
               const SizedBox(height: 6),
-              Text(
-                "Mohon takeover dan letakkan sidik jari pada reader.",
-                textAlign: TextAlign.center,
-                style: Theme.of(dialogContext).textTheme.bodySmall,
+              ValueListenableBuilder<String>(
+                valueListenable: sidikJariProgressText,
+                builder: (ctx, value, _) => Text(
+                  value.toLowerCase().contains('frista')
+                      ? "Mohon tunggu, proses berlanjut di aplikasi Frista."
+                      : "Mohon takeover dan letakkan sidik jari pada reader.",
+                  textAlign: TextAlign.center,
+                  style: Theme.of(ctx).textTheme.bodySmall,
+                ),
               ),
             ],
           ),
@@ -1515,6 +1536,7 @@ Future<bool> _bukaFristaFallback({
   String? password,
   String? nomor,
 }) async {
+  sidikJariProgressText.value = 'Memproses Frista';
   try {
     if (!File(fristaExePath).existsSync()) {
       _logSidikJari("Frista.exe tidak ditemukan: $fristaExePath");
