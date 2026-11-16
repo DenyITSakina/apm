@@ -5,6 +5,7 @@ import 'package:apm/dialog/top_toast.dart';
 import 'package:apm/func/app_log.dart';
 import 'package:apm/func/navigation_helpers.dart';
 import 'package:apm/func/open_aplikasi_bpjsDaftar.dart';
+import 'package:apm/home/ai_assistant/floating_guide_robot.dart';
 import 'package:apm/models/apm_antrian_model.dart';
 import 'package:apm/theme/Style/format_tgl.dart';
 import 'package:apm/theme/app_tokens.dart';
@@ -197,23 +198,56 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
                               );
 
                               if (isWide) {
-                                return Row(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
+                                return Stack(
                                   children: [
-                                    Expanded(flex: 3, child: card),
-                                    const SizedBox(width: AppSpacing.md),
-                                    Expanded(flex: 2, child: actions),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Expanded(flex: 3, child: card),
+                                        const SizedBox(width: AppSpacing.md),
+                                        Expanded(flex: 2, child: actions),
+                                      ],
+                                    ),
+                                    Positioned(
+                                      right: 8,
+                                      bottom: 48,
+                                      child: FloatingGuideRobot(
+                                        accent: AppColors.bpjs,
+                                        alignRight: true,
+                                        step: state is AntrianApmLoading
+                                            ? 3
+                                            : 2,
+                                        totalSteps: 4,
+                                        message: _guideMessage(state),
+                                      ),
+                                    ),
                                   ],
                                 );
                               }
 
-                              return Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                              return Stack(
                                 children: [
-                                  Expanded(child: card),
-                                  const SizedBox(height: AppSpacing.sm),
-                                  actions,
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      Expanded(child: card),
+                                      const SizedBox(height: AppSpacing.sm),
+                                      actions,
+                                    ],
+                                  ),
+                                  Positioned(
+                                    right: 8,
+                                    bottom: 48,
+                                    child: FloatingGuideRobot(
+                                      accent: AppColors.bpjs,
+                                      alignRight: true,
+                                      step: state is AntrianApmLoading ? 3 : 2,
+                                      totalSteps: 4,
+                                      message: _guideMessage(state),
+                                    ),
+                                  ),
                                 ],
                               );
                             },
@@ -417,6 +451,42 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
       ),
     ],
   ];
+
+  String _guideMessage(AntrianApmState state) {
+    if (state is AntrianApmLoading) {
+      final msg = state.message.trim();
+      if (msg.isNotEmpty) {
+        return '$msg Mohon tunggu, proses sedang berjalan.';
+      }
+      return 'Sedang memproses data dan verifikasi, mohon tunggu sebentar. Jangan menutup halaman ini.';
+    }
+    if (state is AntrianApmPrinting) {
+      return 'Proses check-in sedang dilanjutkan. Mohon tunggu hingga selesai.';
+    }
+    if (state is AntrianApmPrinted) {
+      return 'Proses check-in berhasil. Ikuti informasi pada layar dan ambil bukti/nomor antrean jika ada, lalu tunggu panggilan.';
+    }
+
+    final siap = lanjutKePoliBisa;
+    final base =
+        'Periksa kembali data pasien di sebelah kiri. Pastikan nama dan informasi sudah benar. ';
+    if (!data.punyaDataBpjs) {
+      return '${base}Lalu pilih "Ke Poli" untuk melanjutkan check-in, atau "Ke Loket" jika perlu bantuan petugas Front Office.';
+    }
+    if (!data.bpjsAktif) {
+      return '${base}Status peserta BPJS tidak aktif, sehingga pembuatan SEP tidak dapat dilanjutkan otomatis. Silakan pilih "Ke Loket" untuk bantuan petugas.';
+    }
+    if (!data.adaRujukan) {
+      return '${base}Rujukan BPJS belum tersedia, sehingga "Lanjut ke Poli" tidak dapat diproses otomatis. Silakan pilih "Ke Loket" untuk penanganan lebih lanjut.';
+    }
+    if (siap && !isUmurKurangDari16) {
+      return '${base}Pilih "Lanjut ke Poli" untuk verifikasi sidik jari/Frista dan pembuatan SEP. Siapkan jari Anda pada alat pembaca. Atau pilih "Ke Loket" jika ingin bantuan petugas.';
+    }
+    if (siap && isUmurKurangDari16) {
+      return '${base}Karena usia pasien di bawah 16 tahun, sidik jari dapat dilewati. Pilih "Lanjut ke Poli" untuk melanjutkan, atau "Ke Loket" jika perlu bantuan petugas.';
+    }
+    return '${base}Pilih tujuan layanan: "Lanjut ke Poli" atau "Ke Loket" sesuai petunjuk di layar.';
+  }
 
   void _handleState(BuildContext context, AntrianApmState state) {
     if (!mounted) return;

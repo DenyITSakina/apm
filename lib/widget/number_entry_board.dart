@@ -184,7 +184,7 @@ class _NumberEntryBoardState extends State<NumberEntryBoard> {
             const SizedBox(height: AppSpacing.lg),
             Expanded(
               child: Align(
-                alignment: Alignment.topCenter,
+                alignment: Alignment.topRight,
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 520),
                   child: keypad,

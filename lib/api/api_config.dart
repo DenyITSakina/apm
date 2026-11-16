@@ -16,4 +16,14 @@ class ApiConfig {
   static const String bpjsCekRujukan = '$baseUrl/bpjs/cek-rujukan';
   static const String getDaftar = '$baseUrl/apm-get-sosial';
   static const String bookingPasien = '$baseUrl/pasien-booking';
+
+  /// Kunci API Gemini untuk asisten bantuan check-in APM.
+  /// Isi dengan kunci valid; jangan membagikan kunci ini ke pengguna.
+  static const String geminiApiKey = String.fromEnvironment(
+    'GEMINI_API_KEY',
+    defaultValue: '',
+  );
+  static const String geminiModel = 'gemini-1.5-flash';
+  static const String geminiEndpoint =
+      'https://generativelanguage.googleapis.com/v1beta/models/$geminiModel:generateContent';
 }

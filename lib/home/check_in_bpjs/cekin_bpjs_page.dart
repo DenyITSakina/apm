@@ -2,6 +2,7 @@ import 'package:apm/blog/antrian_apm_bloc.dart';
 import 'package:apm/dialog/top_toast.dart';
 import 'package:apm/func/app_log.dart';
 import 'package:apm/func/navigation_helpers.dart';
+import 'package:apm/home/ai_assistant/floating_guide_robot.dart';
 import 'package:apm/home/check_in_bpjs/cekin_bpjs_data.dart';
 import 'package:apm/models/apm_antrian_model.dart';
 import 'package:apm/theme/app_tokens.dart';
@@ -136,23 +137,45 @@ class _CekinBpjsState extends State<CekinBpjs> {
                           final loading =
                               state is AntrianApmLoading || isProcessing;
 
-                          return NumberEntryBoard(
-                            controller: controller,
-                            focusNode: focusNode,
-                            label: 'NOMOR KARTU BPJS / NIK / NO REKAM MEDIS',
-                            accent: AppColors.bpjs,
-                            maxLength: 16,
-                            onDigit: _onNumberPressed,
-                            onBackspace: _onBackspacePressed,
-                            onClear: _onClearPressed,
-                            onSubmit: _submitData,
-                            submitLabel: 'CEK BPJS',
-                            submitIcon: Icons.verified_rounded,
-                            submitCaption: 'Cek data pasien BPJS',
-                            submitGradient: AppGradients.bpjs,
-                            submitLoading: loading,
-                            submitEnabled: controller.text.isNotEmpty,
-                            belowKeypad: const _BpjsGuide(),
+                          final hasInput = controller.text.trim().isNotEmpty;
+                          final guideMessage = loading
+                              ? 'Sedang memeriksa data Anda, mohon tunggu sebentar. Jangan menekan tombol lain.'
+                              : hasInput
+                              ? 'Nomor sudah terisi. Periksa kembali, lalu tekan tombol "CEK BPJS" untuk mencari dan memverifikasi data Anda.'
+                              : 'Silakan masukkan nomor Kartu BPJS, NIK, atau No. Rekam Medis Anda. Anda juga bisa memindai (scan) kartu/barcode pada alat scanner, nomor akan terisi otomatis. Setelah itu tekan "CEK BPJS".';
+
+                          return Stack(
+                            children: [
+                              NumberEntryBoard(
+                                controller: controller,
+                                focusNode: focusNode,
+                                label:
+                                    'NOMOR KARTU BPJS / NIK / NO REKAM MEDIS',
+                                accent: AppColors.bpjs,
+                                maxLength: 16,
+                                onDigit: _onNumberPressed,
+                                onBackspace: _onBackspacePressed,
+                                onClear: _onClearPressed,
+                                onSubmit: _submitData,
+                                submitLabel: 'CEK BPJS',
+                                submitIcon: Icons.verified_rounded,
+                                submitCaption: 'Cek data pasien BPJS',
+                                submitGradient: AppGradients.bpjs,
+                                submitLoading: loading,
+                                submitEnabled: controller.text.isNotEmpty,
+                                belowKeypad: const _BpjsGuide(),
+                              ),
+                              Positioned(
+                                left: 8,
+                                bottom: 48,
+                                child: FloatingGuideRobot(
+                                  accent: AppColors.bpjs,
+                                  step: hasInput ? 2 : 1,
+                                  totalSteps: 2,
+                                  message: guideMessage,
+                                ),
+                              ),
+                            ],
                           );
                         },
                       ),

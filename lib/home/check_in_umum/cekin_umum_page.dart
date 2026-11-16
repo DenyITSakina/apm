@@ -1,6 +1,7 @@
 import 'package:apm/blog/antrian_apm_bloc.dart';
 import 'package:apm/dialog/top_toast.dart';
 import 'package:apm/func/navigation_helpers.dart';
+import 'package:apm/home/ai_assistant/floating_guide_robot.dart';
 import 'package:apm/home/check_in_umum/cekin_umum_data.dart';
 import 'package:apm/theme/app_tokens.dart';
 import 'package:apm/theme/app_typography.dart';
@@ -136,27 +137,53 @@ class _CekinUmumPageState extends State<CekinUmumPage> {
                           final loading =
                               state is AntrianApmLoading || isProcessing;
 
-                          return NumberEntryBoard(
-                            controller: controller,
-                            focusNode: focusNode,
-                            label: _isBpjs
-                                ? 'NOMOR BPJS / NIK / NO REKAM MEDIS / NO BOOKING'
-                                : 'NOMOR REKAM MEDIS / NIK / NO BOOKING',
-                            accent: _isBpjs ? AppColors.bpjs : AppColors.umum,
-                            maxLength: 16,
-                            onDigit: _onNumberPressed,
-                            onBackspace: _onBackspacePressed,
-                            onClear: _onClearPressed,
-                            onSubmit: _submitData,
-                            submitLabel: 'CARI DATA',
-                            submitIcon: Icons.search_rounded,
-                            submitCaption: 'Periksa nomor lalu tekan Cari Data',
-                            submitGradient: _isBpjs
-                                ? AppGradients.bpjs
-                                : AppGradients.umum,
-                            submitLoading: loading,
-                            submitEnabled: controller.text.isNotEmpty,
-                            belowKeypad: _UmumGuide(isBpjs: _isBpjs),
+                          final hasInput = controller.text.trim().isNotEmpty;
+                          final guideMessage = loading
+                              ? 'Sedang memeriksa data Anda, mohon tunggu sebentar. Jangan menekan tombol lain.'
+                              : hasInput
+                              ? 'Nomor sudah terisi. Periksa kembali, lalu tekan tombol "CARI DATA" untuk mencari data Anda.'
+                              : 'Silakan masukkan Nomor Rekam Medis, NIK, atau No. Booking Anda. Anda juga bisa memindai (scan) kartu/barcode pada alat scanner, nomor akan terisi otomatis. Setelah itu tekan "CARI DATA".';
+
+                          return Stack(
+                            children: [
+                              NumberEntryBoard(
+                                controller: controller,
+                                focusNode: focusNode,
+                                label: _isBpjs
+                                    ? 'NOMOR BPJS / NIK / NO REKAM MEDIS / NO BOOKING'
+                                    : 'NOMOR REKAM MEDIS / NIK / NO BOOKING',
+                                accent: _isBpjs
+                                    ? AppColors.bpjs
+                                    : AppColors.umum,
+                                maxLength: 16,
+                                onDigit: _onNumberPressed,
+                                onBackspace: _onBackspacePressed,
+                                onClear: _onClearPressed,
+                                onSubmit: _submitData,
+                                submitLabel: 'CARI DATA',
+                                submitIcon: Icons.search_rounded,
+                                submitCaption:
+                                    'Periksa nomor lalu tekan Cari Data',
+                                submitGradient: _isBpjs
+                                    ? AppGradients.bpjs
+                                    : AppGradients.umum,
+                                submitLoading: loading,
+                                submitEnabled: controller.text.isNotEmpty,
+                                belowKeypad: _UmumGuide(isBpjs: _isBpjs),
+                              ),
+                              Positioned(
+                                left: 8,
+                                bottom: 48,
+                                child: FloatingGuideRobot(
+                                  accent: _isBpjs
+                                      ? AppColors.bpjs
+                                      : AppColors.umum,
+                                  step: hasInput ? 2 : 1,
+                                  totalSteps: 2,
+                                  message: guideMessage,
+                                ),
+                              ),
+                            ],
                           );
                         },
                       ),

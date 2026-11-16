@@ -2,6 +2,7 @@ import 'package:apm/blog/antrian_apm_bloc.dart';
 import 'package:apm/dialog/konfirmasi.dart';
 import 'package:apm/dialog/sukses.dart';
 import 'package:apm/dialog/top_toast.dart';
+import 'package:apm/home/ai_assistant/floating_guide_robot.dart';
 import 'package:apm/models/apm_antrian_model.dart';
 import 'package:apm/theme/Style/format_tgl.dart';
 import 'package:apm/theme/app_tokens.dart';
@@ -88,24 +89,60 @@ class CekinUmumDataPage extends StatelessWidget {
                               );
 
                               if (isWide) {
-                                return Row(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
+                                return Stack(
                                   children: [
-                                    Expanded(flex: 3, child: card),
-                                    const SizedBox(width: AppSpacing.md),
-                                    Expanded(flex: 2, child: actions),
+                                    Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        Expanded(flex: 3, child: card),
+                                        const SizedBox(width: AppSpacing.md),
+                                        Expanded(flex: 2, child: actions),
+                                      ],
+                                    ),
+                                    Positioned(
+                                      right: 8,
+                                      bottom: 48,
+                                      child: FloatingGuideRobot(
+                                        accent: _isBpjs
+                                            ? AppColors.bpjs
+                                            : AppColors.umum,
+                                        alignRight: true,
+                                        step: state is AntrianApmLoading
+                                            ? 3
+                                            : 2,
+                                        totalSteps: 3,
+                                        message: _guideMessage(state),
+                                      ),
+                                    ),
                                   ],
                                 );
                               }
 
-                              return Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.stretch,
+                              return Stack(
                                 children: [
-                                  Expanded(child: card),
-                                  const SizedBox(height: AppSpacing.sm),
-                                  actions,
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.stretch,
+                                    children: [
+                                      Expanded(child: card),
+                                      const SizedBox(height: AppSpacing.sm),
+                                      actions,
+                                    ],
+                                  ),
+                                  Positioned(
+                                    right: 8,
+                                    bottom: 48,
+                                    child: FloatingGuideRobot(
+                                      accent: _isBpjs
+                                          ? AppColors.bpjs
+                                          : AppColors.umum,
+                                      alignRight: true,
+                                      step: state is AntrianApmLoading ? 3 : 2,
+                                      totalSteps: 3,
+                                      message: _guideMessage(state),
+                                    ),
+                                  ),
                                 ],
                               );
                             },
@@ -269,12 +306,33 @@ class CekinUmumDataPage extends StatelessWidget {
     );
   }
 
+  String _guideMessage(AntrianApmState state) {
+    if (state is AntrianApmLoading) {
+      final msg = state.message.trim();
+      if (msg.isNotEmpty) {
+        return '$msg Mohon tunggu, proses sedang berjalan.';
+      }
+      return 'Sedang memproses pilihan Anda, mohon tunggu sebentar.';
+    }
+    if (state is AntrianApmPrinting) {
+      return 'Permintaan Anda sedang diproses. Mohon tunggu hingga selesai.';
+    }
+    if (state is AntrianApmPrinted) {
+      return 'Proses check-in berhasil. Ikuti informasi pada layar dan ambil bukti/nomor antrean jika ada, lalu tunggu panggilan sesuai petunjuk.';
+    }
+    return 'Periksa kembali data pasien di sebelah kiri. Pastikan nama dan informasi sudah benar, lalu pilih "Ke Poli" untuk langsung ke poli tujuan atau "Ke Loket" untuk mendapatkan bantuan di Front Office.';
+  }
+
   void _handleState(BuildContext context, AntrianApmState state) {
     if (state is AntrianApmPrinted || state is AntrianApmPrinting) {
       final message = state is AntrianApmPrinted
           ? 'Sukses: ${state.message}'
           : 'Check-in berhasil, silakan lanjutkan.';
-      showSuccessDialog(context, message, autoCloseAfter: const Duration(seconds: 7));
+      showSuccessDialog(
+        context,
+        message,
+        autoCloseAfter: const Duration(seconds: 7),
+      );
       return;
     }
 

@@ -2,6 +2,7 @@ import 'package:apm/blog/antrian_apm_bloc.dart';
 import 'package:apm/blog/booking/booking_bloc.dart';
 import 'package:apm/dialog/konfirmasi.dart';
 import 'package:apm/func/navigation_helpers.dart';
+import 'package:apm/home/ai_assistant/ai_assistant_sheet.dart';
 import 'package:apm/home/booking/booking_page.dart';
 import 'package:apm/home/check_in_bpjs/cekin_bpjs_page.dart';
 import 'package:apm/home/check_in_umum/cekin_umum_page.dart';
@@ -26,6 +27,8 @@ class _DashboardApmState extends State<DashboardApm>
     vsync: this,
     duration: const Duration(milliseconds: 900),
   )..forward();
+
+  bool _aiOpen = false;
 
   @override
   void dispose() {
@@ -92,6 +95,11 @@ class _DashboardApmState extends State<DashboardApm>
     );
   }
 
+  void _toggleAiAssistant() {
+    HapticFeedback.lightImpact();
+    setState(() => _aiOpen = !_aiOpen);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,57 +110,82 @@ class _DashboardApmState extends State<DashboardApm>
               final isWide = constraints.maxWidth >= 900;
               final pad = isWide ? AppSpacing.lg : AppSpacing.md;
 
-              return Padding(
-                padding: EdgeInsets.fromLTRB(
-                  pad,
-                  AppSpacing.md,
-                  pad,
-                  AppSpacing.md,
-                ),
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: isWide ? 1200 : 720),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        _buildBrand(isWide: isWide),
-                        const SizedBox(height: AppSpacing.md),
-                        _buildGreeting(),
-                        const SizedBox(height: AppSpacing.md),
-                        Expanded(child: _buildServiceGrid(isWide: isWide)),
-                        const SizedBox(height: AppSpacing.md),
-                        if (isWide)
-                          IntrinsicHeight(
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Expanded(child: _buildStepsCard()),
-                                const SizedBox(width: AppSpacing.md),
-                                Expanded(child: _buildHelpCard()),
-                              ],
-                            ),
-                          )
-                        else
-                          _buildHelpChips(),
-                        const SizedBox(height: AppSpacing.xs),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            '${AppInfo.appName} ${AppInfo.label}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontFamily: AppText.family,
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w500,
-                              color: AppColors.textSecondary,
-                            ),
-                          ),
+              return Stack(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      pad,
+                      AppSpacing.md,
+                      pad,
+                      AppSpacing.md,
+                    ),
+                    child: Center(
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(
+                          maxWidth: isWide ? 1200 : 720,
                         ),
-                      ],
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _buildBrand(isWide: isWide),
+                            const SizedBox(height: AppSpacing.md),
+                            _buildGreeting(),
+                            const SizedBox(height: AppSpacing.md),
+                            Expanded(child: _buildServiceGrid(isWide: isWide)),
+                            const SizedBox(height: AppSpacing.md),
+                            if (isWide)
+                              IntrinsicHeight(
+                                child: Row(
+                                  crossAxisAlignment:
+                                      CrossAxisAlignment.stretch,
+                                  children: [
+                                    Expanded(child: _buildStepsCard()),
+                                    const SizedBox(width: AppSpacing.md),
+                                    Expanded(child: _buildHelpCard()),
+                                  ],
+                                ),
+                              )
+                            else
+                              _buildHelpChips(),
+                            const SizedBox(height: AppSpacing.xs),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                '${AppInfo.appName} ${AppInfo.label}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontFamily: AppText.family,
+                                  fontSize: 11.5,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                  // Tombol asisten AI mengambang (di atas label versi, tidak menutupinya)
+                  Positioned(
+                    right: pad,
+                    bottom: 38,
+                    child: _AiFloatingButton(
+                      open: _aiOpen,
+                      onTap: _toggleAiAssistant,
+                    ),
+                  ),
+                  // Panel asisten AI mengambang
+                  if (_aiOpen)
+                    Positioned(
+                      right: pad,
+                      bottom: 104,
+                      child: AiAssistantPanel(
+                        onClose: () => setState(() => _aiOpen = false),
+                      ),
+                    ),
+                ],
               );
             },
           ),
@@ -658,8 +691,9 @@ class _ServiceCardState extends State<_ServiceCard>
                     gradient: config.gradient,
                     borderRadius: BorderRadius.circular(AppRadius.xl),
                     border: Border.all(
-                      color:
-                          Colors.white.withValues(alpha: _hovered ? 0.42 : 0.2),
+                      color: Colors.white.withValues(
+                        alpha: _hovered ? 0.42 : 0.2,
+                      ),
                       width: 1.4,
                     ),
                   ),
@@ -741,12 +775,15 @@ class _ServiceCardState extends State<_ServiceCard>
                                         decoration: BoxDecoration(
                                           gradient: LinearGradient(
                                             colors: [
-                                              Colors.white
-                                                  .withValues(alpha: 0.0),
-                                              Colors.white
-                                                  .withValues(alpha: 0.45),
-                                              Colors.white
-                                                  .withValues(alpha: 0.0),
+                                              Colors.white.withValues(
+                                                alpha: 0.0,
+                                              ),
+                                              Colors.white.withValues(
+                                                alpha: 0.45,
+                                              ),
+                                              Colors.white.withValues(
+                                                alpha: 0.0,
+                                              ),
                                             ],
                                           ),
                                         ),
@@ -766,8 +803,9 @@ class _ServiceCardState extends State<_ServiceCard>
                             builder: (context, constraints) {
                               final compact = constraints.maxHeight < 220;
                               final wide = constraints.maxWidth >= 360;
-                              final logoSize =
-                                  compact ? 64.0 : (wide ? 90.0 : 74.0);
+                              final logoSize = compact
+                                  ? 64.0
+                                  : (wide ? 90.0 : 74.0);
 
                               final badge = config.badge == null
                                   ? const SizedBox.shrink()
@@ -777,13 +815,16 @@ class _ServiceCardState extends State<_ServiceCard>
                                         vertical: 6,
                                       ),
                                       decoration: BoxDecoration(
-                                        color: Colors.white
-                                            .withValues(alpha: 0.16),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.16,
+                                        ),
                                         borderRadius: BorderRadius.circular(
-                                            AppRadius.pill),
+                                          AppRadius.pill,
+                                        ),
                                         border: Border.all(
-                                          color: Colors.white
-                                              .withValues(alpha: 0.3),
+                                          color: Colors.white.withValues(
+                                            alpha: 0.3,
+                                          ),
                                         ),
                                       ),
                                       child: Row(
@@ -828,16 +869,16 @@ class _ServiceCardState extends State<_ServiceCard>
                                         : TextAlign.center,
                                     style: TextStyle(
                                       fontFamily: AppText.family,
-                                      fontSize:
-                                          compact ? 23 : (wide ? 30 : 25),
+                                      fontSize: compact ? 23 : (wide ? 30 : 25),
                                       fontWeight: FontWeight.w900,
                                       color: Colors.white,
                                       height: 1.12,
                                       letterSpacing: 0.1,
                                       shadows: [
                                         Shadow(
-                                          color: Colors.black
-                                              .withValues(alpha: 0.18),
+                                          color: Colors.black.withValues(
+                                            alpha: 0.18,
+                                          ),
                                           blurRadius: 12,
                                           offset: const Offset(0, 4),
                                         ),
@@ -857,8 +898,9 @@ class _ServiceCardState extends State<_ServiceCard>
                                       fontSize: compact ? 13.5 : 15,
                                       fontWeight: FontWeight.w500,
                                       height: 1.35,
-                                      color: Colors.white
-                                          .withValues(alpha: 0.94),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.94,
+                                      ),
                                     ),
                                   ),
                                   SizedBox(height: compact ? 12 : 16),
@@ -870,17 +912,17 @@ class _ServiceCardState extends State<_ServiceCard>
                                     decoration: BoxDecoration(
                                       gradient: LinearGradient(
                                         colors: [
-                                          Colors.white
-                                              .withValues(alpha: 0.22),
-                                          Colors.white
-                                              .withValues(alpha: 0.10),
+                                          Colors.white.withValues(alpha: 0.22),
+                                          Colors.white.withValues(alpha: 0.10),
                                         ],
                                       ),
-                                      borderRadius:
-                                          BorderRadius.circular(AppRadius.md),
+                                      borderRadius: BorderRadius.circular(
+                                        AppRadius.md,
+                                      ),
                                       border: Border.all(
-                                        color: Colors.white
-                                            .withValues(alpha: 0.22),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.22,
+                                        ),
                                       ),
                                     ),
                                     child: Row(
@@ -889,10 +931,12 @@ class _ServiceCardState extends State<_ServiceCard>
                                         Container(
                                           padding: const EdgeInsets.all(7),
                                           decoration: BoxDecoration(
-                                            color: Colors.white
-                                                .withValues(alpha: 0.22),
-                                            borderRadius:
-                                                BorderRadius.circular(10),
+                                            color: Colors.white.withValues(
+                                              alpha: 0.22,
+                                            ),
+                                            borderRadius: BorderRadius.circular(
+                                              10,
+                                            ),
                                           ),
                                           child: const Icon(
                                             Icons.qr_code_scanner_rounded,
@@ -930,12 +974,14 @@ class _ServiceCardState extends State<_ServiceCard>
                                 ),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius:
-                                      BorderRadius.circular(AppRadius.pill),
+                                  borderRadius: BorderRadius.circular(
+                                    AppRadius.pill,
+                                  ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color:
-                                          Colors.black.withValues(alpha: 0.14),
+                                      color: Colors.black.withValues(
+                                        alpha: 0.14,
+                                      ),
                                       blurRadius: _hovered ? 20 : 14,
                                       offset: Offset(0, _hovered ? 10 : 6),
                                     ),
@@ -956,17 +1002,20 @@ class _ServiceCardState extends State<_ServiceCard>
                                     ),
                                     const SizedBox(width: 10),
                                     AnimatedContainer(
-                                      duration:
-                                          const Duration(milliseconds: 220),
+                                      duration: const Duration(
+                                        milliseconds: 220,
+                                      ),
                                       padding: const EdgeInsets.all(4),
                                       decoration: BoxDecoration(
-                                        color: config.color
-                                            .withValues(alpha: 0.12),
+                                        color: config.color.withValues(
+                                          alpha: 0.12,
+                                        ),
                                         shape: BoxShape.circle,
                                       ),
                                       child: AnimatedSlide(
-                                        duration:
-                                            const Duration(milliseconds: 220),
+                                        duration: const Duration(
+                                          milliseconds: 220,
+                                        ),
                                         offset: _hovered
                                             ? const Offset(0.18, 0)
                                             : Offset.zero,
@@ -993,12 +1042,14 @@ class _ServiceCardState extends State<_ServiceCard>
                                           Container(
                                             padding: const EdgeInsets.all(6),
                                             decoration: BoxDecoration(
-                                              color: Colors.white
-                                                  .withValues(alpha: 0.14),
+                                              color: Colors.white.withValues(
+                                                alpha: 0.14,
+                                              ),
                                               shape: BoxShape.circle,
                                               border: Border.all(
-                                                color: Colors.white
-                                                    .withValues(alpha: 0.22),
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.22,
+                                                ),
                                               ),
                                             ),
                                             child: _LogoBadge(
@@ -1021,7 +1072,8 @@ class _ServiceCardState extends State<_ServiceCard>
                                       ),
                                     ),
                                     SizedBox(
-                                        height: compact ? 12 : AppSpacing.md),
+                                      height: compact ? 12 : AppSpacing.md,
+                                    ),
                                     Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
@@ -1032,8 +1084,9 @@ class _ServiceCardState extends State<_ServiceCard>
                                             Icon(
                                               Icons.touch_app_rounded,
                                               size: 16,
-                                              color: Colors.white
-                                                  .withValues(alpha: 0.8),
+                                              color: Colors.white.withValues(
+                                                alpha: 0.8,
+                                              ),
                                             ),
                                             const SizedBox(width: 6),
                                             Text(
@@ -1042,8 +1095,9 @@ class _ServiceCardState extends State<_ServiceCard>
                                                 fontFamily: AppText.family,
                                                 fontSize: 12.5,
                                                 fontWeight: FontWeight.w600,
-                                                color: Colors.white
-                                                    .withValues(alpha: 0.85),
+                                                color: Colors.white.withValues(
+                                                  alpha: 0.85,
+                                                ),
                                               ),
                                             ),
                                           ],
@@ -1063,12 +1117,14 @@ class _ServiceCardState extends State<_ServiceCard>
                                   Container(
                                     padding: const EdgeInsets.all(6),
                                     decoration: BoxDecoration(
-                                      color:
-                                          Colors.white.withValues(alpha: 0.14),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.14,
+                                      ),
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: Colors.white
-                                            .withValues(alpha: 0.22),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.22,
+                                        ),
                                       ),
                                     ),
                                     child: _LogoBadge(
@@ -1078,7 +1134,8 @@ class _ServiceCardState extends State<_ServiceCard>
                                     ),
                                   ),
                                   SizedBox(
-                                      height: compact ? 10 : AppSpacing.md),
+                                    height: compact ? 10 : AppSpacing.md,
+                                  ),
                                   if (widget.fill)
                                     Expanded(
                                       child: SingleChildScrollView(
@@ -1090,7 +1147,8 @@ class _ServiceCardState extends State<_ServiceCard>
                                   else
                                     info,
                                   SizedBox(
-                                      height: compact ? 12 : AppSpacing.md),
+                                    height: compact ? 12 : AppSpacing.md,
+                                  ),
                                   action,
                                 ],
                               );
@@ -1184,11 +1242,8 @@ class _LogoBadge extends StatelessWidget {
         child: Image.asset(
           image,
           fit: BoxFit.contain,
-          errorBuilder: (_, _, _) => Icon(
-            icon,
-            size: size * 0.5,
-            color: AppColors.primary,
-          ),
+          errorBuilder: (_, _, _) =>
+              Icon(icon, size: size * 0.5, color: AppColors.primary),
         ),
       ),
     );
@@ -1277,6 +1332,100 @@ class _StepRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _AiFloatingButton extends StatefulWidget {
+  const _AiFloatingButton({required this.open, required this.onTap});
+  final bool open;
+  final VoidCallback onTap;
+
+  @override
+  State<_AiFloatingButton> createState() => _AiFloatingButtonState();
+}
+
+class _AiFloatingButtonState extends State<_AiFloatingButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _c = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1800),
+  )..repeat(reverse: true);
+
+  @override
+  void dispose() {
+    _c.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _c,
+      builder: (context, _) {
+        final glow = 0.18 + (_c.value * 0.22);
+        final lift = widget.open ? 0.0 : (_c.value * 2.0);
+        return Transform.translate(
+          offset: Offset(0, -lift),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: widget.onTap,
+              borderRadius: BorderRadius.circular(30),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 220),
+                curve: Curves.easeOutCubic,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 11,
+                ),
+                decoration: BoxDecoration(
+                  gradient: widget.open
+                      ? const LinearGradient(
+                          colors: [Color(0xFF334155), Color(0xFF1E293B)],
+                        )
+                      : AppGradients.brand,
+                  borderRadius: BorderRadius.circular(30),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.28),
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: (widget.open ? Colors.black : AppColors.primary)
+                          .withValues(alpha: glow),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      widget.open
+                          ? Icons.close_rounded
+                          : Icons.auto_awesome_rounded,
+                      color: Colors.white,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      widget.open ? 'Tutup' : 'Bantuan AI',
+                      style: const TextStyle(
+                        fontFamily: AppText.family,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
