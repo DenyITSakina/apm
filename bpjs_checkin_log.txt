@@ -25,3 +25,12 @@
 [2026-11-16T14:35:40.530824] Log file: D:\Sakina\apm\bpjs_checkin_log.txt
 [2026-11-16T14:35:40.557763] Mulai proses ke poli | rm=0023****7913 | pasienBaru=0 | bpjsAktif=false | adaRujukan=false | umur=26
 [2026-11-16T14:36:11.816960] Sidik jari selesai | sukses=false | dialihkanFrista=true | reason=Frista gagal: teks validasi tidak cocok (harus "Peserta telah terdaftar hari ini" / "Peserta sudah terdaftar")
+[2026-11-16T14:42:09.645024] Mulai validasi | nomor=0023****7913 | jenis=bpjs
+[2026-11-16T14:42:58.444987] Mulai validasi | nomor=0023****7913 | jenis=bpjs
+[2026-11-16T14:43:31.181836] Mulai validasi | nomor=0023****7913 | jenis=bpjs
+[2026-11-16T14:45:46.242693] Mulai validasi | nomor=0023****7913 | jenis=bpjs
+[2026-11-16T14:45:50.073646] Mulai validasi | nomor=0023****7913 | jenis=bpjs
+[2026-11-16T14:45:51.169963] Mulai validasi | nomor=0023****7913 | jenis=bpjs
+[2026-11-16T14:45:53.609800] Mulai validasi | nomor=0023****7913 | jenis=bpjs
+[2026-11-16T14:45:54.689762] Mulai validasi | nomor=0023****7913 | jenis=bpjs
+[2026-11-16T14:45:55.651956] Mulai validasi | nomor=0023****7913 | jenis=bpjs

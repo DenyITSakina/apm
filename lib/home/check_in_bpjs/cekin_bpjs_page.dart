@@ -216,6 +216,25 @@ class _CekinBpjsState extends State<CekinBpjs> {
   }
 
   void _handleValidated(BuildContext context, AntrianApmValidated state) {
+    final jenisBooking = state.apmData.jenisBooking;
+    if (jenisBooking != '2') {
+      if (jenisBooking == '1') {
+        TopToast.warning(
+          context,
+          'Pasien Umum tidak dapat dilanjutkan di halaman Cek-in BPJS. '
+          'Silakan gunakan layanan CEK-IN UMUM.',
+        );
+      } else {
+        TopToast.warning(
+          context,
+          'Booking pasien tidak valid (jenis: $jenisBooking). '
+          'Hanya pasien BPJS (jenis 2) yang dapat dilanjutkan.',
+        );
+      }
+      _refocusScanner();
+      return;
+    }
+
     final tanggalBooking = state.apmData.tglBooking.trim();
     if (tanggalBooking.isNotEmpty) {
       TopToast.warning(
