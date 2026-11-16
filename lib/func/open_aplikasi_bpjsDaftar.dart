@@ -232,20 +232,14 @@ Write-Output ($found -join '~')
   }
 }
 
-enum SidikJariStatus { selesai, ditutupOtomatis, popupError, timeout }
+enum SidikJariStatus { selesai, popupError, timeout }
 
 const String _namaScriptOtomatis = 'sidik_jari_otomatis.ps1';
 const String _namaScriptStatus = 'sidik_jari_status.ps1';
 
-/// Teks UI After.exe yang menandakan sidik jari berhasil tersimpan.
-const List<String> _kunciSukses = [
-  'data berhasil disimpan',
-  'sidik jari berhasil disimpan',
-  'berhasil disimpan',
-  'verifikasi berhasil',
-  'selesai',
-  'berhasil',
-];
+/// Satu-satunya teks yang dianggap validasi sidik jari BERHASIL.
+/// Teks lain (mis. "Data berhasil disimpan") dianggap GAGAL.
+const String _teksSuksesSidikJari = 'sidik jari peserta sudah terdaftar';
 
 /// Teks UI After.exe yang menandakan penolakan atas nomor yang dikirim.
 const List<String> _kunciGagal = [
@@ -255,6 +249,7 @@ const List<String> _kunciGagal = [
   'tidak bisa dikenali',
   'sidik jari tidak di kenali',
   'tidak di kenali',
+  'sidik jari tidak valid',
   'belum terdaftar',
   'tidak sesuai',
   'harus 13 digit',
@@ -279,8 +274,19 @@ final Set<String> _kunciGagalLower = _kunciGagal
     .map((k) => k.toLowerCase())
     .toSet();
 
+/// Rapikan teks UI sebelum pencocokan: lowercase, ubah pemisah '~' menjadi
+/// spasi, lalu rapatkan spasi. Ini penting karena satu kalimat bisa terbaca
+/// sebagai beberapa elemen (mis. "Sidik Jari" + "Tidak Valid").
+String _rapikanTeks(String teks) {
+  return teks
+      .toLowerCase()
+      .replaceAll('~', ' ')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .trim();
+}
+
 bool _mengandungKunciGagal(String teks) {
-  final t = teks.toLowerCase();
+  final t = _rapikanTeks(teks);
   for (final k in _kunciGagalLower) {
     if (t.contains(k)) return true;
   }
@@ -292,47 +298,48 @@ const List<String> _kunciPeringatan = [
   'mesin fingerprint terhubung', // "Pastikan Mesin Fingerprint Terhubung..."
 ];
 
-/// Window utama After.exe memuat panel konfigurasi mesin dan daftar statis
-/// "Kategori Permohonan" dengan teks seperti "Gagal Disimpan", "Sudah Terdaftar",
-/// "Koneksi Mesin Harus Diisi". Teks-teks itu BUKAN hasil proses, jadi untuk
-/// window utama hanya frasa hasil yang dipakai menilai.
-const List<String> _kunciHasilDiWindowUtama = [
-  'data berhasil disimpan',
-  'sidik jari berhasil disimpan',
-  'data sidik jari berhasil',
-  'data gagal disimpan',
-  'data sidik jari gagal',
-  'selesai',
-  'berhasil',
-  'Pastikan mesin fingerprint terhubung dengan PC',
+/// Dialog informasional (bukan hasil proses): changelog/info versi.
+/// Diabaikan supaya tidak dianggap gagal dan proses tetap ditunggu.
+const List<String> _kunciDialogInfo = [
+  'changelog',
+  'penambahan kategori',
+  'perbaikan bug',
+  'versi 2.',
+  'update tersedia',
+  "what's new",
+  'info versi',
 ];
 
-/// Klasifikasi teks dialog hasil (dialog muncul karena aksi pengguna, jadi
-/// aman memakai daftar[_kunciGagal]). Null = belum ada petunjuk.
-SidikJariStatus? _klasifikasiDialog(String teks) {
-  final t = teks.toLowerCase();
-  // Cek gagal dulu agar "gagal disimpan"/"tidak ditemukan" langsung terdeteksi.
-  if (_mengandungKunciGagal(t)) {
-    return SidikJariStatus.popupError;
-  }
-  if (t.contains('sudah terdaftar')) {
-    return SidikJariStatus.selesai;
-  }
-  if (_kunciSukses.any(t.contains)) {
-    return SidikJariStatus.selesai;
-  }
-  return null;
+bool _adalahDialogInfo(String teks) {
+  final t = _rapikanTeks(teks);
+  return _kunciDialogInfo.any(t.contains);
 }
 
-/// Klasifikasi teks window utama memakai frasa hasil yang spesifik saja.
+/// Klasifikasi teks dialog hasil.
+///
+/// Validasi dianggap BERHASIL hanya bila dialog memuat
+/// [_teksSuksesSidikJari]. Teks lain (termasuk "berhasil disimpan") dianggap
+/// gagal. Dialog informasional (changelog/info versi) dan teks peringatan
+/// lingkungan dianggap bukan hasil (null) supaya tidak salah menolak.
+SidikJariStatus? _klasifikasiDialog(String teks) {
+  final t = _rapikanTeks(teks);
+  if (t.contains(_teksSuksesSidikJari)) {
+    return SidikJariStatus.selesai;
+  }
+  if (_kunciPeringatan.any(t.contains)) {
+    return null;
+  }
+  return SidikJariStatus.popupError;
+}
+
+/// Klasifikasi teks window utama.
+///
+/// Window utama memuat teks kategori statis (mis. "Sidik Jari Peserta Sudah
+/// Terdaftar"), jadi teks sukses TIDAK boleh dibaca dari sini. Hanya teks gagal
+/// yang sudah dikenal dibaca sebagai gagal; teks lain diabaikan.
 SidikJariStatus? _klasifikasiWindowUtama(String teks) {
-  final t = teks.toLowerCase();
-  // Prioritaskan deteksi gagal di window utama untuk close instan.
-  if (_kunciHasilDiWindowUtama.any((k) => t.contains(k.toLowerCase())) ||
-      _mengandungKunciGagal(t)) {
-    if (t.contains('sudah terdaftar') || _kunciSukses.any(t.contains)) {
-      return SidikJariStatus.selesai;
-    }
+  final t = _rapikanTeks(teks);
+  if (_mengandungKunciGagal(t)) {
     return SidikJariStatus.popupError;
   }
   return null;
@@ -345,27 +352,30 @@ String? lastTeksSidikJari;
 String _ringkasTeks(String teks) {
   final bagian = teks.split('~').map((e) => e.trim());
   final mencurigakan = bagian.where((e) {
-    final t = e.toLowerCase();
+    final t = _rapikanTeks(e);
     return _mengandungKunciGagal(t) ||
-        _kunciSukses.any(t.contains) ||
+        t.contains(_teksSuksesSidikJari) ||
         _kunciPeringatan.any(t.contains);
   }).toList();
   if (mencurigakan.isEmpty) {
-    return 'teks UI tidak terbaca';
+    // Bukan teks sukses/gagal/peringatan: tampilkan apa adanya supaya alasan
+    // gagal tetap informatif.
+    final semua = teks.split('~').map((e) => e.trim()).where((e) => e.isNotEmpty);
+    final gabung = semua.join(' | ');
+    return gabung.isEmpty ? 'teks UI tidak terbaca' : gabung;
   }
   return mencurigakan.join(' | ');
 }
 
 /// Menunggu sidik jari selesai dengan membaca teks UI After.exe.
 ///
-/// Penanda sukses: aplikasi menampilkan teks berhasil, atau aplikasi menutup
-/// dirinya sendiri (After.exe menutup diri setelah nomor diproses). Penutupan
-/// sendiri dilaporkan sebagai [SidikJariStatus.ditutupOtomatis] supaya pemanggil
-/// bisa tetap melanjutkan ke dialog konfirmasi. Teks error/penolakan
-/// menghasilkan kegagalan lebih awal.
+/// Penanda sukses HANYA teks "Sidik Jari Peserta Sudah Terdaftar". Teks lain,
+/// termasuk aplikasi yang menutup diri tanpa teks tersebut, dianggap gagal
+/// supaya pemanggil bisa langsung beralih ke Frista.
 Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
   final stopwatch = Stopwatch()..start();
   var sudahBacaTeks = false;
+  var sudahAbaikanDialogInfo = false;
 
   while (true) {
     final statusUi = await bacaStatusSidikJari();
@@ -373,21 +383,34 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
     if (!statusUi.aplikasiTerbuka) {
       _logSidikJari(
         sudahBacaTeks
-            ? "Aplikasi menutup diri -> sidik jari dianggap selesai"
+            ? "Aplikasi menutup diri tanpa teks '$_teksSuksesSidikJari'"
             : "Aplikasi menutup diri (${stopwatch.elapsed.inSeconds} dtk setelah nomor dikirim)",
       );
-      return SidikJariStatus.ditutupOtomatis;
+      lastTeksSidikJari =
+          'aplikasi menutup diri tanpa teks "$_teksSuksesSidikJari"';
+      return SidikJariStatus.popupError;
     }
 
     sudahBacaTeks = true;
 
-    final teksGabungan =
-        '${statusUi.dialog} ${statusUi.windowUtama} ${statusUi.peringatan}';
-    final teksGabunganLower = teksGabungan.toLowerCase();
+    // Dialog changelog/info versi bukan hasil proses: jangan dianggap gagal,
+    // tetap tunggu hasil sebenarnya.
+    final dialogInfo = _adalahDialogInfo(statusUi.dialog);
+    if (dialogInfo && !sudahAbaikanDialogInfo) {
+      sudahAbaikanDialogInfo = true;
+      _logSidikJari(
+        "Dialog informasional diabaikan: ${_ringkasTeks(statusUi.dialog)}",
+      );
+    }
 
-    // "Sidik Jari Peserta Sudah Terdaftar" = sukses, langsung klik OK lalu close.
-    if (teksGabunganLower.contains('sidik jari peserta sudah terdaftar') ||
-        teksGabunganLower.contains('sidik jari peserta sudah terdaftar.')) {
+    final teksGabungan =
+        '${dialogInfo ? '' : statusUi.dialog} ${statusUi.windowUtama} ${statusUi.peringatan}';
+
+    // Sukses HANYA dibaca dari dialog hasil. Window utama memuat teks kategori
+    // statis "Sidik Jari Peserta Sudah Terdaftar", jadi tidak boleh dipakai
+    // sebagai penanda berhasil (kalau tidak, popup gagal ikut lolos).
+    if (!dialogInfo &&
+        _rapikanTeks(statusUi.dialog).contains(_teksSuksesSidikJari)) {
       lastTeksSidikJari = 'Sidik Jari Peserta Sudah Terdaftar';
       _logSidikJari("Sudah terdaftar terdeteksi: $lastTeksSidikJari");
       _closeSudahTerdaftar();
@@ -403,7 +426,7 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
     }
 
     // 1) Dialog hasil (pop-up terpisah) = sumber penentuan yang paling tepat.
-    if (statusUi.dialog.isNotEmpty) {
+    if (!dialogInfo && statusUi.dialog.isNotEmpty) {
       lastTeksSidikJari = _ringkasTeks(statusUi.dialog);
       final statusDialog = _klasifikasiDialog(statusUi.dialog);
       if (statusDialog != null) {
@@ -417,14 +440,9 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
       }
     }
 
-    // 2) Window utama: hanya frasa hasil spesifik (hindari salah tolak).
+    // 2) Window utama: hanya teks gagal yang dikenal (teks sukses diabaikan
+    // karena window utama memuat kategori statis).
     final statusUtama = _klasifikasiWindowUtama(statusUi.windowUtama);
-    if (statusUtama == SidikJariStatus.selesai) {
-      tutupSidikJariCepat();
-      lastTeksSidikJari = _ringkasTeks(statusUi.windowUtama);
-      _logSidikJari("Teks sukses terdeteksi: $lastTeksSidikJari");
-      return SidikJariStatus.selesai;
-    }
     if (statusUtama == SidikJariStatus.popupError) {
       lastTeksSidikJari = _ringkasTeks(statusUi.windowUtama);
       _logSidikJari("Teks penolakan terdeteksi: $lastTeksSidikJari");
@@ -1178,9 +1196,6 @@ Future<void> Function() showSidikJariProgress(BuildContext context) {
 
 String lastSidikJariReason = '';
 
-/// True kalau After.exe menutup dirinya sendiri tanpa teks konfirmasi.
-bool lastSidikJariDitutupOtomatis = false;
-
 /// True kalau sidik jari gagal berulang dan dialihkan ke Frista.
 bool lastSidikJariDialihkanKeFrista = false;
 
@@ -1239,7 +1254,6 @@ Future<bool> openExe(
   bool tampilkanToast = true,
 }) async {
   lastSidikJariReason = '';
-  lastSidikJariDitutupOtomatis = false;
   lastSidikJariDialihkanKeFrista = false;
   lastFristaBerhasil = false;
 
@@ -1284,7 +1298,6 @@ Future<bool> openExe(
     _logSidikJari("Login otomatis memakai user=${maskUserLog(akun.username)}");
 
     for (var percobaan = 1; percobaan <= _maxSidikJariAttempts; percobaan++) {
-      lastSidikJariDitutupOtomatis = false;
       Process? process;
       _logSidikJari("Percobaan sidik jari $percobaan/$_maxSidikJariAttempts");
 
@@ -1393,15 +1406,6 @@ Future<bool> openExe(
         case SidikJariStatus.selesai:
           _logSidikJari("Sidik jari terverifikasi dari UI aplikasi");
           tutupSidikJariCepat();
-          return true;
-        case SidikJariStatus.ditutupOtomatis:
-          // After.exe menutup diri tanpa teks konfirmasi; tetap dianggap sukses
-          // supaya alur lanjut ke dialog konfirmasi.
-          _logSidikJari(
-            "Aplikasi sidik jari menutup diri tanpa teks konfirmasi, "
-            "lanjut sebagai selesai",
-          );
-          lastSidikJariDitutupOtomatis = true;
           return true;
         case SidikJariStatus.popupError:
           lastSidikJariReason =

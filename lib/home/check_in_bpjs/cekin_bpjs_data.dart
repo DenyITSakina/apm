@@ -571,7 +571,7 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
     if (!mounted) return;
 
     AppLog.instance.write(
-      'Sidik jari selesai | sukses=$sukses | ditutupOtomatis=$lastSidikJariDitutupOtomatis | dialihkanFrista=$lastSidikJariDialihkanKeFrista | reason=$lastSidikJariReason',
+      'Sidik jari selesai | sukses=$sukses | dialihkanFrista=$lastSidikJariDialihkanKeFrista | reason=$lastSidikJariReason',
     );
 
     if (lastSidikJariDialihkanKeFrista) {
@@ -581,9 +581,9 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
       return;
     }
 
-    // After.exe yang menutup dirinya sendiri (popup error, versi kadaluarsa,
-    // dll) tetap diteruskan, tidak dianggap gagal.
-    if (sukses != true && !lastSidikJariDitutupOtomatis) {
+    // Validasi hanya berhasil bila muncul teks "Sidik Jari Peserta Sudah
+    // Terdaftar"; selain itu dianggap gagal.
+    if (sukses != true) {
       sedangProses = false;
       debugPrint('Alasan gagal: $lastSidikJariReason');
       tutupDialog();

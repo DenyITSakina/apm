@@ -148,7 +148,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
                             onSubmit: _submitData,
                             submitLabel: 'CEK BPJS',
                             submitIcon: Icons.verified_rounded,
-                            submitCaption: 'Kirim data ke server',
+                            submitCaption: 'Cek data pasien BPJS',
                             submitGradient: AppGradients.bpjs,
                             submitLoading: loading,
                             submitEnabled: controller.text.isNotEmpty,
