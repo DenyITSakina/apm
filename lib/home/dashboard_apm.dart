@@ -2,7 +2,6 @@ import 'package:apm/blog/antrian_apm_bloc.dart';
 import 'package:apm/blog/booking/booking_bloc.dart';
 import 'package:apm/dialog/konfirmasi.dart';
 import 'package:apm/func/navigation_helpers.dart';
-import 'package:apm/home/ai_assistant/ai_assistant_sheet.dart';
 import 'package:apm/home/booking/booking_page.dart';
 import 'package:apm/home/check_in_bpjs/cekin_bpjs_page.dart';
 import 'package:apm/home/check_in_umum/cekin_umum_page.dart';
@@ -27,8 +26,6 @@ class _DashboardApmState extends State<DashboardApm>
     vsync: this,
     duration: const Duration(milliseconds: 900),
   )..forward();
-
-  bool _aiOpen = false;
 
   @override
   void dispose() {
@@ -95,11 +92,6 @@ class _DashboardApmState extends State<DashboardApm>
     );
   }
 
-  void _toggleAiAssistant() {
-    HapticFeedback.lightImpact();
-    setState(() => _aiOpen = !_aiOpen);
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -110,82 +102,57 @@ class _DashboardApmState extends State<DashboardApm>
               final isWide = constraints.maxWidth >= 900;
               final pad = isWide ? AppSpacing.lg : AppSpacing.md;
 
-              return Stack(
-                children: [
-                  Padding(
-                    padding: EdgeInsets.fromLTRB(
-                      pad,
-                      AppSpacing.md,
-                      pad,
-                      AppSpacing.md,
-                    ),
-                    child: Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth: isWide ? 1200 : 720,
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            _buildBrand(isWide: isWide),
-                            const SizedBox(height: AppSpacing.md),
-                            _buildGreeting(),
-                            const SizedBox(height: AppSpacing.md),
-                            Expanded(child: _buildServiceGrid(isWide: isWide)),
-                            const SizedBox(height: AppSpacing.md),
-                            if (isWide)
-                              IntrinsicHeight(
-                                child: Row(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.stretch,
-                                  children: [
-                                    Expanded(child: _buildStepsCard()),
-                                    const SizedBox(width: AppSpacing.md),
-                                    Expanded(child: _buildHelpCard()),
-                                  ],
-                                ),
-                              )
-                            else
-                              _buildHelpChips(),
-                            const SizedBox(height: AppSpacing.xs),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: Text(
-                                '${AppInfo.appName} ${AppInfo.label}',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontFamily: AppText.family,
-                                  fontSize: 11.5,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
+              return Padding(
+                padding: EdgeInsets.fromLTRB(
+                  pad,
+                  AppSpacing.md,
+                  pad,
+                  AppSpacing.md,
+                ),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: isWide ? 1200 : 720),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _buildBrand(isWide: isWide),
+                        const SizedBox(height: AppSpacing.md),
+                        _buildGreeting(),
+                        const SizedBox(height: AppSpacing.md),
+                        Expanded(child: _buildServiceGrid(isWide: isWide)),
+                        const SizedBox(height: AppSpacing.md),
+                        if (isWide)
+                          IntrinsicHeight(
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Expanded(child: _buildStepsCard()),
+                                const SizedBox(width: AppSpacing.md),
+                                Expanded(child: _buildHelpCard()),
+                              ],
                             ),
-                          ],
+                          )
+                        else
+                          _buildHelpChips(),
+                        const SizedBox(height: AppSpacing.xs),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            '${AppInfo.appName} ${AppInfo.label}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontFamily: AppText.family,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w500,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
-                  // Tombol asisten AI mengambang (di atas label versi, tidak menutupinya)
-                  Positioned(
-                    right: pad,
-                    bottom: 38,
-                    child: _AiFloatingButton(
-                      open: _aiOpen,
-                      onTap: _toggleAiAssistant,
-                    ),
-                  ),
-                  // Panel asisten AI mengambang
-                  if (_aiOpen)
-                    Positioned(
-                      right: pad,
-                      bottom: 104,
-                      child: AiAssistantPanel(
-                        onClose: () => setState(() => _aiOpen = false),
-                      ),
-                    ),
-                ],
+                ),
               );
             },
           ),
@@ -538,7 +505,7 @@ class _DashboardApmState extends State<DashboardApm>
               description: 'Info lain: hubungi petugas front office.',
             ),
             const _StepRow(
-              number: '•',
+              number: 'â€¢',
               title: 'Persiapan Kunjungan',
               description: 'Booking dahulu dan simpan kode antrean.',
               isLast: true,
@@ -1332,100 +1299,6 @@ class _StepRow extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _AiFloatingButton extends StatefulWidget {
-  const _AiFloatingButton({required this.open, required this.onTap});
-  final bool open;
-  final VoidCallback onTap;
-
-  @override
-  State<_AiFloatingButton> createState() => _AiFloatingButtonState();
-}
-
-class _AiFloatingButtonState extends State<_AiFloatingButton>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _c = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1800),
-  )..repeat(reverse: true);
-
-  @override
-  void dispose() {
-    _c.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _c,
-      builder: (context, _) {
-        final glow = 0.18 + (_c.value * 0.22);
-        final lift = widget.open ? 0.0 : (_c.value * 2.0);
-        return Transform.translate(
-          offset: Offset(0, -lift),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: widget.onTap,
-              borderRadius: BorderRadius.circular(30),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 220),
-                curve: Curves.easeOutCubic,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 11,
-                ),
-                decoration: BoxDecoration(
-                  gradient: widget.open
-                      ? const LinearGradient(
-                          colors: [Color(0xFF334155), Color(0xFF1E293B)],
-                        )
-                      : AppGradients.brand,
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.28),
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: (widget.open ? Colors.black : AppColors.primary)
-                          .withValues(alpha: glow),
-                      blurRadius: 18,
-                      offset: const Offset(0, 8),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      widget.open
-                          ? Icons.close_rounded
-                          : Icons.auto_awesome_rounded,
-                      color: Colors.white,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      widget.open ? 'Tutup' : 'Bantuan AI',
-                      style: const TextStyle(
-                        fontFamily: AppText.family,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }

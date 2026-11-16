@@ -480,7 +480,7 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
       return '${base}Rujukan BPJS belum tersedia, sehingga "Lanjut ke Poli" tidak dapat diproses otomatis. Silakan pilih "Ke Loket" untuk penanganan lebih lanjut.';
     }
     if (siap && !isUmurKurangDari16) {
-      return '${base}Pilih "Lanjut ke Poli" untuk verifikasi sidik jari/Frista dan pembuatan SEP. Siapkan jari Anda pada alat pembaca. Atau pilih "Ke Loket" jika ingin bantuan petugas.';
+      return '${base}Pilih "Lanjut ke Poli" untuk verifikasi sidik jari/Frista dan pembuatan SEP. Siapkan jari Anda pada alat pembaca sidik jari dan kamera untuk Frista.';
     }
     if (siap && isUmurKurangDari16) {
       return '${base}Karena usia pasien di bawah 16 tahun, sidik jari dapat dilewati. Pilih "Lanjut ke Poli" untuk melanjutkan, atau "Ke Loket" jika perlu bantuan petugas.';

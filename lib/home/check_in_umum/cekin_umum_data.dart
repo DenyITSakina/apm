@@ -320,7 +320,7 @@ class CekinUmumDataPage extends StatelessWidget {
     if (state is AntrianApmPrinted) {
       return 'Proses check-in berhasil. Ikuti informasi pada layar dan ambil bukti/nomor antrean jika ada, lalu tunggu panggilan sesuai petunjuk.';
     }
-    return 'Periksa kembali data pasien di sebelah kiri. Pastikan nama dan informasi sudah benar, lalu pilih "Ke Poli" untuk langsung ke poli tujuan atau "Ke Loket" untuk mendapatkan bantuan di Front Office.';
+    return 'Periksa kembali data pasien di sebelah kiri. Pastikan nama dan informasi sudah benar, lalu pilih "Ke Poli" untuk langsung ke poli tujuan';
   }
 
   void _handleState(BuildContext context, AntrianApmState state) {

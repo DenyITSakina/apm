@@ -8,24 +8,27 @@ import 'package:http/http.dart' as http;
 /// - Tidak boleh membagikan/meminta data sensitif (nomor kartu, NIK, RM, nama, alamat, dll).
 class AiAssistantService {
   static const String _systemInstruction =
-      'Anda adalah asisten bantuan untuk Anjungan Pendaftaran Mandiri (APM) RSU Sakina Idaman. '
-      'Tugas Anda HANYA membantu pasien memilih dan menuntun proses check-in yang tersedia: '
-      'Cek-in BPJS dan Cek-in Umum. '
-      'Aturan ketat: '
-      '1) Jangan pernah meminta, menyebutkan, mengulang, atau membagikan data sensitif/pribadi pasien '
-      '(nomor BPJS, NIK, nomor rekam medis, nomor booking, nama, alamat, tanggal lahir, nomor telepon, atau data medis). '
-      '2) Jangan melakukan hal di luar bantuan navigasi/panduan check-in APM. Tolak permintaan lain dengan sopan dan arahkan ke petugas. '
-      '3) Berikan jawaban singkat, jelas, ramah dalam Bahasa Indonesia. '
-      '4) Jika pasien ingin check-in BPJS, sarankan membuka layanan Cek-in BPJS dan jelaskan langkahnya: '
-      'siapkan kartu/NIK/RM, masukkan/scan nomor di halaman Cek-in BPJS, tekan CEK BPJS, periksa data, lalu ikuti petunjuk (sidik jari/Frista jika diminta) dan lanjut ke poli/loket sesuai arahan. '
-      '5) Jika pasien ingin check-in Umum, sarankan membuka layanan Cek-in Umum dan jelaskan langkah serupa. '
-      '6) Jika niat pengguna tidak jelas, tanyakan apakah ingin Cek-in BPJS atau Cek-in Umum.';
+      'Anda adalah asisten bantuan khusus Anjungan Pendaftaran Mandiri (APM) RSU Sakina Idaman. '
+      'Fungsi Anda WAJIB dan HANYA membantu pasien memilih serta menuntun proses check-in: Cek-in BPJS atau Cek-in Umum. '
+      'Anda tidak memiliki fungsi lain. '
+      'Aturan mutlak (tidak boleh dilanggar): '
+      '1) SELALU bantu dan arahkan pengguna terkait proses check-in BPJS/Umum dengan langkah yang jelas. '
+      '2) TOLAK semua permintaan di luar bantuan/panduan check-in APM (mis. percakapan umum, hiburan, opini, pengetahuan umum, diagnosis, saran medis, administrasi lain, teknis di luar APM, atau permintaan apa pun yang tidak terkait check-in). '
+      'Saat menolak, jawab singkat bahwa Anda hanya membantu check-in APM, lalu langsung bantu memilih/menuntun Cek-in BPJS atau Umum. '
+      '3) Jangan pernah meminta, menyebutkan, mengulang, menyimpan, atau membagikan data sensitif/pribadi pasien '
+      '(nomor BPJS, NIK, nomor rekam medis, nomor booking, nama, alamat, tanggal lahir, nomor telepon, data medis, atau data krusial lainnya). '
+      'Jika pengguna mengirim data tersebut, jangan mengulangnya; ingatkan agar tidak dibagikan dan tetap bantu langkah check-in tanpa data itu. '
+      '4) Berikan jawaban singkat, jelas, ramah dalam Bahasa Indonesia. '
+      '5) Panduan Cek-in BPJS: pilih Cek-in BPJS, siapkan kartu BPJS/NIK/No. RM, masukkan/scan nomor di halaman Cek-in BPJS, tekan CEK BPJS, periksa data, ikuti petunjuk sidik jari/Frista bila diminta, lalu lanjut ke Poli atau Loket sesuai arahan. '
+      '6) Panduan Cek-in Umum: pilih Cek-in Umum, masukkan/scan No. RM/NIK/No. Booking, tekan CARI DATA, periksa data, lalu ikuti petunjuk di layar/ke Poli atau Loket. '
+      '7) Jika niat pengguna tidak jelas, tanyakan dengan sopan: ingin Cek-in BPJS atau Cek-in Umum, lalu pandu langkahnya.';
 
   static const String _fallbackHelp =
-      'Saya hanya dapat membantu panduan check-in APM.\n'
+      'Saya khusus membantu panduan check-in APM (tidak melayani hal lain).\n'
+      'Silakan pilih layanan:\n'
       '- Cek-in BPJS: untuk peserta BPJS Kesehatan.\n'
       '- Cek-in Umum: untuk pasien non-BPJS.\n'
-      'Pilih layanan yang sesuai, lalu ikuti petunjuk di layar. Jangan bagikan nomor kartu/NIK/RM kepada saya.';
+      'Ketik/pilih salah satu, saya akan menuntun langkahnya. Jangan bagikan nomor kartu/NIK/RM/data pribadi kepada saya.';
 
   /// Kembalikan (reply, action). action: "bpjs", "umum", atau null.
   static Future<({String reply, String? action})> sendMessage(
@@ -57,6 +60,18 @@ class AiAssistantService {
         ],
       });
 
+      final generationConfig = <String, dynamic>{
+        'temperature': ApiConfig.geminiTemperature,
+        'topP': ApiConfig.geminiTopP,
+        'topK': ApiConfig.geminiTopK,
+        'maxOutputTokens': ApiConfig.geminiMaxOutputTokens,
+      };
+      if (ApiConfig.geminiEnableThinking) {
+        generationConfig['thinkingConfig'] = {
+          'thinkingBudget': ApiConfig.geminiThinkingBudget,
+        };
+      }
+
       final body = jsonEncode({
         'system_instruction': {
           'parts': [
@@ -64,17 +79,34 @@ class AiAssistantService {
           ],
         },
         'contents': contents,
-        'generationConfig': {'temperature': 0.2, 'maxOutputTokens': 256},
+        'generationConfig': generationConfig,
       });
 
       final uri = Uri.parse(
         '${ApiConfig.geminiEndpoint}?key=${ApiConfig.geminiApiKey}',
       );
-      final resp = await http
-          .post(uri, headers: {'Content-Type': 'application/json'}, body: body)
-          .timeout(const Duration(seconds: 15));
 
-      if (resp.statusCode != 200) {
+      http.Response? resp;
+      final attempts =
+          (ApiConfig.geminiMaxRetries < 0 ? 0 : ApiConfig.geminiMaxRetries) + 1;
+      for (var i = 0; i < attempts; i++) {
+        try {
+          resp = await http
+              .post(
+                uri,
+                headers: {'Content-Type': 'application/json'},
+                body: body,
+              )
+              .timeout(Duration(seconds: ApiConfig.geminiTimeoutSeconds));
+          if (resp.statusCode == 200) break;
+          // retry on transient server/rate-limit errors
+          if (resp.statusCode != 429 && resp.statusCode < 500) break;
+        } catch (_) {
+          if (i == attempts - 1) rethrow;
+        }
+      }
+
+      if (resp == null || resp.statusCode != 200) {
         final action = _detectIntentLocal(userMessage);
         return (reply: _localReply(action), action: action);
       }

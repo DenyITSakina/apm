@@ -67,3 +67,34 @@
 [2026-11-16T14:09:28.106584] Frista dibuka+auto-login via frista_automation.py (python, D:\Sakina\apm\python_scripts\frista_automation.py, nomor=0000****3033)
 [2026-11-16T14:09:47.187536] Frista gagal: teks validasi tidak cocok (harus "Peserta telah terdaftar hari ini" / "Peserta sudah terdaftar")
 [2026-11-16T14:09:47.221037] GAGAL Frista: Frista gagal: teks validasi tidak cocok (harus "Peserta telah terdaftar hari ini" / "Peserta sudah terdaftar")
+[2026-11-16T14:35:10.220639] Mulai proses | nomor=0000****3033 | app=D:\Sakina\apm
+[2026-11-16T14:35:10.247673] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-11-16T14:35:10.570373] Ambil akun VClaim (297 ms)
+[2026-11-16T14:35:10.598979] Login otomatis memakai user=ci*******a
+[2026-11-16T14:35:10.622978] Percobaan sidik jari 1/1
+[2026-11-16T14:35:10.828013] After.exe tidak berjalan
+[2026-11-16T14:35:10.861098] After.exe dijalankan (pid=3928), menunggu proses muncul
+[2026-11-16T14:35:16.459451] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED
+[2026-11-16T14:35:16.482447] Otomasi UI selesai (5329 ms)
+[2026-11-16T14:35:16.598716] After.exe tidak berjalan
+[2026-11-16T14:35:16.622715] GAGAL percobaan 1: aplikasi sidik jari menutup diri saat otomasi (After.ini WSURL kosong (login tetap dicoba))
+[2026-11-16T14:35:16.657720] Sidik jari gagal 1 kali, mencoba membuka Frista
+[2026-11-16T14:35:16.714814] Frista dibuka+auto-login via frista_automation.py (python, D:\Sakina\apm\python_scripts\frista_automation.py, nomor=0000****3033)
+[2026-11-16T14:35:17.669087] Frista.exe dibuka (fallback, script tidak menampilkan window)
+[2026-11-16T14:35:39.328034] Frista gagal: teks validasi tidak cocok (harus "Peserta telah terdaftar hari ini" / "Peserta sudah terdaftar")
+[2026-11-16T14:35:39.349044] GAGAL Frista: Frista gagal: teks validasi tidak cocok (harus "Peserta telah terdaftar hari ini" / "Peserta sudah terdaftar")
+[2026-11-16T14:35:40.585768] Mulai proses | nomor=0000****3033 | app=D:\Sakina\apm
+[2026-11-16T14:35:40.607286] Log file: D:\Sakina\apm\sidik_jari_log.txt
+[2026-11-16T14:35:40.852873] Ambil akun VClaim (220 ms)
+[2026-11-16T14:35:40.882895] Login otomatis memakai user=ci*******a
+[2026-11-16T14:35:40.907805] Percobaan sidik jari 1/1
+[2026-11-16T14:35:41.012659] After.exe tidak berjalan
+[2026-11-16T14:35:41.036169] After.exe dijalankan (pid=6848), menunggu proses muncul
+[2026-11-16T14:35:46.405992] Otomasi UI: STEP=WINDOW_OK Aplikasi Registrasi Sidik Jari | STEP=FIELDS_OK | STEP=WARN_NO_SERVER | STEP=READER_OK | STEP=USER_OK | STEP=PASS_OK | STEP=LOGIN_CLICKED | STEP=APP_CLOSED_DURING_LOGIN
+[2026-11-16T14:35:46.433002] Otomasi UI selesai (5286 ms)
+[2026-11-16T14:35:46.559225] After.exe tidak berjalan
+[2026-11-16T14:35:46.582234] GAGAL percobaan 1: aplikasi sidik jari menutup diri saat otomasi (aplikasi sidik jari tertutup saat login)
+[2026-11-16T14:35:46.616298] Sidik jari gagal 1 kali, mencoba membuka Frista
+[2026-11-16T14:35:46.652095] Frista dibuka+auto-login via frista_automation.py (python, D:\Sakina\apm\python_scripts\frista_automation.py, nomor=0000****3033)
+[2026-11-16T14:36:11.759941] Frista gagal: teks validasi tidak cocok (harus "Peserta telah terdaftar hari ini" / "Peserta sudah terdaftar")
+[2026-11-16T14:36:11.783953] GAGAL Frista: Frista gagal: teks validasi tidak cocok (harus "Peserta telah terdaftar hari ini" / "Peserta sudah terdaftar")
