@@ -23,7 +23,6 @@ const int _maxLogBytes = 2 * 1024 * 1024;
 
 File? _logFile;
 
-/// Lokasi log: folder aplikasi bila bisa ditulis, jika tidak ke folder TEMP.
 File _resolusiLogFile() {
   final cached = _logFile;
   if (cached != null) {
@@ -53,8 +52,6 @@ File _resolusiLogFile() {
   return _logFile!;
 }
 
-/// Log ke console + file `sidik_jari_log.txt` supaya bisa dicek di lapangan
-/// tanpa membuka debug console.
 void _logSidikJari(String pesan) {
   final stamp = DateTime.now().toIso8601String();
   final baris = "[$stamp] $pesan";
@@ -122,8 +119,6 @@ Future<void> closeSidikJariExe() async {
     return;
   }
 
-  // Tanpa delay/menunggu: tembak taskkill secepat mungkin.
-  // runInShell:false + normal => CREATE_NO_WINDOW (tanpa jendela cmd).
   try {
     Process.start(
       'taskkill',
@@ -134,17 +129,14 @@ Future<void> closeSidikJariExe() async {
   } catch (_) {}
 }
 
-/// Tutup cepat sidik jari (kill proses), tanpa delay/menunggu.
 void tutupSidikJariCepat() {
   unawaited(closeSidikJariExe());
 }
 
-/// Tutup cepat saat teks gagal/sukses terdeteksi, tanpa delay/menunggu.
 void _closeSidikJariOnFailFast() {
   tutupSidikJariCepat();
 }
 
-/// "Sidik Jari Peserta Sudah Terdaftar" = sukses -> klik OK (1027,590) lalu close (1206,319).
 void _closeSudahTerdaftar() {
   if (kIsWeb) return;
   try {
@@ -172,7 +164,6 @@ void _closeSudahTerdaftar() {
 
 String _escapePowerShell(String value) => value.replaceAll("'", "''");
 
-/// Judul semua window milik proses After.exe (termasuk dialog/popup).
 Future<List<String>> getSidikJariWindowTitles() async {
   if (kIsWeb) {
     return const [];
@@ -238,7 +229,6 @@ enum SidikJariStatus { selesai, popupError, timeout }
 const String _namaScriptOtomatis = 'sidik_jari_otomatis.ps1';
 const String _namaScriptStatus = 'sidik_jari_status.ps1';
 
-/// Teks yang dianggap validasi sidik jari BERHASIL.
 const List<String> _teksSuksesSidikJari = [
   'sidik jari peserta sudah terdaftar',
   'data berhasil disimpan',
@@ -249,7 +239,6 @@ const List<String> _teksSuksesSidikJari = [
   'berhasil',
 ];
 
-/// Teks UI After.exe yang menandakan penolakan atas nomor yang dikirim.
 const List<String> _kunciGagal = [
   'data gagal disimpan',
   'gagal disimpan',
@@ -282,9 +271,6 @@ final Set<String> _kunciGagalLower = _kunciGagal
     .map((k) => k.toLowerCase())
     .toSet();
 
-/// Rapikan teks UI sebelum pencocokan: lowercase, ubah pemisah '~' menjadi
-/// spasi, lalu rapatkan spasi. Ini penting karena satu kalimat bisa terbaca
-/// sebagai beberapa elemen (mis. "Sidik Jari" + "Tidak Valid").
 String _rapikanTeks(String teks) {
   return teks
       .toLowerCase()
@@ -301,13 +287,8 @@ bool _mengandungKunciGagal(String teks) {
   return false;
 }
 
-/// Kondisi lingkungan (bukan penolakan nomor). Hanya untuk pesan informatif.
-const List<String> _kunciPeringatan = [
-  'mesin fingerprint terhubung', // "Pastikan Mesin Fingerprint Terhubung..."
-];
+const List<String> _kunciPeringatan = ['mesin fingerprint terhubung'];
 
-/// Dialog informasional (bukan hasil proses): changelog/info versi.
-/// Diabaikan supaya tidak dianggap gagal dan proses tetap ditunggu.
 const List<String> _kunciDialogInfo = [
   'changelog',
   'penambahan kategori',
@@ -323,11 +304,6 @@ bool _adalahDialogInfo(String teks) {
   return _kunciDialogInfo.any(t.contains);
 }
 
-/// Klasifikasi teks dialog hasil.
-///
-/// Validasi dianggap BERHASIL bila dialog memuat salah satu
-/// [_teksSuksesSidikJari]. Teks lain dianggap gagal. Teks peringatan
-/// lingkungan dianggap bukan hasil (null) supaya tidak salah menolak.
 SidikJariStatus? _klasifikasiDialog(String teks) {
   final t = _rapikanTeks(teks);
   if (_teksSuksesSidikJari.any(t.contains)) {
@@ -339,11 +315,6 @@ SidikJariStatus? _klasifikasiDialog(String teks) {
   return SidikJariStatus.popupError;
 }
 
-/// Klasifikasi teks window utama.
-///
-/// Window utama memuat teks kategori statis (mis. "Sidik Jari Peserta Sudah
-/// Terdaftar"), jadi teks sukses TIDAK boleh dibaca dari sini. Hanya teks gagal
-/// yang sudah dikenal dibaca sebagai gagal; teks lain diabaikan.
 SidikJariStatus? _klasifikasiWindowUtama(String teks) {
   final t = _rapikanTeks(teks);
   if (_mengandungKunciGagal(t)) {
@@ -352,10 +323,8 @@ SidikJariStatus? _klasifikasiWindowUtama(String teks) {
   return null;
 }
 
-/// Teks UI terakhir yang terbaca, dipakai untuk pesan error.
 String? lastTeksSidikJari;
 
-/// Ambil bagian teks yang mencurigakan (error/sukses/peringatan).
 String _ringkasTeks(String teks) {
   final bagian = teks.split('~').map((e) => e.trim());
   final mencurigakan = bagian.where((e) {
@@ -365,20 +334,16 @@ String _ringkasTeks(String teks) {
         _kunciPeringatan.any(t.contains);
   }).toList();
   if (mencurigakan.isEmpty) {
-    // Bukan teks sukses/gagal/peringatan: tampilkan apa adanya supaya alasan
-    // gagal tetap informatif.
-    final semua = teks.split('~').map((e) => e.trim()).where((e) => e.isNotEmpty);
+    final semua = teks
+        .split('~')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty);
     final gabung = semua.join(' | ');
     return gabung.isEmpty ? 'teks UI tidak terbaca' : gabung;
   }
   return mencurigakan.join(' | ');
 }
 
-/// Menunggu sidik jari selesai dengan membaca teks UI After.exe.
-///
-/// Penanda sukses: salah satu teks pada [_teksSuksesSidikJari]. Teks lain,
-/// termasuk aplikasi yang menutup diri tanpa teks tersebut, dianggap gagal
-/// supaya pemanggil bisa langsung beralih ke Frista.
 Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
   final stopwatch = Stopwatch()..start();
   var sudahBacaTeks = false;
@@ -399,8 +364,6 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
 
     sudahBacaTeks = true;
 
-    // Dialog changelog/info versi bukan hasil proses: jangan dianggap gagal,
-    // tetap tunggu hasil sebenarnya.
     final dialogInfo = _adalahDialogInfo(statusUi.dialog);
     if (dialogInfo && !sudahAbaikanDialogInfo) {
       sudahAbaikanDialogInfo = true;
@@ -412,9 +375,6 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
     final teksGabungan =
         '${dialogInfo ? '' : statusUi.dialog} ${statusUi.windowUtama} ${statusUi.peringatan}';
 
-    // Sukses HANYA dibaca dari dialog hasil. Window utama memuat teks kategori
-    // statis "Sidik Jari Peserta Sudah Terdaftar", jadi tidak boleh dipakai
-    // sebagai penanda berhasil (kalau tidak, popup gagal ikut lolos).
     if (!dialogInfo) {
       final dialogTeks = _rapikanTeks(statusUi.dialog);
       if (_teksSuksesSidikJari.any(dialogTeks.contains)) {
@@ -425,7 +385,6 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
       }
     }
 
-    // Deteksi kilat: jika ada teks _kunciGagal, close instan tanpa langkah lain.
     if (_mengandungKunciGagal(teksGabungan)) {
       lastTeksSidikJari = _ringkasTeks(teksGabungan);
       _logSidikJari("Teks gagal terdeteksi: $lastTeksSidikJari");
@@ -433,7 +392,6 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
       return SidikJariStatus.popupError;
     }
 
-    // 1) Dialog hasil (pop-up terpisah) = sumber penentuan yang paling tepat.
     if (!dialogInfo && statusUi.dialog.isNotEmpty) {
       lastTeksSidikJari = _ringkasTeks(statusUi.dialog);
       final statusDialog = _klasifikasiDialog(statusUi.dialog);
@@ -448,8 +406,6 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
       }
     }
 
-    // 2) Window utama: hanya teks gagal yang dikenal (teks sukses diabaikan
-    // karena window utama memuat kategori statis).
     final statusUtama = _klasifikasiWindowUtama(statusUi.windowUtama);
     if (statusUtama == SidikJariStatus.popupError) {
       lastTeksSidikJari = _ringkasTeks(statusUi.windowUtama);
@@ -464,11 +420,6 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
   }
 }
 
-/// Script PowerShell: isi field + klik tombol lewat UI Automation (WPF).
-///
-/// Field After.exe ( AutomationId ): am=username, an=password, ao=Login,
-/// ar/as=radio BPJS/NIK, au=input nomor (aktif setelah login diterima).
-/// Kredensial lewat environment variable supaya tidak terlihat di task manager.
 const String _isiScriptOtomatis = r'''
 $ErrorActionPreference = 'Stop'
 $User = $env:SIDIK_USER
@@ -686,12 +637,6 @@ try {
 exit 0
 ''';
 
-/// Script PowerShell: baca status After.exe dalam sekali jalan.
-///
-/// Output 3 baris:
-///   DIALOG=...      teks dari jendela dialog hasil (pop-up terpisah)
-///   MAIN=...        teks window utama (hanya yang terlihat di layar)
-///   PERINGATAN=...  misalnya "Pastikan Mesin Fingerprint Terhubung..."
 const String _isiScriptStatus = r'''
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName UIAutomationClient
@@ -770,7 +715,6 @@ Write-Output ("PERINGATAN=" + $peringatan)
 exit 0
 ''';
 
-/// Tulis script ke temp sekali saja, lalu jalankan.
 Future<String> _jalankanScriptPs({
   required String nama,
   required String isi,
@@ -794,7 +738,6 @@ Future<String> _jalankanScriptPs({
   return result.stdout.toString();
 }
 
-/// Hasil menjalankan otomasi UI.
 class HasilOtomatis {
   final bool berhasil;
   final List<String> langkah;
@@ -807,7 +750,6 @@ class HasilOtomatis {
   });
 }
 
-/// Mengisi username/password, login, dan nomor lewat UI Automation.
 Future<HasilOtomatis> jalankanOtomatisSidikJari({
   required String username,
   required String password,
@@ -882,7 +824,6 @@ String _alasanDariLangkah(List<String> langkah) {
   }
   if (cari('STEP=NOMOR_FAIL') != null) return 'nomor gagal diisi';
 
-  // Peringatan lingkungan, bukan alasan kegagalan utama.
   if (cari('STEP=WARN_NO_SERVER') != null) {
     return 'After.ini WSURL kosong (login tetap dicoba)';
   }
@@ -895,7 +836,6 @@ String _alasanDariLangkah(List<String> langkah) {
   return 'langkah otomasi tidak lengkap';
 }
 
-/// Status UI After.exe: dialog hasil dipisah dari window utama.
 class StatusSidikJari {
   final bool aplikasiTerbuka;
   final String dialog;
@@ -910,10 +850,6 @@ class StatusSidikJari {
   });
 }
 
-/// Baca status After.exe dalam satu proses PowerShell.
-///
-/// Dialog hasil dipisah dari window utama karena window utama memuat teks
-/// statis (panel konfigurasi + daftar kategori) yang tidak boleh dianggap hasil.
 Future<StatusSidikJari> bacaStatusSidikJari() async {
   try {
     final output = await _jalankanScriptPs(
@@ -995,8 +931,6 @@ bool isWindowOpen(String windowTitle) {
   }
 }
 
-/// Fokuskan window aplikasi sidik jari. Non-blocking, mengembalikan `true`
-/// bila window ditemukan.
 Future<bool> focusWindow(String windowTitle) async {
   if (kIsWeb) {
     debugPrint('Fokus window tidak tersedia di web');
@@ -1082,7 +1016,6 @@ void sendKeys(String text) {
 void pressEnter() => sendVirtualKey(vkReturn);
 void pressTab() => sendVirtualKey(vkTab);
 
-/// Escape karakter khusus SendKeys pada teks biasa (username/password).
 String _escapeSendKeysText(String text) {
   final buffer = StringBuffer();
   for (final rune in text.runes) {
@@ -1096,10 +1029,6 @@ String _escapeSendKeysText(String text) {
   return buffer.toString();
 }
 
-/// Mengirim seluruh rangkaian tombol dalam SATU proses PowerShell.
-///
-/// Sebelumnya tiap tombol spawn `powershell.exe` sendiri (~23 kali), sehingga
-/// UI membeku 7-10 detik. Sekarang satu spawn untuk semua tombol.
 Future<void> sendKeySequence(List<String> keys, {int jedaMs = 0}) async {
   if (kIsWeb || keys.isEmpty) {
     return;
@@ -1137,10 +1066,9 @@ Future<void> sendAutoLogin({
   ]);
 }
 
-/// Teks progres dialog proses. Berubah menjadi "Memproses Frista" saat proses
-/// dialihkan dari sidik jari ke Frista.
-final ValueNotifier<String> sidikJariProgressText =
-    ValueNotifier<String>('Memproses Sidik Jari');
+final ValueNotifier<String> sidikJariProgressText = ValueNotifier<String>(
+  'Memproses Sidik Jari',
+);
 
 Future<void> Function() showSidikJariProgress(BuildContext context) {
   VoidCallback? closer;
@@ -1150,7 +1078,7 @@ Future<void> Function() showSidikJariProgress(BuildContext context) {
     context: context,
     barrierDismissible: false,
     barrierLabel: "Memproses sidik jari",
-    barrierColor: Colors.black.withOpacity(0.45),
+    barrierColor: Colors.black.withValues(alpha: 0.45),
     pageBuilder: (dialogContext, _, _) {
       closer = () {
         if (Navigator.of(dialogContext).canPop()) {
@@ -1166,7 +1094,7 @@ Future<void> Function() showSidikJariProgress(BuildContext context) {
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.15),
+                color: Colors.black.withValues(alpha: 0.15),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -1184,9 +1112,9 @@ Future<void> Function() showSidikJariProgress(BuildContext context) {
                 valueListenable: sidikJariProgressText,
                 builder: (ctx, value, _) => Text(
                   value,
-                  style: Theme.of(
-                    ctx,
-                  ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
+                  style: Theme.of(ctx).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(height: 6),
@@ -1217,24 +1145,16 @@ Future<void> Function() showSidikJariProgress(BuildContext context) {
 }
 
 String lastSidikJariReason = '';
-
-/// True kalau sidik jari gagal berulang dan dialihkan ke Frista.
 bool lastSidikJariDialihkanKeFrista = false;
-
-/// True kalau Frista berhasil (mis. "Peserta telah terdaftar Hari ini") -> lanjut SEP.
 bool lastFristaBerhasil = false;
-
-/// Alasan Frista gagal (mis. teks validasi tidak cocok).
 String lastFristaReason = '';
 
-/// Samarkan nomor untuk log (jangan tulis nomor BPJS penuh ke file).
 String maskNomorLog(String? nomor) {
   final value = (nomor ?? '').trim();
   if (value.length < 8) return value;
   return "${value.substring(0, 4)}****${value.substring(value.length - 4)}";
 }
 
-/// Samarkan username untuk log: cicifitria -> ci*******a
 String maskUserLog(String? user) {
   final value = (user ?? '').trim();
   if (value.isEmpty) return '-';
@@ -1312,8 +1232,6 @@ Future<bool> openExe(
     final nomor = normalizeNomor(noPeserta);
     final tipe = detectNomorType(nomor);
 
-    // Validasi akun login OTOMATIS lebih dulu: jangan buka After.exe kalau
-    // memang tidak akan bisa login.
     final swAkun = Stopwatch()..start();
     final akun = await _ambilAkunVclaim();
     _logSidikJari("Ambil akun VClaim (${swAkun.elapsedMilliseconds} ms)");
@@ -1366,7 +1284,6 @@ Future<bool> openExe(
         }
       }
 
-      // Jalur cepat: kendalikan UI After.exe langsung (bukan mengetik buta).
       final swOto = Stopwatch()..start();
       final hasilOto = await jalankanOtomatisSidikJari(
         username: akun.username!,
@@ -1378,7 +1295,6 @@ Future<bool> openExe(
 
       var sukses = hasilOto.berhasil;
       if (!sukses && hasilOto.alasan.contains('field login tidak ditemukan')) {
-        // Struktur UI berubah: pakai jalur ketik lama.
         _logSidikJari("Fallback ke input keyboard");
         if (!context.mounted) {
           return false;
@@ -1392,9 +1308,6 @@ Future<bool> openExe(
       }
 
       if (!sukses) {
-        // After.exe menutup diri saat otomasi/login sebelum nomor selesai
-        // diproses = percobaan gagal, bukan sukses. Coba lagi lalu fallback
-        // ke Frista bila tetap gagal (tanpa interaksi klik manual).
         final masihBerjalan = await isSidikJariRunning();
         if (!masihBerjalan) {
           lastSidikJariReason = hasilOto.alasan.isEmpty
@@ -1546,7 +1459,6 @@ Future<bool> _bukaFristaFallback({
     final appDir = Directory.current.path;
     final sep = Platform.pathSeparator;
 
-    // File hasil (deteksi popup "Peserta telah terdaftar Hari ini" -> sukses SEP)
     final resultFile = File(
       '${Directory.systemTemp.path}${sep}frista_result_${DateTime.now().millisecondsSinceEpoch}.txt',
     );
@@ -1554,7 +1466,6 @@ Future<bool> _bukaFristaFallback({
       if (resultFile.existsSync()) resultFile.deleteSync();
     } catch (_) {}
 
-    // Cari script otomasi
     final scriptCandidates = <String>[
       '$appDir${sep}python_scripts${sep}frista_automation.py',
       '$appDir${sep}data${sep}python_scripts${sep}frista_automation.py',
@@ -1567,7 +1478,6 @@ Future<bool> _bukaFristaFallback({
       }
     }
 
-    // Cari python: PATH dulu (punya deps), lalu bundled
     final pythonCandidates = <String>[
       'python',
       'py',
@@ -1576,7 +1486,6 @@ Future<bool> _bukaFristaFallback({
     ];
 
     if (scriptPath != null) {
-      // Pastikan Frista minimal terbuka walau proses python/script bermasalah
       bool fristaTriggered = false;
       for (final py in pythonCandidates) {
         final pyOk = py == 'python' || py == 'py' || File(py).existsSync();
@@ -1613,7 +1522,6 @@ Future<bool> _bukaFristaFallback({
         }
       }
       if (fristaTriggered) {
-        // Jaring pengaman cepat: jika script gagal diam-diam, buka exe langsung
         Future<void>.delayed(const Duration(milliseconds: 800), () async {
           try {
             final r = await Process.run('tasklist', [
@@ -1634,8 +1542,6 @@ Future<bool> _bukaFristaFallback({
           } catch (_) {}
         });
 
-        // Tunggu hasil Frista: sukses HANYA bila "Peserta telah terdaftar hari
-        // ini" / "Peserta sudah terdaftar"; selain itu dianggap gagal.
         final deadline = DateTime.now().add(const Duration(seconds: 200));
         while (DateTime.now().isBefore(deadline)) {
           try {
@@ -1671,7 +1577,6 @@ Future<bool> _bukaFristaFallback({
       );
     }
 
-    // Fallback: buka exe saja (tanpa pengisian otomatis script)
     await Process.start(
       fristaExePath,
       [],
@@ -1688,7 +1593,6 @@ Future<bool> _bukaFristaFallback({
   }
 }
 
-/// Jalur cadangan: fokus window + ketik seperti versi lama.
 Future<bool> _jalankanViaKetik({
   required BuildContext context,
   required String username,
@@ -1751,7 +1655,6 @@ Future<void> sendNoPeserta(BuildContext context, String nomor) async {
 
     await focusWindow(sidikJariExePath);
 
-    // Seluruh urutan tombol dikirim dalam satu proses PowerShell.
     final keys = <String>[
       for (int i = 0; i < 5; i++) "{ESC}",
       "{TAB}",

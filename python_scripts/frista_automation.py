@@ -14,7 +14,7 @@ import time
 try:
     import mysql.connector
     from mysql.connector import Error
-except Exception:  # mysql opsional (mode --frista bisa pakai default)
+except Exception:
     mysql = None
 
     class Error(Exception):
@@ -23,10 +23,8 @@ except Exception:  # mysql opsional (mode --frista bisa pakai default)
 import psutil
 import pyautogui
 
-
 pyautogui.FAILSAFE = False
 
-# ===== KONFIGURASI =====
 DB_CONFIG = {
     "host": "10.30.0.15",
     "database": "sakina_pasien2",
@@ -43,22 +41,19 @@ AFTER_PATH = (
 AFTER_PROCESS_NAME = "After.exe"
 FRISTA_PROCESS_NAME = "Frista.exe"
 
-# ===== WAKTU TUNGGU (detik) =====
 POLL_INTERVAL = 0.01
 AFTER_LAUNCH_TIMEOUT = 3
 # AFTER_LOGIN_TIMEOUT = 12
 AFTER_EXIT_TIMEOUT = 180
 FRISTA_LAUNCH_TIMEOUT = 10
 MAX_AFTER_ATTEMPTS = 1
-FAST_FAIL_AFTER_LOGIN = 3  # detik: tutup cepat setelah login dianggap gagal
+FAST_FAIL_AFTER_LOGIN = 3
 
-# Validasi Frista: HANYA dua teks ini yang dianggap berhasil.
 FRISTA_SUCCESS_TEXTS = (
     "peserta telah terdaftar hari ini",
     "peserta sudah terdaftar",
 )
 
-# Teks hasil lain yang menandakan gagal (selain teks sukses di atas).
 FRISTA_FAIL_TEXTS = (
     "tidak valid",
     "tidak ditemukan",
@@ -68,15 +63,12 @@ FRISTA_FAIL_TEXTS = (
     "penolakan",
 )
 
-# Kredensial default dihapus: ambil dari DB (vclaim_accounts) atau argumen CLI.
 DEFAULT_USER = None
 DEFAULT_PASSWORD = None
 
 user32 = ctypes.windll.user32
 SW_RESTORE = 9
 
-
-# ===== HELPER =====
 def get_account_from_db():
     """Ambil satu account aktif (tanpa no_peserta)."""
     if mysql is None:
@@ -195,8 +187,6 @@ def fast_type(text, interval=0.02):
     """Tulis cepat ke field aktif."""
     pyautogui.write(text, interval=interval)
 
-
-# ===== AFTER.EXE (Sidik Jari) =====
 def run_after(username, password):
     """Jalankan After.exe, auto login, lalu tunggu proses selesai."""
     print(">>> Menjalankan After.exe ...")
@@ -214,11 +204,9 @@ def run_after(username, password):
     if not activate_window(AFTER_PROCESS_NAME, AFTER_LAUNCH_TIMEOUT):
         print("[!] Window After.exe tidak muncul")
         if proc is not None:
-            # Hanya matikan proses yang baru kita buka.
             kill_process(AFTER_PROCESS_NAME)
         return False
 
-    # Auto login (username, tab, password, enter)
     login_time = time.time()
     pyautogui.write(username, interval=0.02)
     pyautogui.press("tab")
@@ -226,7 +214,6 @@ def run_after(username, password):
     pyautogui.press("enter")
     print(">>> Auto login After.exe dikirim")
 
-    # Deteksi cepat: jika After menutup diri segera setelah login, gagal cepat.
     fast_deadline = login_time + FAST_FAIL_AFTER_LOGIN
     while time.time() < fast_deadline:
         if not is_process_running(AFTER_PROCESS_NAME):
@@ -236,7 +223,6 @@ def run_after(username, password):
 
     activate_window(AFTER_PROCESS_NAME, 1)
 
-    # Tunggu After.exe selesai (pasien selesai sidik jari), dibatasi waktu.
     deadline = time.time() + AFTER_EXIT_TIMEOUT
     while is_process_running(AFTER_PROCESS_NAME) and time.time() < deadline:
         time.sleep(0.02)
@@ -246,8 +232,6 @@ def run_after(username, password):
         kill_process(AFTER_PROCESS_NAME)
         return False
 
-    # Jika kita tidak membuka proses sendiri, exit code tidak bisa dipastikan;
-    # anggap tidak berhasil agar fallback Frista bisa dijalankan.
     if proc is None:
         print("[!] After.exe ditutup/selesai (instance lama), status tidak pasti")
         return False
@@ -336,7 +320,6 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
     else:
         print(">>> Frista sudah berjalan, lanjut pengisian otomatis")
 
-    # Tampilkan window secepat mungkin begitu tersedia
     shown = False
     deadline = time.time() + FRISTA_LAUNCH_TIMEOUT
     while time.time() < deadline:
@@ -359,7 +342,6 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
         return False
 
     try:
-        # Fokus window dan beri waktu UI siap sesingkat mungkin
         time.sleep(0.1)
         if not activate_window(FRISTA_PROCESS_NAME, 2):
             hwnd = find_window(FRISTA_PROCESS_NAME)
@@ -375,23 +357,18 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
         old_pause = pyautogui.PAUSE
         pyautogui.PAUSE = 0
         try:
-            # Isi username
             pyautogui.click(904, 536)
             pyautogui.hotkey("ctrl", "a")
             pyautogui.write(username, interval=0)
 
-            # Isi password
             pyautogui.click(903, 602)
             pyautogui.hotkey("ctrl", "a")
             pyautogui.write(password, interval=0)
 
-            # Login
             pyautogui.click(961, 682)
             print(">>> Auto login Frista dikirim (koordinat)")
 
-            # Setelah login berhasil, isi no peserta jika ada
             if nomor:
-                # Tunggu halaman utama Frista siap (singkat, secepat mungkin)
                 time.sleep(1.0)
                 activate_window(FRISTA_PROCESS_NAME, 3)
                 hwnd = find_window(FRISTA_PROCESS_NAME)
@@ -405,7 +382,6 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                 pyautogui.press("enter")
                 print(f">>> No peserta dikirim: {_mask_nomor(nomor)}")
 
-                # Tunggu deteksi wajah (kotak biru) lalu ambil foto (timer fullscreen)
                 wait_total = 10
                 batal_coords = [
                     (1137, 630), (1206, 673), (1281, 648), (1338, 676),
@@ -472,7 +448,6 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                                 if user32.GetCursorPos(ctypes.byref(pt)):
                                     for bx, by in batal_coords:
                                         if abs(pt.x - bx) <= 50 and abs(pt.y - by) <= 50:
-                                            # sembunyikan overlay agar klik/refill ke Frista
                                             try:
                                                 root.withdraw()
                                                 root.update()
@@ -509,7 +484,6 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                     root.after(1000, _tick)
                     root.mainloop()
                 except Exception:
-                    # Fallback jika tkinter tidak tersedia
                     for _ in range(wait_total):
                         time.sleep(1)
 
@@ -521,7 +495,6 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                 pyautogui.click(1257, 552)
                 print(">>> Ambil foto dikirim (koordinat 1257,552)")
 
-                # Setelah ambil foto: deteksi hasil & jaga nomor (tanpa benturan)
                 print(">>> Monitoring: nomor tetap terisi, deteksi hasil Frista...")
                 monitor_deadline = time.time() + 130  # detik
                 last_refill = time.time()
@@ -547,16 +520,12 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                         print(f">>> {reason}, no peserta diisi ulang: {_mask_nomor(nomor)}")
 
                 while time.time() < monitor_deadline:
-                    # Frista tertutup tanpa teks sukses BUKAN bukti berhasil.
                     if not is_process_running(FRISTA_PROCESS_NAME):
                         print(">>> Frista tertutup tanpa teks sukses")
                         break
 
                     now = time.time()
 
-                    # Deteksi popup hasil Frista (UI Automation, lalu OCR fallback).
-                    # Sukses HANYA dua teks: "Peserta telah terdaftar hari ini"
-                    # atau "Peserta sudah terdaftar". Teks lain = gagal.
                     if now - last_text_check >= 0.5:
                         last_text_check = now
                         try:
@@ -565,7 +534,6 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                                 texts = texts + " " + get_frista_texts_ocr()
                             if _is_frista_terdaftar(texts):
                                 print(">>> Hasil Frista: Peserta telah terdaftar hari ini / sudah terdaftar (berhasil)")
-                                # klik OK lalu close popup hasil (tanpa gangguan isi ulang)
                                 pyautogui.click(1027, 590)
                                 time.sleep(0.05)
                                 pyautogui.click(1531, 295)
@@ -578,8 +546,6 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                         except Exception:
                             pass
 
-                    # Jaga nomor dengan delay (jarang) agar tidak benturan dengan verifikasi.
-                    # Cek sukses dulu, baru isi ulang jika perlu.
                     if not success and now - last_refill >= 8.0:
                         try:
                             texts = get_frista_texts()
@@ -600,7 +566,6 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                             _refill_now()
                             last_refill = time.time()
 
-                    # Isi ulang hanya saat tombol Batal diklik
                     down = bool(user32.GetAsyncKeyState(0x01) & 0x8000)
                     if down:
                         pt = wintypes.POINT()
@@ -626,14 +591,12 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                 else:
                     print(">>> FRISTA_FAILED (teks sukses tidak ditemukan)")
 
-                # Tutup aplikasi Frista setelah selesai (sukses atau gagal)
                 if is_process_running(FRISTA_PROCESS_NAME):
                     kill_process(FRISTA_PROCESS_NAME)
                     print(">>> Frista ditutup")
         finally:
             pyautogui.PAUSE = old_pause
     except Exception as exc:
-        # Pastikan Frista tetap terbuka walau automasi input gagal
         print(f"[!] Gagal auto-login/isi Frista: {exc}")
 
     return True
@@ -666,7 +629,6 @@ def main():
 
 if __name__ == "__main__":
     args = sys.argv[1:]
-    # Ambil kredensial/nomor dari argumen jika diberikan
     cli_user = None
     cli_pass = None
     cli_nomor = None
@@ -688,7 +650,6 @@ if __name__ == "__main__":
         else:
             i += 1
 
-    # Mode khusus: langsung buka/login Frista (dipakai fallback dari app)
     if any(a in ("--frista", "--frista-only", "frista") for a in args):
         if cli_user and cli_pass:
             username, password = cli_user, cli_pass
