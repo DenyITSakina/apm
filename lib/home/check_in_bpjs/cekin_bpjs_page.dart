@@ -237,10 +237,7 @@ class _CekinBpjsState extends State<CekinBpjs> {
 
     final tanggalBooking = state.apmData.tglBooking.trim();
     if (tanggalBooking.isNotEmpty) {
-      TopToast.warning(
-        context,
-        'Tanggal booking Anda $tanggalBooking. Silakan lanjutkan check-in.',
-      );
+      TopToast.warning(context, 'Tanggal booking Anda $tanggalBooking');
     }
 
     final rawNoPeserta = state.apmData.noPeserta.trim();
