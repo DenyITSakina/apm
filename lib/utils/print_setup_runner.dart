@@ -52,7 +52,7 @@ class PrintSetupRunner {
       pythonExe.path,
       [scriptFile.path],
       workingDirectory: p.dirname(scriptFile.path),
-      runInShell: Platform.isWindows,
+      runInShell: false,
     );
 
     if (result.exitCode != 0) {

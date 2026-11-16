@@ -82,7 +82,7 @@ Future<bool> isSidikJariRunning() async {
       '/FI',
       'IMAGENAME eq After.exe',
       '/NH',
-    ], runInShell: true);
+    ], runInShell: false);
     final output = result.stdout.toString();
     if (!output.contains("After.exe")) {
       _logSidikJari("After.exe tidak berjalan");
@@ -123,12 +123,13 @@ Future<void> closeSidikJariExe() async {
   }
 
   // Tanpa delay/menunggu: tembak taskkill secepat mungkin.
+  // runInShell:false + normal => CREATE_NO_WINDOW (tanpa jendela cmd).
   try {
     Process.start(
       'taskkill',
       ['/IM', 'After.exe', '/F', '/T'],
-      runInShell: true,
-      mode: ProcessStartMode.detached,
+      runInShell: false,
+      mode: ProcessStartMode.normal,
     );
   } catch (_) {}
 }
@@ -162,8 +163,8 @@ void _closeSudahTerdaftar() {
             "[System.Windows.Forms.Cursor]::Position=New-Object System.Drawing.Point(1206,319);"
             "[W.U]::mouse_event(2,0,0,0,0);[W.U]::mouse_event(4,0,0,0,0)",
       ],
-      runInShell: true,
-      mode: ProcessStartMode.detached,
+      runInShell: false,
+      mode: ProcessStartMode.normal,
     );
   } catch (_) {}
   tutupSidikJariCepat();
@@ -1202,6 +1203,9 @@ bool lastSidikJariDialihkanKeFrista = false;
 /// True kalau Frista berhasil (mis. "Peserta telah terdaftar Hari ini") -> lanjut SEP.
 bool lastFristaBerhasil = false;
 
+/// Alasan Frista gagal (mis. teks validasi tidak cocok).
+String lastFristaReason = '';
+
 /// Samarkan nomor untuk log (jangan tulis nomor BPJS penuh ke file).
 String maskNomorLog(String? nomor) {
   final value = (nomor ?? '').trim();
@@ -1256,6 +1260,7 @@ Future<bool> openExe(
   lastSidikJariReason = '';
   lastSidikJariDialihkanKeFrista = false;
   lastFristaBerhasil = false;
+  lastFristaReason = '';
 
   void gagal(String alasan, [String? pesan]) {
     lastSidikJariReason = '$alasan${pesan != null ? ' ($pesan)' : ''}';
@@ -1316,7 +1321,7 @@ Future<bool> openExe(
         process = await Process.start(
           sidikJariExePath,
           [],
-          runInShell: true,
+          runInShell: false,
           mode: ProcessStartMode.normal,
         );
         _logSidikJari(
@@ -1440,15 +1445,17 @@ Future<bool> openExe(
     if (fristaDibuka) {
       if (lastFristaBerhasil) {
         _logSidikJari(
-          "Frista sukses (Peserta telah terdaftar Hari ini), lanjut SEP",
+          "Frista sukses (Peserta telah terdaftar Hari ini / sudah terdaftar), lanjut SEP",
         );
         return true;
       }
       lastSidikJariDialihkanKeFrista = true;
-      lastSidikJariReason =
-          "sidik jari gagal $_maxSidikJariAttempts kali, dialihkan ke Frista";
+      lastSidikJariReason = lastFristaReason.isNotEmpty
+          ? lastFristaReason
+          : "sidik jari gagal $_maxSidikJariAttempts kali, Frista tidak berhasil";
+      _logSidikJari("GAGAL Frista: $lastSidikJariReason");
       if (tampilkanToast && context.mounted) {
-        TopToast.warning(context, "Sidik jari gagal. Aplikasi Frista dibuka.");
+        TopToast.error(context, "Sidik jari gagal. $lastSidikJariReason");
       }
     } else {
       gagal(lastSidikJariReason, "Sidik jari gagal diproses.");
@@ -1570,9 +1577,9 @@ Future<bool> _bukaFristaFallback({
               '--result-file',
               resultFile.path,
             ],
-            runInShell: true,
+            runInShell: false,
             workingDirectory: File(scriptPath).parent.path,
-            mode: ProcessStartMode.detached,
+            mode: ProcessStartMode.normal,
           );
           _logSidikJari(
             "Frista dibuka+auto-login via frista_automation.py ($py, $scriptPath, nomor=${maskNomorLog(nomor)})",
@@ -1595,7 +1602,7 @@ Future<bool> _bukaFristaFallback({
               await Process.start(
                 fristaExePath,
                 [],
-                runInShell: true,
+                runInShell: false,
                 mode: ProcessStartMode.normal,
               );
               _logSidikJari(
@@ -1605,7 +1612,8 @@ Future<bool> _bukaFristaFallback({
           } catch (_) {}
         });
 
-        // Tunggu hasil Frista: "Peserta telah terdaftar Hari ini" -> sukses (lanjut SEP)
+        // Tunggu hasil Frista: sukses HANYA bila "Peserta telah terdaftar hari
+        // ini" / "Peserta sudah terdaftar"; selain itu dianggap gagal.
         final deadline = DateTime.now().add(const Duration(seconds: 200));
         while (DateTime.now().isBefore(deadline)) {
           try {
@@ -1614,15 +1622,26 @@ Future<bool> _bukaFristaFallback({
               if (content == 'SUCCESS') {
                 lastFristaBerhasil = true;
                 _logSidikJari(
-                  "Frista: Peserta telah terdaftar Hari ini (sukses)",
+                  "Frista: Peserta telah terdaftar hari ini / sudah terdaftar (sukses)",
                 );
+                return true;
+              }
+              if (content == 'FAILED') {
+                lastFristaBerhasil = false;
+                lastFristaReason =
+                    'Frista gagal: teks validasi tidak cocok '
+                    '(harus "Peserta telah terdaftar hari ini" / "Peserta sudah terdaftar")';
+                _logSidikJari(lastFristaReason);
                 return true;
               }
             }
           } catch (_) {}
           await Future<void>.delayed(const Duration(milliseconds: 500));
         }
-        _logSidikJari("Frista: menunggu hasil selesai tanpa status SUCCESS");
+        lastFristaBerhasil = false;
+        lastFristaReason =
+            'Frista gagal: teks sukses tidak ditemukan sebelum batas waktu';
+        _logSidikJari("Frista: $lastFristaReason");
         return true;
       }
       _logSidikJari(
@@ -1634,7 +1653,7 @@ Future<bool> _bukaFristaFallback({
     await Process.start(
       fristaExePath,
       [],
-      runInShell: true,
+      runInShell: false,
       mode: ProcessStartMode.normal,
     );
     _logSidikJari(

@@ -52,6 +52,22 @@ FRISTA_LAUNCH_TIMEOUT = 10
 MAX_AFTER_ATTEMPTS = 1
 FAST_FAIL_AFTER_LOGIN = 3  # detik: tutup cepat setelah login dianggap gagal
 
+# Validasi Frista: HANYA dua teks ini yang dianggap berhasil.
+FRISTA_SUCCESS_TEXTS = (
+    "peserta telah terdaftar hari ini",
+    "peserta sudah terdaftar",
+)
+
+# Teks hasil lain yang menandakan gagal (selain teks sukses di atas).
+FRISTA_FAIL_TEXTS = (
+    "tidak valid",
+    "tidak ditemukan",
+    "tidak sesuai",
+    "belum terdaftar",
+    "gagal",
+    "penolakan",
+)
+
 # Kredensial default dihapus: ambil dari DB (vclaim_accounts) atau argumen CLI.
 DEFAULT_USER = None
 DEFAULT_PASSWORD = None
@@ -282,6 +298,31 @@ foreach($p in (Get-Process -Name Frista -ErrorAction SilentlyContinue | Where-Ob
         return ""
 
 
+def get_frista_texts_ocr():
+    """Fallback OCR (belum tersedia): kembalikan teks kosong."""
+    return ""
+
+
+def _rapikan_teks(teks):
+    """Lowercase, ubah pemisah '~' jadi spasi, rapatkan spasi."""
+    try:
+        return " ".join(str(teks or "").lower().replace("~", " ").split())
+    except Exception:
+        return ""
+
+
+def _is_frista_terdaftar(texts):
+    """True hanya bila ada 'Peserta telah terdaftar hari ini'/'Peserta sudah terdaftar'."""
+    t = _rapikan_teks(texts)
+    return any(k in t for k in FRISTA_SUCCESS_TEXTS)
+
+
+def _is_frista_gagal(texts):
+    """True bila ada teks hasil gagal (selain teks sukses)."""
+    t = _rapikan_teks(texts)
+    return any(k in t for k in FRISTA_FAIL_TEXTS)
+
+
 # ===== FRISTA =====
 def start_frista_and_login(username, password, nomor=None, result_file=None):
     """Buka Frista, login otomatis, isi no peserta, dan deteksi hasil jika diberikan."""
@@ -486,6 +527,7 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                 last_refill = time.time()
                 last_text_check = 0
                 success = False
+                failed = False
 
                 def _refill_now(reason=""):
                     activate_window(FRISTA_PROCESS_NAME, 2)
@@ -505,28 +547,33 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                         print(f">>> {reason}, no peserta diisi ulang: {_mask_nomor(nomor)}")
 
                 while time.time() < monitor_deadline:
-                    # Jika Frista ditutup, anggap sudah terdaftar/berhasil
+                    # Frista tertutup tanpa teks sukses BUKAN bukti berhasil.
                     if not is_process_running(FRISTA_PROCESS_NAME):
-                        print(">>> Frista tertutup, dianggap terdaftar (berhasil)")
-                        success = True
+                        print(">>> Frista tertutup tanpa teks sukses")
                         break
 
                     now = time.time()
 
-                    # Deteksi popup hasil Frista (UI Automation, lalu OCR fallback)
+                    # Deteksi popup hasil Frista (UI Automation, lalu OCR fallback).
+                    # Sukses HANYA dua teks: "Peserta telah terdaftar hari ini"
+                    # atau "Peserta sudah terdaftar". Teks lain = gagal.
                     if now - last_text_check >= 0.5:
                         last_text_check = now
                         try:
                             texts = get_frista_texts()
                             if not _is_frista_terdaftar(texts):
-                                texts = get_frista_texts_ocr()
+                                texts = texts + " " + get_frista_texts_ocr()
                             if _is_frista_terdaftar(texts):
-                                print(">>> Hasil Frista terdeteksi: terdaftar/sudah terdaftar (berhasil)")
+                                print(">>> Hasil Frista: Peserta telah terdaftar hari ini / sudah terdaftar (berhasil)")
                                 # klik OK lalu close popup hasil (tanpa gangguan isi ulang)
                                 pyautogui.click(1027, 590)
                                 time.sleep(0.05)
                                 pyautogui.click(1531, 295)
                                 success = True
+                                break
+                            if _is_frista_gagal(texts):
+                                print(">>> Hasil Frista gagal (teks validasi tidak cocok)")
+                                failed = True
                                 break
                         except Exception:
                             pass
@@ -537,11 +584,15 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                         try:
                             texts = get_frista_texts()
                             if _is_frista_terdaftar(texts):
-                                print(">>> Hasil Frista terdeteksi: terdaftar/sudah terdaftar (berhasil)")
+                                print(">>> Hasil Frista: Peserta telah terdaftar hari ini / sudah terdaftar (berhasil)")
                                 pyautogui.click(1027, 590)
                                 time.sleep(0.05)
                                 pyautogui.click(1531, 295)
                                 success = True
+                                break
+                            if _is_frista_gagal(texts):
+                                print(">>> Hasil Frista gagal (teks validasi tidak cocok)")
+                                failed = True
                                 break
                         except Exception:
                             pass
@@ -565,11 +616,15 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                 if result_file:
                     try:
                         with open(result_file, "w", encoding="utf-8") as rf:
-                            rf.write("SUCCESS" if success else "DONE")
+                            rf.write("SUCCESS" if success else "FAILED")
                     except Exception:
                         pass
                 if success:
                     print(">>> FRISTA_SUCCESS")
+                elif failed:
+                    print(">>> FRISTA_FAILED")
+                else:
+                    print(">>> FRISTA_FAILED (teks sukses tidak ditemukan)")
         finally:
             pyautogui.PAUSE = old_pause
     except Exception as exc:

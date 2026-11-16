@@ -577,7 +577,13 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
     if (lastSidikJariDialihkanKeFrista) {
       sedangProses = false;
       tutupDialog();
-      TopToast.warning(context, 'Sidik jari gagal. Dialihkan ke Frista.');
+      // Frista sudah dijalankan; bila tidak ada teks sukses, ini kegagalan.
+      TopToast.error(
+        context,
+        lastSidikJariReason.isEmpty
+            ? 'Sidik jari gagal. Frista tidak berhasil.'
+            : lastSidikJariReason,
+      );
       return;
     }
 
