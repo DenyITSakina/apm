@@ -625,6 +625,11 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                     print(">>> FRISTA_FAILED")
                 else:
                     print(">>> FRISTA_FAILED (teks sukses tidak ditemukan)")
+
+                # Tutup aplikasi Frista setelah selesai (sukses atau gagal)
+                if is_process_running(FRISTA_PROCESS_NAME):
+                    kill_process(FRISTA_PROCESS_NAME)
+                    print(">>> Frista ditutup")
         finally:
             pyautogui.PAUSE = old_pause
     except Exception as exc:
