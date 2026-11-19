@@ -1,4 +1,3 @@
-// ignore: file_names
 import 'dart:async';
 import 'dart:io';
 
@@ -1479,11 +1478,11 @@ Future<bool> _bukaFristaFallback({
     }
 
     final pythonCandidates = <String>[
-      'python',
-      'py',
       '$appDir${sep}data${sep}python${sep}python.exe',
       '$appDir${sep}python_runtime${sep}python.exe',
       '$appDir${sep}data${sep}flutter_assets${sep}python_runtime${sep}python.exe',
+      'python',
+      'py',
     ];
 
     if (scriptPath != null) {
