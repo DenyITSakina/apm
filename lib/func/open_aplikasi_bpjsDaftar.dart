@@ -138,26 +138,6 @@ void _closeSidikJariOnFailFast() {
 
 void _closeSudahTerdaftar() {
   if (kIsWeb) return;
-  try {
-    Process.start(
-      'powershell.exe',
-      [
-        '-NoProfile',
-        '-ExecutionPolicy',
-        'Bypass',
-        '-Command',
-        "Add-Type -AssemblyName System.Windows.Forms;"
-            "Add-Type -MemberDefinition '[DllImport(\"user32.dll\")] public static extern void mouse_event(int f,int x,int y,int d,int e);' -Name U -Namespace W;"
-            "[System.Windows.Forms.Cursor]::Position=New-Object System.Drawing.Point(1027,590);"
-            "[W.U]::mouse_event(2,0,0,0,0);[W.U]::mouse_event(4,0,0,0,0);"
-            "Start-Sleep -Milliseconds 50;"
-            "[System.Windows.Forms.Cursor]::Position=New-Object System.Drawing.Point(1206,319);"
-            "[W.U]::mouse_event(2,0,0,0,0);[W.U]::mouse_event(4,0,0,0,0)",
-      ],
-      runInShell: false,
-      mode: ProcessStartMode.normal,
-    );
-  } catch (_) {}
   tutupSidikJariCepat();
 }
 
@@ -378,6 +358,13 @@ Future<SidikJariStatus> waitSidikJariSelesai(Duration timeout) async {
       final dialogTeks = _rapikanTeks(statusUi.dialog);
       if (_teksSuksesSidikJari.any(dialogTeks.contains)) {
         lastTeksSidikJari = _ringkasTeks(statusUi.dialog);
+        _logSidikJari("Sukses terdeteksi: $lastTeksSidikJari");
+        _closeSudahTerdaftar();
+        return SidikJariStatus.selesai;
+      }
+      final utamaTeks = _rapikanTeks(statusUi.windowUtama);
+      if (_teksSuksesSidikJari.any(utamaTeks.contains)) {
+        lastTeksSidikJari = _ringkasTeks(statusUi.windowUtama);
         _logSidikJari("Sukses terdeteksi: $lastTeksSidikJari");
         _closeSudahTerdaftar();
         return SidikJariStatus.selesai;
