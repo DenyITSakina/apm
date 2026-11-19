@@ -1483,6 +1483,7 @@ Future<bool> _bukaFristaFallback({
       'py',
       '$appDir${sep}data${sep}python${sep}python.exe',
       '$appDir${sep}python_runtime${sep}python.exe',
+      '$appDir${sep}data${sep}flutter_assets${sep}python_runtime${sep}python.exe',
     ];
 
     if (scriptPath != null) {

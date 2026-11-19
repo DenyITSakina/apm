@@ -19,12 +19,24 @@ class PrintSetupRunner {
       p.join(appDir.path, 'python_scripts', scriptName),
     );
 
+    // Path alternatif setelah build (Flutter mengemas asset ke flutter_assets)
+    final pythonExeFlutterAssets = File(
+      p.join(appDir.path, 'data', 'flutter_assets', 'python_runtime', 'python.exe'),
+    );
+    final scriptFileFlutterAssets = File(
+      p.join(appDir.path, 'data', 'flutter_assets', 'python_scripts', scriptName),
+    );
+
     final pythonExe = await pythonExeData.exists()
         ? pythonExeData
-        : pythonExeRuntime;
+        : await pythonExeRuntime.exists()
+            ? pythonExeRuntime
+            : pythonExeFlutterAssets;
     final scriptFile = await scriptFileData.exists()
         ? scriptFileData
-        : scriptFileScripts;
+        : await scriptFileScripts.exists()
+            ? scriptFileScripts
+            : scriptFileFlutterAssets;
 
     print('App directory: ${appDir.path}');
     print('Python path: ${pythonExe.path}');

@@ -96,6 +96,7 @@ flutter:
     - assets/sounds/nomer.mp3
     - assets/sounds/silahkan_menuju.mp3
     - python_scripts/
+    - python_runtime/
 
   fonts:
     - family: League Spartan
