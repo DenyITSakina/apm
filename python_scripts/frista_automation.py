@@ -274,7 +274,7 @@ foreach($p in (Get-Process -Name Frista -ErrorAction SilentlyContinue | Where-Ob
     try:
         r = subprocess.run(
             ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ps],
-            capture_output=True, text=True, timeout=3,
+            capture_output=True, text=True, timeout=1,
             creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
         )
         return (r.stdout or "").lower()
@@ -546,7 +546,7 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                         except Exception:
                             pass
 
-                    if not success and now - last_refill >= 8.0:
+                    if not success and now - last_refill >= 15.0:
                         try:
                             texts = get_frista_texts()
                             if _is_frista_terdaftar(texts):
