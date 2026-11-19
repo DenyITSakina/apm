@@ -357,15 +357,15 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
         old_pause = pyautogui.PAUSE
         pyautogui.PAUSE = 0
         try:
-            pyautogui.click(904, 536)
+            pyautogui.click(667, 444)
             pyautogui.hotkey("ctrl", "a")
             pyautogui.write(username, interval=0)
 
-            pyautogui.click(903, 602)
+            pyautogui.click(669, 513)
             pyautogui.hotkey("ctrl", "a")
             pyautogui.write(password, interval=0)
 
-            pyautogui.click(961, 682)
+            pyautogui.click(717, 602)
             print(">>> Auto login Frista dikirim (koordinat)")
 
             if nomor:
@@ -376,7 +376,7 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                     user32.BringWindowToTop(hwnd)
                     user32.SetForegroundWindow(hwnd)
                 time.sleep(0.1)
-                pyautogui.click(1124, 406)
+                pyautogui.click(893, 330)
                 pyautogui.hotkey("ctrl", "a")
                 pyautogui.write(str(nomor), interval=0)
                 pyautogui.press("enter")
@@ -384,8 +384,8 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
 
                 wait_total = 10
                 batal_coords = [
-                    (1137, 630), (1206, 673), (1281, 648), (1338, 676),
-                    (1333, 634), (1414, 651), (1379, 673), (1310, 643),
+                    (1041, 562), (1127, 584), (985, 575), (1099, 561),
+                    (940, 559), (1038, 560), (1133, 575), (1111, 580),
                 ]
                 try:
                     import tkinter as tk
@@ -431,7 +431,7 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                                 user32.BringWindowToTop(hwnd)
                                 user32.SetForegroundWindow(hwnd)
                             time.sleep(0.1)
-                            pyautogui.click(1124, 406)
+                            pyautogui.click(893, 330)
                             time.sleep(0.05)
                             pyautogui.hotkey("ctrl", "a")
                             pyautogui.press("delete")
@@ -492,8 +492,8 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                 if hwnd:
                     user32.BringWindowToTop(hwnd)
                     user32.SetForegroundWindow(hwnd)
-                pyautogui.click(1257, 552)
-                print(">>> Ambil foto dikirim (koordinat 1257,552)")
+                pyautogui.click(1032, 460)
+                print(">>> Ambil foto dikirim (koordinat 1032,460)")
 
                 print(">>> Monitoring: nomor tetap terisi, deteksi hasil Frista...")
                 monitor_deadline = time.time() + 130  # detik
@@ -510,7 +510,7 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                         user32.BringWindowToTop(hwnd)
                         user32.SetForegroundWindow(hwnd)
                     time.sleep(0.1)
-                    pyautogui.click(1124, 406)
+                    pyautogui.click(893, 330)
                     time.sleep(0.05)
                     pyautogui.hotkey("ctrl", "a")
                     pyautogui.press("delete")
@@ -534,9 +534,9 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                                 texts = texts + " " + get_frista_texts_ocr()
                             if _is_frista_terdaftar(texts):
                                 print(">>> Hasil Frista: Peserta telah terdaftar hari ini / sudah terdaftar (berhasil)")
-                                pyautogui.click(1027, 590)
+                                pyautogui.click(819, 501)
                                 time.sleep(0.05)
-                                pyautogui.click(1531, 295)
+                                pyautogui.click(1301, 205)
                                 success = True
                                 break
                             if _is_frista_gagal(texts):
@@ -551,9 +551,9 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                             texts = get_frista_texts()
                             if _is_frista_terdaftar(texts):
                                 print(">>> Hasil Frista: Peserta telah terdaftar hari ini / sudah terdaftar (berhasil)")
-                                pyautogui.click(1027, 590)
+                                pyautogui.click(819, 501)
                                 time.sleep(0.05)
-                                pyautogui.click(1531, 295)
+                                pyautogui.click(1301, 205)
                                 success = True
                                 break
                             if _is_frista_gagal(texts):
