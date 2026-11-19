@@ -357,15 +357,15 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
         old_pause = pyautogui.PAUSE
         pyautogui.PAUSE = 0
         try:
-            pyautogui.click(667, 444)
+            pyautogui.click(571, 518)
             pyautogui.hotkey("ctrl", "a")
             pyautogui.write(username, interval=0)
 
-            pyautogui.click(669, 513)
+            pyautogui.click(592, 586)
             pyautogui.hotkey("ctrl", "a")
             pyautogui.write(password, interval=0)
 
-            pyautogui.click(717, 602)
+            pyautogui.click(635, 661)
             print(">>> Auto login Frista dikirim (koordinat)")
 
             if nomor:
@@ -376,7 +376,7 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                     user32.BringWindowToTop(hwnd)
                     user32.SetForegroundWindow(hwnd)
                 time.sleep(0.1)
-                pyautogui.click(893, 330)
+                pyautogui.click(818, 390)
                 pyautogui.hotkey("ctrl", "a")
                 pyautogui.write(str(nomor), interval=0)
                 pyautogui.press("enter")
@@ -384,116 +384,40 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
 
                 wait_total = 10
                 batal_coords = [
-                    (1041, 562), (1127, 584), (985, 575), (1099, 561),
-                    (940, 559), (1038, 560), (1133, 575), (1111, 580),
+                    (957, 622), (861, 605), (1062, 638), (938, 609),
+                    (979, 645), (1069, 643), (1035, 606), (998, 619),
                 ]
+                # Countdown tampil di layar Windows via PowerShell (tanpa tkinter Python).
+                ps_countdown = (
+                    "Add-Type -AssemblyName System.Windows.Forms; "
+                    "$f=New-Object System.Windows.Forms.Form; "
+                    "$f.FormBorderStyle='None'; $f.TopMost=$true; $f.BackColor=[System.Drawing.Color]::Black; "
+                    "$f.Opacity=0.7; $f.Width=300; $f.Height=120; "
+                    "$f.StartPosition='CenterScreen'; "
+                    "$l=New-Object System.Windows.Forms.Label; $l.ForeColor=[System.Drawing.Color]::White; "
+                    "$l.Font=New-Object System.Drawing.Font('Arial',48,[System.Drawing.FontStyle]::Bold); "
+                    "$l.TextAlign='MiddleCenter'; $l.Dock='Fill'; $f.Controls.Add($l); "
+                    "for($i=10;$i -ge 1;$i--){ $l.Text=$i.ToString(); $f.Refresh(); Start-Sleep -Seconds 1 } "
+                    "$f.Close()"
+                )
                 try:
-                    import tkinter as tk
-
-                    transparent = "#010203"
-                    root = tk.Tk()
-                    root.attributes("-fullscreen", True)
-                    root.configure(bg=transparent)
-                    root.attributes("-transparentcolor", transparent)
-                    root.attributes("-topmost", True)
-                    root.overrideredirect(True)
-                    label = tk.Label(
-                        root,
-                        text=str(wait_total),
-                        fg="white",
-                        bg=transparent,
-                        font=("Arial", 160, "bold"),
+                    subprocess.Popen(
+                        ["powershell.exe", "-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", ps_countdown],
+                        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0),
                     )
-                    label.place(relx=0.5, rely=0.5, anchor="center")
-                    sub = tk.Label(
-                        root,
-                        text=(
-                            "Silakan arahkan wajah Anda ke kamera.\n"
-                            "Pastikan kotak berwarna biru muncul dengan jelas.\n\n"
-                            "Mohon tunggu beberapa detik hingga proses\n"
-                            "pengambilan foto selesai."
-                        ),
-                        fg="black",
-                        bg=transparent,
-                        font=("Courier New", 12, "bold"),
-                        justify="center",
-                    )
-                    sub.place(relx=0.5, rely=0.7, anchor="center")
-
-                    state = {"n": wait_total}
-
-                    def _refill_nomor():
-                        try:
-                            activate_window(FRISTA_PROCESS_NAME, 1)
-                            hwnd = find_window(FRISTA_PROCESS_NAME)
-                            if hwnd:
-                                user32.ShowWindow(hwnd, SW_RESTORE)
-                                user32.BringWindowToTop(hwnd)
-                                user32.SetForegroundWindow(hwnd)
-                            time.sleep(0.1)
-                            pyautogui.click(893, 330)
-                            time.sleep(0.05)
-                            pyautogui.hotkey("ctrl", "a")
-                            pyautogui.press("delete")
-                            pyautogui.write(str(nomor), interval=0)
-                            pyautogui.press("enter")
-                        except Exception:
-                            pass
-
-                    def _poll_batal():
-                        try:
-                            down = bool(user32.GetAsyncKeyState(0x01) & 0x8000)
-                            if down:
-                                pt = wintypes.POINT()
-                                if user32.GetCursorPos(ctypes.byref(pt)):
-                                    for bx, by in batal_coords:
-                                        if abs(pt.x - bx) <= 50 and abs(pt.y - by) <= 50:
-                                            try:
-                                                root.withdraw()
-                                                root.update()
-                                            except Exception:
-                                                pass
-                                            _refill_nomor()
-                                            print(f">>> Batal terdeteksi, no peserta diisi ulang: {_mask_nomor(nomor)}")
-                                            try:
-                                                root.deiconify()
-                                                root.attributes("-topmost", True)
-                                                root.attributes("-fullscreen", True)
-                                            except Exception:
-                                                pass
-                                            break
-                        except Exception:
-                            pass
-                        try:
-                            root.after(100, _poll_batal)
-                        except Exception:
-                            pass
-
-                    def _tick():
-                        if state["n"] <= 0:
-                            try:
-                                root.destroy()
-                            except Exception:
-                                pass
-                            return
-                        label.config(text=str(state["n"]))
-                        state["n"] -= 1
-                        root.after(1000, _tick)
-
-                    root.after(100, _poll_batal)
-                    root.after(1000, _tick)
-                    root.mainloop()
                 except Exception:
-                    for _ in range(wait_total):
-                        time.sleep(1)
+                    pass
+                for sisa in range(wait_total, 0, -1):
+                    print(f">>> Countdown: {sisa}", flush=True)
+                    time.sleep(1)
 
                 activate_window(FRISTA_PROCESS_NAME, 2)
                 hwnd = find_window(FRISTA_PROCESS_NAME)
                 if hwnd:
                     user32.BringWindowToTop(hwnd)
                     user32.SetForegroundWindow(hwnd)
-                pyautogui.click(1032, 460)
-                print(">>> Ambil foto dikirim (koordinat 1032,460)")
+                pyautogui.click(950, 521)
+                print(">>> Ambil foto dikirim (koordinat 950,521)")
 
                 print(">>> Monitoring: nomor tetap terisi, deteksi hasil Frista...")
                 monitor_deadline = time.time() + 130  # detik
@@ -510,7 +434,7 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                         user32.BringWindowToTop(hwnd)
                         user32.SetForegroundWindow(hwnd)
                     time.sleep(0.1)
-                    pyautogui.click(893, 330)
+                    pyautogui.click(818, 390)
                     time.sleep(0.05)
                     pyautogui.hotkey("ctrl", "a")
                     pyautogui.press("delete")
@@ -534,9 +458,9 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                                 texts = texts + " " + get_frista_texts_ocr()
                             if _is_frista_terdaftar(texts):
                                 print(">>> Hasil Frista: Peserta telah terdaftar hari ini / sudah terdaftar (berhasil)")
-                                pyautogui.click(819, 501)
+                                pyautogui.click(792, 589)
                                 time.sleep(0.05)
-                                pyautogui.click(1301, 205)
+                                pyautogui.click(1218, 259)
                                 success = True
                                 break
                             if _is_frista_gagal(texts):
@@ -551,9 +475,9 @@ def start_frista_and_login(username, password, nomor=None, result_file=None):
                             texts = get_frista_texts()
                             if _is_frista_terdaftar(texts):
                                 print(">>> Hasil Frista: Peserta telah terdaftar hari ini / sudah terdaftar (berhasil)")
-                                pyautogui.click(819, 501)
+                                pyautogui.click(792, 589)
                                 time.sleep(0.05)
-                                pyautogui.click(1301, 205)
+                                pyautogui.click(1218, 259)
                                 success = True
                                 break
                             if _is_frista_gagal(texts):
