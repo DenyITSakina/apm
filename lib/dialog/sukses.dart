@@ -55,24 +55,30 @@ Future<void> showSuccessDialog(
                           padding: const EdgeInsets.all(18),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: AppGradients.brand,
-                            boxShadow: AppShadow.glow(AppColors.primary),
+                            gradient: isFailed
+                                ? const LinearGradient(
+                                    colors: [Color(0xFFE53935), Color(0xFFB71C1C)],
+                                  )
+                                : AppGradients.brand,
+                            boxShadow: AppShadow.glow(
+                              isFailed ? Colors.red : AppColors.primary,
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.check_rounded,
+                          child: Icon(
+                            isFailed ? Icons.close_rounded : Icons.check_rounded,
                             color: Colors.white,
                             size: 44,
                           ),
                         ),
                         const SizedBox(height: AppSpacing.md),
                         Text(
-                          title,
+                          isFailed ? 'Gagal' : title,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: AppText.family,
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
-                            color: AppColors.textPrimary,
+                            color: isFailed ? Colors.red : AppColors.textPrimary,
                             decoration: TextDecoration.none,
                           ),
                         ),
