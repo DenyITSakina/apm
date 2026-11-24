@@ -11,6 +11,7 @@ Future<void> showSuccessDialog(
   String actionLabel = 'SELESAI',
   VoidCallback? onClose,
   Duration? autoCloseAfter,
+  bool isFailed = false,
 }) {
   final dialogFuture = showGeneralDialog(
     context: context,
@@ -103,17 +104,19 @@ Future<void> showSuccessDialog(
                               ),
                               const SizedBox(width: 10),
                               Expanded(
-                                child: Text(
-                                  'Silakan lanjutkan ke poli atau loket sesuai '
-                                  'petunjuk petugas.',
-                                  style: TextStyle(
-                                    fontFamily: AppText.family,
-                                    fontSize: 13,
-                                    height: 1.45,
-                                    color: AppColors.textSecondary,
-                                    decoration: TextDecoration.none,
-                                  ),
-                                ),
+child: Text(
+                            isFailed
+                                ? 'Jika gagal, lanjut ke FO'
+                                : 'Silakan lanjutkan ke poli atau loket sesuai '
+                                    'petunjuk petugas.',
+                            style: TextStyle(
+                              fontFamily: AppText.family,
+                              fontSize: 13,
+                              height: 1.45,
+                              color: AppColors.textSecondary,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
                               ),
                             ],
                           ),
