@@ -46,7 +46,7 @@ AFTER_LAUNCH_TIMEOUT = 3
 # AFTER_LOGIN_TIMEOUT = 12
 AFTER_EXIT_TIMEOUT = 180
 FRISTA_LAUNCH_TIMEOUT = 10
-MAX_AFTER_ATTEMPTS = 1
+MAX_AFTER_ATTEMPTS = 3
 FAST_FAIL_AFTER_LOGIN = 3
 
 FRISTA_SUCCESS_TEXTS = (
@@ -543,11 +543,16 @@ def main():
         if attempt < MAX_AFTER_ATTEMPTS:
             time.sleep(0.3)
 
-    print("[!] Sidik jari gagal, membuka Frista")
-    if start_frista_and_login(username, password):
-        return 2
+    # Frista dinonaktifkan sementara — hanya gunakan sidik jari.
+    # Kode Frista tetap disimpan (tidak dihapus) di bawah ini.
+    # print("[!] Sidik jari gagal, membuka Frista")
+    # if start_frista_and_login(username, password):
+    #     return 2
+    #
+    # print("[!] Gagal membuka Frista setelah sidik jari gagal 1x")
+    # return 1
 
-    print("[!] Gagal membuka Frista setelah sidik jari gagal 1x")
+    print("[!] Sidik jari gagal (Frista dinonaktifkan)")
     return 1
 
 
@@ -574,18 +579,37 @@ if __name__ == "__main__":
         else:
             i += 1
 
+    # Frista dinonaktifkan sementara — hanya gunakan sidik jari.
+    # Kode Frista tetap disimpan (tidak dihapus) di bawah ini.
+    # if any(a in ("--frista", "--frista-only", "frista") for a in args):
+    #     if cli_user and cli_pass:
+    #         username, password = cli_user, cli_pass
+    #     else:
+    #         try:
+    #             username, password = get_account_from_db()
+    #         except Exception as exc:
+    #             print(f"[!] Gagal ambil akun: {exc}")
+    #             sys.exit(1)
+    #     print(f"User: {username}, Password: {'*' * len(password)}")
+    #     ok = start_frista_and_login(username, password, nomor=cli_nomor, result_file=cli_result)
+    #     sys.exit(2 if ok else 1)
+
     if any(a in ("--frista", "--frista-only", "frista") for a in args):
-        if cli_user and cli_pass:
-            username, password = cli_user, cli_pass
-        else:
-            try:
-                username, password = get_account_from_db()
-            except Exception as exc:
-                print(f"[!] Gagal ambil akun: {exc}")
-                sys.exit(1)
-        print(f"User: {username}, Password: {'*' * len(password)}")
-        ok = start_frista_and_login(username, password, nomor=cli_nomor, result_file=cli_result)
-        sys.exit(2 if ok else 1)
+        print("[!] Frista dinonaktifkan, hanya sidik jari yang digunakan")
+        sys.exit(1)
+        
+
+        # if cli_user and cli_pass:
+        #     username, password = cli_user, cli_pass
+        # else:
+        #     try:
+        #         username, password = get_account_from_db()
+        #     except Exception as exc:
+        #         print(f"[!] Gagal ambil akun: {exc}")
+        #         sys.exit(1)
+        # print(f"User: {username}, Password: {'*' * len(password)}")
+        # ok = start_frista_and_login(username, password, nomor=cli_nomor, result_file=cli_result)
+        # sys.exit(2 if ok else 1)
 
     try:
         sys.exit(main())

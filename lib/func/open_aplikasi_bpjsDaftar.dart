@@ -16,7 +16,7 @@ const String fristaExePath = r"C:\frista\Frista.exe";
 
 const Duration _sidikJariLaunchTimeout = Duration(seconds: 5);
 const Duration _sidikJariExitTimeout = Duration(seconds: 180);
-const int _maxSidikJariAttempts = 1;
+const int _maxSidikJariAttempts = 3;
 
 const int _maxLogBytes = 2 * 1024 * 1024;
 
@@ -1354,6 +1354,9 @@ Future<bool> openExe(
       }
     }
 
+    // Frista dinonaktifkan sementara — hanya gunakan sidik jari.
+    // Kode Frista tetap disimpan (tidak dihapus) di bawah ini.
+    /*
     _logSidikJari(
       "Sidik jari gagal $_maxSidikJariAttempts kali, mencoba membuka Frista",
     );
@@ -1380,6 +1383,11 @@ Future<bool> openExe(
     } else {
       gagal(lastSidikJariReason, "Sidik jari gagal diproses.");
     }
+    */
+    _logSidikJari(
+      "Sidik jari gagal $_maxSidikJariAttempts kali (Frista dinonaktifkan)",
+    );
+    gagal(lastSidikJariReason, "Sidik jari gagal diproses.");
     return false;
   } catch (e) {
     lastSidikJariReason = 'error tidak terduga: $e';
@@ -1430,6 +1438,7 @@ Future<_AkunVclaim> _ambilAkunVclaim() async {
   }
 }
 
+// ignore: unused_element
 Future<bool> _bukaFristaFallback({
   String? username,
   String? password,
