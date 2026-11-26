@@ -1,4 +1,5 @@
 import 'package:apm/blog/antrian_apm_bloc.dart';
+import 'package:apm/dialog/gagal.dart';
 import 'package:apm/dialog/konfirmasi.dart';
 import 'package:apm/dialog/sukses.dart';
 import 'package:apm/dialog/top_toast.dart';
@@ -337,7 +338,7 @@ class CekinUmumDataPage extends StatelessWidget {
     }
 
     if (state is AntrianApmError) {
-      TopToast.error(context, state.pesan);
+      showFailureDialog(context, state.pesan, title: 'Gagal');
       return;
     }
 

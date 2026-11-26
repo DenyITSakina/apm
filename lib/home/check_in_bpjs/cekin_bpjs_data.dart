@@ -1,4 +1,5 @@
 import 'package:apm/blog/antrian_apm_bloc.dart';
+import 'package:apm/dialog/gagal.dart';
 import 'package:apm/dialog/konfirmasi.dart';
 import 'package:apm/dialog/sukses.dart';
 import 'package:apm/dialog/top_toast.dart';
@@ -529,7 +530,7 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
           'SEP gagal | rm=${AppLog.maskNomor(data.rm)} | '
           'message=${poli.sepMessage.isNotEmpty ? poli.sepMessage : "tidak diketahui"}',
         );
-        showSuccessDialog(
+        showFailureDialog(
           context,
           'Gagal: SEP tidak berhasil dibuat.\n'
           'Pesan BPJS: ${poli.sepMessage.isNotEmpty ? poli.sepMessage : 'tidak diketahui'}\n'
@@ -554,7 +555,7 @@ class _CekinBpjsDataPageState extends State<CekinBpjsDataPage> {
       AppLog.instance.write(
         'Gagal | rm=${AppLog.maskNomor(data.rm)} | ${state.pesan}',
       );
-      showSuccessDialog(context, 'Gagal: ${state.pesan}', title: 'Gagal');
+      showFailureDialog(context, 'Gagal: ${state.pesan}', title: 'Gagal');
       return;
     }
 
