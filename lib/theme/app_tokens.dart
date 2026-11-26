@@ -131,7 +131,7 @@ class AppInfo {
   const AppInfo._();
 
   static const String appName = 'APM RSU Sakina Idaman';
-  static const String version = '2.5.0';
+  static const String version = '2.5.1';
 
   static String get label => 'v$version';
 }

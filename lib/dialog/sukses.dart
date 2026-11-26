@@ -11,7 +11,6 @@ Future<void> showSuccessDialog(
   String actionLabel = 'SELESAI',
   VoidCallback? onClose,
   Duration? autoCloseAfter,
-  bool isFailed = false,
 }) {
   final dialogFuture = showGeneralDialog(
     context: context,
@@ -55,30 +54,24 @@ Future<void> showSuccessDialog(
                           padding: const EdgeInsets.all(18),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            gradient: isFailed
-                                ? const LinearGradient(
-                                    colors: [Color(0xFFE53935), Color(0xFFB71C1C)],
-                                  )
-                                : AppGradients.brand,
-                            boxShadow: AppShadow.glow(
-                              isFailed ? Colors.red : AppColors.primary,
-                            ),
+                            gradient: AppGradients.brand,
+                            boxShadow: AppShadow.glow(AppColors.primary),
                           ),
-                          child: Icon(
-                            isFailed ? Icons.close_rounded : Icons.check_rounded,
+                          child: const Icon(
+                            Icons.check_rounded,
                             color: Colors.white,
                             size: 44,
                           ),
                         ),
                         const SizedBox(height: AppSpacing.md),
                         Text(
-                          isFailed ? 'Gagal' : title,
+                          title,
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontFamily: AppText.family,
                             fontSize: 24,
                             fontWeight: FontWeight.w800,
-                            color: isFailed ? Colors.red : AppColors.textPrimary,
+                            color: AppColors.textPrimary,
                             decoration: TextDecoration.none,
                           ),
                         ),
@@ -110,19 +103,17 @@ Future<void> showSuccessDialog(
                               ),
                               const SizedBox(width: 10),
                               Expanded(
-child: Text(
-                            isFailed
-                                ? 'Jika gagal, lanjut ke FO'
-                                : 'Silakan lanjutkan ke poli atau loket sesuai '
-                                    'petunjuk petugas.',
-                            style: TextStyle(
-                              fontFamily: AppText.family,
-                              fontSize: 13,
-                              height: 1.45,
-                              color: AppColors.textSecondary,
-                              decoration: TextDecoration.none,
-                            ),
-                          ),
+                                child: Text(
+                                  'Silakan lanjutkan ke poli atau loket sesuai '
+                                  'petunjuk petugas.',
+                                  style: TextStyle(
+                                    fontFamily: AppText.family,
+                                    fontSize: 13,
+                                    height: 1.45,
+                                    color: AppColors.textSecondary,
+                                    decoration: TextDecoration.none,
+                                  ),
+                                ),
                               ),
                             ],
                           ),
